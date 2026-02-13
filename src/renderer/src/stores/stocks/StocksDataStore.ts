@@ -204,8 +204,19 @@ export class StocksDataStore {
     })
   }
 
+  private async stopFetchQueueAndWait(): Promise<void> {
+    this.queueAbortController?.abort()
+    const runningQueue = this.fetchQueuePromise
+    if (runningQueue) {
+      await runningQueue
+    }
+    runInAction(() => {
+      this.loading = false
+    })
+  }
+
   async refreshAll(): Promise<void> {
-    this.stopFetchQueue()
+    await this.stopFetchQueueAndWait()
     runInAction(() => {
       this.quotes.clear()
       this.errors.clear()
