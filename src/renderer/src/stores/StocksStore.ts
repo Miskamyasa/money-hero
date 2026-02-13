@@ -18,6 +18,7 @@ export class StocksStore {
     this.symbols = symbols
     this.storageKey = storageKey
     makeAutoObservable(this, {
+      allocationSnapshot: computed({ keepAlive: true }),
       allocations: computed({ keepAlive: true }),
     })
     this.loadDisabledSymbols()
@@ -132,16 +133,22 @@ export class StocksStore {
     this.investmentAmount = amount
   }
 
-  get allocations(): Map<string, number> {
+  get allocationSnapshot(): { allocations: Map<string, number>, balances: Map<string, number> } {
     if (!this.buyingMode || this.investmentAmount <= 0) {
-      return new Map()
+      return {
+        allocations: new Map(),
+        balances: new Map(),
+      }
     }
 
     const scoreable = Array.from(this.quotes.values())
       .filter(q => q.change2y != null)
 
     if (scoreable.length === 0) {
-      return new Map()
+      return {
+        allocations: new Map(),
+        balances: new Map(),
+      }
     }
 
     const byGrowth = [...scoreable].sort((a, b) => b.change2y! - a.change2y!)
@@ -160,7 +167,8 @@ export class StocksStore {
       }))
       .sort((a, b) => a.priority - b.priority || a.symbol.localeCompare(b.symbol))
 
-    const result = new Map<string, number>()
+    const allocations = new Map<string, number>()
+    const balances = new Map<string, number>()
     let remaining = this.investmentAmount
     let changed = true
 
@@ -168,24 +176,30 @@ export class StocksStore {
       changed = false
       for (const stock of ranked) {
         if (stock.price > 0 && stock.price <= remaining) {
-          result.set(stock.symbol, (result.get(stock.symbol) ?? 0) + 1)
+          allocations.set(stock.symbol, (allocations.get(stock.symbol) ?? 0) + 1)
+          balances.set(stock.symbol, (balances.get(stock.symbol) ?? 0) + stock.price)
           remaining -= stock.price
           changed = true
         }
       }
     }
 
-    return result
+    return {
+      allocations,
+      balances,
+    }
+  }
+
+  get allocations(): Map<string, number> {
+    return this.allocationSnapshot.allocations
   }
 
   getAllocation(symbol: string): number {
-    return this.allocations.get(symbol) ?? 0
+    return this.allocationSnapshot.allocations.get(symbol) ?? 0
   }
 
   getAllocationBalance(symbol: string): number {
-    const allocation = this.getAllocation(symbol)
-    const quote = this.quotes.get(symbol)
-    return allocation * (quote?.price ?? 0)
+    return this.allocationSnapshot.balances.get(symbol) ?? 0
   }
 
   get totalCount(): number {
