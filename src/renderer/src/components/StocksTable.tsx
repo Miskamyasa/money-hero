@@ -147,7 +147,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   }
 
   const handleRefresh = (): void => {
-    stocks.refreshAll()
+    void stocks.refreshAll()
   }
 
   const filterLower = debouncedFilter.toLowerCase().trim()

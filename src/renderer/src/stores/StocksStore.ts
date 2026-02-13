@@ -6,6 +6,7 @@ import { makeAutoObservable, runInAction } from "mobx"
 import { notifyError } from "../utils/notify"
 
 const FETCH_INTERVAL = 1000
+const CACHE_SAVE_BATCH_SIZE = 5
 export const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF-B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
 export const HIGH_YIELD = ["MPLX", "EPD", "VICI", "VZ", "HPQ", "OKE", "NNN", "O", "MO", "PFE", "DOC", "CAG", "KHC", "BBY", "EIX", "CPB", "PRU", "AMCR", "LYB", "UPS", "DUK", "ABBV", "VEDL.NS", "HINDZINC.NS", "RECLTD.NS", "LGEN.L", "PHNX.L", "IMB.L", "LAND.L", "AV.L", "MNG.L"]
 
@@ -31,6 +32,8 @@ export class StocksStore {
   disabledSymbols = new Set<string>()
 
   private queueAbortController: AbortController | null = null
+  private fetchQueuePromise: Promise<void> | null = null
+  private amountWriteVersion = new Map<string, number>()
 
   get rootStore(): RootStore {
     return this.root
@@ -74,8 +77,20 @@ export class StocksStore {
   }
 
   setAmount(symbol: string, value: number): void {
+    const previousValue = this.getAmount(symbol)
     this.amounts.set(symbol, value)
-    window.api.setStockAmount(symbol, value)
+    const writeVersion = (this.amountWriteVersion.get(symbol) ?? 0) + 1
+    this.amountWriteVersion.set(symbol, writeVersion)
+
+    void window.api.setStockAmount(symbol, value).catch((error) => {
+      if (this.amountWriteVersion.get(symbol) !== writeVersion)
+        return
+
+      runInAction(() => {
+        this.amounts.set(symbol, previousValue)
+      })
+      notifyError(`Failed to save amount for ${symbol}`, error)
+    })
   }
 
   startEditing(symbol: string): void {
@@ -219,44 +234,88 @@ export class StocksStore {
   }
 
   async startFetchQueue(): Promise<void> {
-    this.queueAbortController = new AbortController()
-    runInAction(() => {
-      this.loading = true
-      this.fetchedCount = 0
-    })
-
-    for (let i = 0; i < this.symbols.length; i++) {
-      if (this.queueAbortController.signal.aborted)
-        break
-
-      const symbol = this.symbols[i]
-      try {
-        const data = await window.api.fetchStockQuote(symbol)
-        runInAction(() => {
-          this.quotes.set(symbol, data)
-        })
-        this.saveToCache()
+    if (this.fetchQueuePromise) {
+      if (!this.queueAbortController?.signal.aborted) {
+        return this.fetchQueuePromise
       }
-      catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Failed to fetch quote"
-        runInAction(() => {
-          this.errors.set(symbol, errorMessage)
-        })
-        notifyError(`Failed to fetch ${symbol}`, error)
-      }
-
-      runInAction(() => {
-        this.fetchedCount++
-      })
-
-      if (i < this.symbols.length - 1 && !this.queueAbortController.signal.aborted) {
-        await new Promise(resolve => setTimeout(resolve, FETCH_INTERVAL))
-      }
+      await this.fetchQueuePromise
     }
 
-    runInAction(() => {
-      this.loading = false
-    })
+    const abortController = new AbortController()
+    this.queueAbortController = abortController
+
+    const runPromise = (async () => {
+      let pendingCacheWrites = 0
+      runInAction(() => {
+        this.loading = true
+        this.fetchedCount = 0
+      })
+
+      for (let i = 0; i < this.symbols.length; i++) {
+        if (abortController.signal.aborted)
+          break
+
+        const symbol = this.symbols[i]
+        try {
+          const data = await window.api.fetchStockQuote(symbol)
+
+          if (abortController.signal.aborted) {
+            break
+          }
+
+          runInAction(() => {
+            this.quotes.set(symbol, data)
+          })
+          pendingCacheWrites++
+          if (pendingCacheWrites >= CACHE_SAVE_BATCH_SIZE) {
+            await this.saveToCache()
+            pendingCacheWrites = 0
+          }
+        }
+        catch (error) {
+          if (abortController.signal.aborted) {
+            break
+          }
+
+          const errorMessage = error instanceof Error ? error.message : "Failed to fetch quote"
+          runInAction(() => {
+            this.errors.set(symbol, errorMessage)
+          })
+          notifyError(`Failed to fetch ${symbol}`, error)
+        }
+
+        if (!abortController.signal.aborted) {
+          runInAction(() => {
+            this.fetchedCount++
+          })
+        }
+
+        if (i < this.symbols.length - 1 && !abortController.signal.aborted) {
+          await new Promise(resolve => setTimeout(resolve, FETCH_INTERVAL))
+        }
+      }
+
+      if (!abortController.signal.aborted && pendingCacheWrites > 0) {
+        await this.saveToCache()
+      }
+    })()
+
+    this.fetchQueuePromise = runPromise
+
+    try {
+      await runPromise
+    }
+    finally {
+      if (this.fetchQueuePromise === runPromise) {
+        this.fetchQueuePromise = null
+      }
+      if (this.queueAbortController === abortController) {
+        this.queueAbortController = null
+      }
+      runInAction(() => {
+        this.loading = false
+      })
+    }
   }
 
   stopFetchQueue(): void {
@@ -266,14 +325,19 @@ export class StocksStore {
     })
   }
 
-  refreshAll(): void {
+  async refreshAll(): Promise<void> {
     this.stopFetchQueue()
     runInAction(() => {
       this.quotes.clear()
       this.errors.clear()
     })
-    window.api.clearStockCache(this.symbols)
-    this.startFetchQueue()
+    try {
+      await window.api.clearStockCache(this.symbols)
+    }
+    catch (error) {
+      notifyError("Failed to clear stocks cache", error)
+    }
+    await this.startFetchQueue()
   }
 
   async loadAmounts(): Promise<void> {
