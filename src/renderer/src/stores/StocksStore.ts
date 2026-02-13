@@ -21,7 +21,6 @@ export class StocksStore {
       allocationSnapshot: computed({ keepAlive: true }),
       allocations: computed({ keepAlive: true }),
     })
-    this.loadDisabledSymbols()
   }
 
   quotes = new Map<string, StockQuote>()
@@ -57,6 +56,10 @@ export class StocksStore {
   }
 
   getDividendYield(symbol: string, months: number): number | null {
+    if (months <= 0) {
+      return null
+    }
+
     const quote = this.quotes.get(symbol)
     if (!quote || quote.price <= 0 || !quote.dividends || quote.dividends.length === 0) {
       return null
@@ -207,6 +210,9 @@ export class StocksStore {
   }
 
   get progress(): number {
+    if (this.totalCount === 0) {
+      return 0
+    }
     return this.fetchedCount / this.totalCount
   }
 
@@ -377,7 +383,7 @@ export class StocksStore {
     localStorage.setItem(key, JSON.stringify(array))
   }
 
-  private loadDisabledSymbols(): void {
+  loadDisabledSymbols(): void {
     const key = `money-hero-disabled-stocks-${this.storageKey}`
     const stored = localStorage.getItem(key)
     if (stored) {
@@ -386,7 +392,7 @@ export class StocksStore {
         this.disabledSymbols = new Set(array)
       }
       catch (error) {
-        console.error("Failed to parse disabled symbols from localStorage", error)
+        notifyError("Failed to load disabled stocks from localStorage", error)
       }
     }
   }

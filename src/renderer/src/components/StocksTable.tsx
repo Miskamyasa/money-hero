@@ -111,6 +111,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   }, [stocks])
 
   useEffect(() => {
+    stocks.loadDisabledSymbols()
     stocks.loadFromCache()
     stocks.loadAmounts()
   }, [stocks])
