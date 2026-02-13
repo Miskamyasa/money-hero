@@ -10,10 +10,12 @@ import { fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CH
 import {
   clearStockQuotesCache,
   getDisabledStockSymbols,
+  getScopedStockAmounts,
   getStockAmounts,
   getStockQuotesCache,
   saveStockQuotesCache,
   setDisabledStockSymbols,
+  setScopedStockAmount,
   setStockAmount,
 } from "./repositories"
 import { fetchStockQuote, STOCK_IPC_CHANNEL } from "./stocks"
@@ -80,6 +82,8 @@ app.whenReady().then(async () => {
   ipcMain.handle("db:clear-stock-cache", (_event, symbols: string[]) => clearStockQuotesCache(symbols))
   ipcMain.handle("db:get-stock-amounts", () => getStockAmounts())
   ipcMain.handle("db:set-stock-amount", (_event, symbol, amount) => setStockAmount(symbol, amount))
+  ipcMain.handle("db:get-scoped-stock-amounts", (_event, scope: string) => getScopedStockAmounts(scope))
+  ipcMain.handle("db:set-scoped-stock-amount", (_event, scope: string, symbol: string, amount: number) => setScopedStockAmount(scope, symbol, amount))
   ipcMain.handle("db:get-disabled-stock-symbols", (_event, storageKey: string) => getDisabledStockSymbols(storageKey))
   ipcMain.handle("db:set-disabled-stock-symbols", (_event, storageKey: string, symbols: string[]) => setDisabledStockSymbols(storageKey, symbols))
 

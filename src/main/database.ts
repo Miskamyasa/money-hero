@@ -53,6 +53,17 @@ export async function initDatabase(): Promise<void> {
     })
   }
 
+  // Create stock_amounts_scoped table
+  const hasStockAmountsScoped = await db.schema.hasTable("stock_amounts_scoped")
+  if (!hasStockAmountsScoped) {
+    await db.schema.createTable("stock_amounts_scoped", (table) => {
+      table.string("scope").notNullable()
+      table.string("symbol").notNullable()
+      table.float("amount").notNullable()
+      table.primary(["scope", "symbol"])
+    })
+  }
+
   // Create stock_disabled_symbols table
   const hasStockDisabledSymbols = await db.schema.hasTable("stock_disabled_symbols")
   if (!hasStockDisabledSymbols) {

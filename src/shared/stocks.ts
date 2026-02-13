@@ -1,6 +1,8 @@
+export type UnixTimestampSeconds = number
+
 export interface DividendEvent {
   amount: number
-  date: number
+  date: UnixTimestampSeconds
 }
 
 export interface StockQuote {

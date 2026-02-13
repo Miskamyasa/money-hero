@@ -29,6 +29,18 @@ function parseStorageKey(value: unknown, label: string): string {
   return value
 }
 
+function parseAmountScope(value: unknown, label: string): string {
+  if (typeof value !== "string") {
+    throw new TypeError(`${label} must be a string`)
+  }
+
+  if (value.length === 0) {
+    throw new TypeError(`${label} must not be empty`)
+  }
+
+  return value
+}
+
 function parseStockAmountWrite(value: unknown): { symbol: string, amount: number } {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new TypeError("stock amount write payload must be an object")
@@ -100,6 +112,22 @@ const api = {
   setStockAmount: (symbol: string, amount: number): Promise<void> => {
     const parsed = parseStockAmountWrite({ symbol, amount })
     return ipcRenderer.invoke("db:set-stock-amount", parsed.symbol, parsed.amount)
+  },
+  getScopedStockAmounts: async (scope: string): Promise<Record<string, number>> => {
+    const parsedScope = parseAmountScope(scope, "getScopedStockAmounts scope")
+    const payload = await ipcRenderer.invoke("db:get-scoped-stock-amounts", parsedScope)
+    try {
+      return parseStockAmounts(payload)
+    }
+    catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown payload error"
+      throw new Error(`Invalid IPC payload for db:get-scoped-stock-amounts: ${message}`)
+    }
+  },
+  setScopedStockAmount: (scope: string, symbol: string, amount: number): Promise<void> => {
+    const parsedScope = parseAmountScope(scope, "setScopedStockAmount scope")
+    const parsed = parseStockAmountWrite({ symbol, amount })
+    return ipcRenderer.invoke("db:set-scoped-stock-amount", parsedScope, parsed.symbol, parsed.amount)
   },
   getDisabledStockSymbols: async (storageKey: string): Promise<string[]> => {
     const parsedStorageKey = parseStorageKey(storageKey, "getDisabledStockSymbols storageKey")

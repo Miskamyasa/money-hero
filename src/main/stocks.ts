@@ -173,8 +173,8 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
 
   const dividends: DividendEvent[] = dividendsRaw
     ? Object.values(dividendsRaw)
-        .filter(d => typeof d.amount === "number" && typeof d.date === "number")
-        .map(d => ({ amount: d.amount, date: d.date }))
+        .filter(d => Number.isFinite(d.amount) && Number.isFinite(d.date))
+        .map(d => ({ amount: d.amount, date: Math.trunc(d.date) }))
         .sort((a, b) => a.date - b.date)
     : []
 

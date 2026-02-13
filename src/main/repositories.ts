@@ -136,6 +136,39 @@ export async function setStockAmount(symbol: string, amount: number): Promise<vo
   }
 }
 
+export async function getScopedStockAmounts(scope: string): Promise<Record<string, number>> {
+  const db = getDb()
+  const scopedRows = await db("stock_amounts_scoped")
+    .where("scope", scope)
+    .select("symbol", "amount")
+
+  if (scopedRows.length > 0) {
+    const scopedResult: Record<string, number> = {}
+    for (const row of scopedRows) {
+      scopedResult[row.symbol as string] = row.amount as number
+    }
+    return scopedResult
+  }
+
+  return getStockAmounts()
+}
+
+export async function setScopedStockAmount(scope: string, symbol: string, amount: number): Promise<void> {
+  const db = getDb()
+
+  if (amount === 0) {
+    await db("stock_amounts_scoped")
+      .where({ scope, symbol })
+      .delete()
+  }
+  else {
+    await db("stock_amounts_scoped")
+      .insert({ scope, symbol, amount })
+      .onConflict(["scope", "symbol"])
+      .merge()
+  }
+}
+
 export async function getDisabledStockSymbols(storageKey: string): Promise<string[]> {
   const db = getDb()
   const rows = await db("stock_disabled_symbols")

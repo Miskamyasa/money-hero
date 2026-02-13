@@ -1,6 +1,8 @@
 import { notifyError } from "@renderer/utils/notify"
 import { makeAutoObservable, runInAction } from "mobx"
 
+const STOCK_AMOUNT_SCOPE = "stocks"
+
 export class StockAmountsStore {
   amounts = new Map<string, number>()
 
@@ -22,7 +24,7 @@ export class StockAmountsStore {
     const writeVersion = (this.amountWriteVersion.get(symbol) ?? 0) + 1
     this.amountWriteVersion.set(symbol, writeVersion)
 
-    void window.api.setStockAmount(symbol, value).catch((error) => {
+    void window.api.setScopedStockAmount(STOCK_AMOUNT_SCOPE, symbol, value).catch((error) => {
       if (this.amountWriteVersion.get(symbol) !== writeVersion)
         return
 
@@ -44,7 +46,7 @@ export class StockAmountsStore {
 
     const runPromise = (async () => {
       try {
-        const amounts = await window.api.getStockAmounts()
+        const amounts = await window.api.getScopedStockAmounts(STOCK_AMOUNT_SCOPE)
         runInAction(() => {
           for (const [symbol, amount] of Object.entries(amounts)) {
             this.amounts.set(symbol, amount)

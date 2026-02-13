@@ -6,6 +6,9 @@ import { makeAutoObservable, runInAction } from "mobx"
 
 const FETCH_INTERVAL = 1000
 const CACHE_SAVE_BATCH_SIZE = 5
+const SECONDS_PER_DAY = 24 * 60 * 60
+const DAYS_PER_MONTH = 30.44
+const MONTHS_PER_YEAR = 12
 
 export class StocksDataStore {
   quotes = new Map<string, StockQuote>()
@@ -46,12 +49,13 @@ export class StocksDataStore {
     }
 
     const quote = this.quotes.get(symbol)
-    if (!quote || quote.price <= 0 || !quote.dividends || quote.dividends.length === 0) {
+    if (!quote || quote.price <= 0 || quote.dividends.length === 0) {
       return null
     }
 
-    const now = Date.now() / 1000
-    const cutoff = now - (months * 30.44 * 24 * 60 * 60)
+    const nowSeconds = Date.now() / 1000
+    const periodSeconds = months * DAYS_PER_MONTH * SECONDS_PER_DAY
+    const cutoff = nowSeconds - periodSeconds
     const divsInPeriod = quote.dividends.filter(d => d.date >= cutoff)
 
     if (divsInPeriod.length === 0) {
@@ -59,7 +63,7 @@ export class StocksDataStore {
     }
 
     const totalDivs = divsInPeriod.reduce((sum, d) => sum + d.amount, 0)
-    const annualized = totalDivs * (12 / months)
+    const annualized = totalDivs * (MONTHS_PER_YEAR / months)
     return (annualized / quote.price) * 100
   }
 

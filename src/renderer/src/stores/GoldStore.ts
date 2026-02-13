@@ -4,6 +4,8 @@ import { makeAutoObservable, runInAction } from "mobx"
 
 import { notifyError } from "../utils/notify"
 
+const GOLD_AMOUNT_SCOPE = "gold"
+
 interface GoldQuote {
   price: number
   previousClose: number
@@ -45,12 +47,14 @@ export class GoldStore {
 
   setAmount(value: number): void {
     this.amount = value
-    window.api.setStockAmount("GC=F", value)
+    void window.api.setScopedStockAmount(GOLD_AMOUNT_SCOPE, "GC=F", value).catch((error) => {
+      notifyError("Failed to save gold amount", error)
+    })
   }
 
   async loadAmount(): Promise<void> {
     try {
-      const amounts = await window.api.getStockAmounts()
+      const amounts = await window.api.getScopedStockAmounts(GOLD_AMOUNT_SCOPE)
       runInAction(() => {
         this.amount = amounts["GC=F"] ?? 0
       })
