@@ -1,21 +1,4 @@
-export interface DividendEvent {
-  amount: number
-  date: number // Unix timestamp in seconds
-}
-
-export interface StockQuote {
-  symbol: string
-  name: string
-  price: number
-  previousClose: number
-  change: number
-  changePercent: number
-  currency: string
-  change1m: number | null
-  change6m: number | null
-  change2y: number | null
-  dividends: DividendEvent[]
-}
+import type { DividendEvent, StockQuote } from "../shared/stocks"
 
 export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
 

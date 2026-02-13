@@ -1,4 +1,4 @@
-import type { DividendEvent, StockQuote } from "./stocks"
+import type { DividendEvent, StockQuote } from "../shared/stocks"
 
 import { getDb } from "./database"
 

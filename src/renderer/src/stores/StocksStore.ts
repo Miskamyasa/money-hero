@@ -1,27 +1,9 @@
+import type { StockQuote } from "../../../shared/stocks"
+
 import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
-
 import { notifyError } from "../utils/notify"
-
-interface DividendEvent {
-  amount: number
-  date: number
-}
-
-interface StockQuote {
-  symbol: string
-  name: string
-  price: number
-  previousClose: number
-  change: number
-  changePercent: number
-  currency: string
-  change1m: number | null
-  change6m: number | null
-  change2y: number | null
-  dividends: DividendEvent[]
-}
 
 const FETCH_INTERVAL = 1000
 export const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF-B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
@@ -248,7 +230,7 @@ export class StocksStore {
       try {
         const data = await window.api.fetchStockQuote(symbol)
         runInAction(() => {
-          this.quotes.set(symbol, data as StockQuote)
+          this.quotes.set(symbol, data)
         })
         this.saveToCache()
       }

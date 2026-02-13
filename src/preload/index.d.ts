@@ -1,4 +1,5 @@
 import type { ElectronAPI } from "@electron-toolkit/preload"
+import type { StockQuote } from "../shared/stocks"
 
 export interface GoldQuote {
   price: number
@@ -13,25 +14,6 @@ export interface GoldHistory {
   change1m: number | null
   change6m: number | null
   change2y: number | null
-}
-
-export interface DividendEvent {
-  amount: number
-  date: number
-}
-
-export interface StockQuote {
-  symbol: string
-  name: string
-  price: number
-  previousClose: number
-  change: number
-  changePercent: number
-  currency: string
-  change1m: number | null
-  change6m: number | null
-  change2y: number | null
-  dividends: DividendEvent[]
 }
 
 export interface CurrencyRate {
