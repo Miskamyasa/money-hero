@@ -23,9 +23,40 @@ export class SymbolStore {
   quote: SymbolQuote | null = null
   loading = false
   error: string | null = null
+  amount = 0
+  editingAmount = false
 
   get rootStore(): RootStore {
     return this.root
+  }
+
+  get balance(): number {
+    return this.amount * (this.quote?.price ?? 0)
+  }
+
+  setAmount(value: number): void {
+    this.amount = value
+    window.api.setStockAmount(this.symbol, value)
+  }
+
+  async loadAmount(): Promise<void> {
+    try {
+      const amounts = await window.api.getStockAmounts()
+      runInAction(() => {
+        this.amount = amounts[this.symbol] ?? 0
+      })
+    }
+    catch (error) {
+      console.error(`Failed to load amount for ${this.symbol}:`, error)
+    }
+  }
+
+  startEditing(): void {
+    this.editingAmount = true
+  }
+
+  stopEditing(): void {
+    this.editingAmount = false
   }
 
   async fetchQuote(): Promise<void> {

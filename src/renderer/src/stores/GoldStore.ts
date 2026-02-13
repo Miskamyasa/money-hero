@@ -30,8 +30,40 @@ export class GoldStore {
   historyLoading = false
   historyError: string | null = null
 
+  amount = 0
+  editingAmount = false
+
   get rootStore(): RootStore {
     return this.root
+  }
+
+  get balance(): number {
+    return this.amount * (this.quote?.price ?? 0)
+  }
+
+  setAmount(value: number): void {
+    this.amount = value
+    window.api.setStockAmount("GC=F", value)
+  }
+
+  async loadAmount(): Promise<void> {
+    try {
+      const amounts = await window.api.getStockAmounts()
+      runInAction(() => {
+        this.amount = amounts["GC=F"] ?? 0
+      })
+    }
+    catch (error) {
+      console.error("Failed to load gold amount:", error)
+    }
+  }
+
+  startEditing(): void {
+    this.editingAmount = true
+  }
+
+  stopEditing(): void {
+    this.editingAmount = false
   }
 
   async fetchQuote(): Promise<void> {

@@ -1,6 +1,6 @@
 import type { SymbolStore } from "@renderer/stores/SymbolStore"
 
-import { Alert, Button, Card, Center, Group, Loader, Paper, Stack, Text } from "@mantine/core"
+import { ActionIcon, Alert, Button, Card, Center, Group, Loader, NumberInput, Paper, Stack, Text } from "@mantine/core"
 import { observer } from "mobx-react-lite"
 
 import { useEffect } from "react"
@@ -12,6 +12,7 @@ interface SymbolStatsProps {
 function SymbolStats({ store }: SymbolStatsProps): React.JSX.Element {
   useEffect(() => {
     store.fetchQuote()
+    store.loadAmount()
   }, [store])
 
   const formatPrice = (value: number): string => {
@@ -89,6 +90,39 @@ function SymbolStats({ store }: SymbolStatsProps): React.JSX.Element {
                 <Text size="xl" fw={700} c={getChangeColor(store.quote.changePercent)}>
                   {formatChangePercent(store.quote.changePercent)}
                 </Text>
+              </Stack>
+            </Group>
+
+            <Group justify="space-between">
+              <Stack gap={4}>
+                <Text size="xs" c="dimmed">Balance</Text>
+                <Text size="xl" fw={700}>{formatPrice(store.balance)}</Text>
+              </Stack>
+              <Stack gap={4}>
+                <Text size="xs" c="dimmed">Amount</Text>
+                <Group gap={4}>
+                  <NumberInput
+                    size="xs"
+                    value={store.amount}
+                    onChange={value => store.setAmount(Number(value) || 0)}
+                    min={0}
+                    step={1}
+                    hideControls
+                    disabled={!store.editingAmount}
+                    styles={{ input: { width: 80 } }}
+                  />
+                  <ActionIcon
+                    variant={store.editingAmount ? "filled" : "subtle"}
+                    size="sm"
+                    aria-label={store.editingAmount ? "Stop editing" : "Edit amount"}
+                    onClick={() => store.editingAmount ? store.stopEditing() : store.startEditing()}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                      <path d="M13.5 6.5l4 4" />
+                    </svg>
+                  </ActionIcon>
+                </Group>
               </Stack>
             </Group>
 

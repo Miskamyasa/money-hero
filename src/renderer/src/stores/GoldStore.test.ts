@@ -7,6 +7,8 @@ describe("goldStore", () => {
     window.api = {
       fetchGoldQuote: vi.fn(),
       fetchGoldHistory: vi.fn(),
+      getStockAmounts: vi.fn().mockResolvedValue({}),
+      setStockAmount: vi.fn().mockResolvedValue(undefined),
     } as any
   })
 
@@ -170,5 +172,103 @@ describe("goldStore", () => {
     expect(store.history!.change1m).toBe(2.50)
     expect(store.history!.change6m).toBeNull()
     expect(store.history!.change2y).toBeNull()
+  })
+
+  it("starts with amount 0, balance 0, editingAmount false", () => {
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    expect(store.amount).toBe(0)
+    expect(store.balance).toBe(0)
+    expect(store.editingAmount).toBe(false)
+  })
+
+  it("setAmount updates local state and calls setStockAmount with GC=F", () => {
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    store.setAmount(5)
+
+    expect(store.amount).toBe(5)
+    expect(window.api.setStockAmount).toHaveBeenCalledWith("GC=F", 5)
+  })
+
+  it("balance computes amount * price when quote is set", () => {
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    store.quote = {
+      price: 2000.50,
+      previousClose: 1995.00,
+      change: 5.50,
+      changePercent: 0.28,
+      currency: "USD",
+      symbol: "XAUUSD",
+    }
+    store.setAmount(3)
+
+    expect(store.balance).toBe(6001.50)
+  })
+
+  it("balance returns 0 when quote is null", () => {
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    store.setAmount(5)
+
+    expect(store.balance).toBe(0)
+  })
+
+  it("loadAmount reads from getStockAmounts and sets GC=F value", async () => {
+    vi.mocked(window.api.getStockAmounts).mockResolvedValue({ "GC=F": 10 })
+
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    await store.loadAmount()
+
+    expect(store.amount).toBe(10)
+  })
+
+  it("loadAmount sets amount to 0 when GC=F not in response", async () => {
+    vi.mocked(window.api.getStockAmounts).mockResolvedValue({ OTHER: 5 })
+
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    await store.loadAmount()
+
+    expect(store.amount).toBe(0)
+  })
+
+  it("loadAmount handles errors gracefully", async () => {
+    vi.mocked(window.api.getStockAmounts).mockRejectedValue(new Error("Database error"))
+
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    await store.loadAmount()
+
+    expect(store.amount).toBe(0)
+  })
+
+  it("startEditing sets editingAmount to true", () => {
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    store.startEditing()
+
+    expect(store.editingAmount).toBe(true)
+  })
+
+  it("stopEditing sets editingAmount to false", () => {
+    const root = new RootStore()
+    const store = new GoldStore(root)
+
+    store.startEditing()
+    expect(store.editingAmount).toBe(true)
+
+    store.stopEditing()
+    expect(store.editingAmount).toBe(false)
   })
 })
