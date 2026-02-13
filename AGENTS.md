@@ -213,7 +213,6 @@ src/
         ├── assets/
         ├── components/
         └── stores/
-            ├── index.ts           # Singleton export
             ├── RootStore.ts       # Root store
             ├── AppStore.ts        # Feature store
             ├── StoreProvider.tsx   # React context provider

@@ -2,6 +2,7 @@ import { join } from "node:path"
 import { electronApp, is, optimizer } from "@electron-toolkit/utils"
 import { app, BrowserWindow, ipcMain, shell } from "electron"
 import icon from "../../resources/icon.png?asset"
+import { CURRENCY_IPC_CHANNEL, fetchCurrencyRates } from "./currency"
 import { initDatabase } from "./database"
 import { fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CHANNEL } from "./gold"
 import { clearStockQuotesCache, getStockAmounts, getStockQuotesCache, saveStockQuotesCache, setStockAmount } from "./repositories"
@@ -61,6 +62,7 @@ app.whenReady().then(async () => {
   ipcMain.handle(GOLD_IPC_CHANNEL, fetchGoldQuote)
   ipcMain.handle(GOLD_HISTORY_IPC_CHANNEL, fetchGoldHistory)
   ipcMain.handle(STOCK_IPC_CHANNEL, (_event, symbol: string) => fetchStockQuote(symbol))
+  ipcMain.handle(CURRENCY_IPC_CHANNEL, fetchCurrencyRates)
 
   // Database IPC handlers
   ipcMain.handle("db:get-stock-cache", () => getStockQuotesCache())

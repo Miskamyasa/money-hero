@@ -1,4 +1,5 @@
 import { Group, Stack, Title } from "@mantine/core"
+import CurrencyRates from "@renderer/components/CurrencyRates"
 import GoldStats from "@renderer/components/GoldStats"
 import StocksTable from "@renderer/components/StocksTable"
 import SymbolStats from "@renderer/components/SymbolStats"
@@ -15,6 +16,7 @@ function Dashboard(): React.JSX.Element {
       <Stack align="stretch" gap="xl" w="100%" maw={1200}>
         <Title order={1} size="4rem" ta="center">Money Hero</Title>
         <ThemeToggle />
+        <CurrencyRates />
         <Group grow align="stretch" w="100%">
           <GoldStats />
           <SymbolStats store={vt} />

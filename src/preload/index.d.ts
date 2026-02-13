@@ -34,7 +34,25 @@ export interface StockQuote {
   dividends: DividendEvent[]
 }
 
+export interface CurrencyRate {
+  symbol: string
+  label: string
+  rate: number
+  changePercent: number
+}
+
+export interface DollarIndex {
+  value: number
+  changePercent: number
+}
+
+export interface CurrencyRates {
+  dollar: DollarIndex
+  currencies: CurrencyRate[]
+}
+
 export interface Api {
+  fetchCurrencyRates: () => Promise<CurrencyRates>
   fetchGoldQuote: () => Promise<GoldQuote>
   fetchGoldHistory: () => Promise<GoldHistory>
   fetchStockQuote: (symbol: string) => Promise<StockQuote>

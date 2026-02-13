@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, Text, Tooltip, UnstyledButton } from "@mantine/core"
+import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
 
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
@@ -43,6 +43,27 @@ function SortableHeader({ label, column, sortState, onSort }: {
 function StocksTable(): React.JSX.Element {
   const { stocks } = useStores()
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: "desc" })
+  const [filterInput, setFilterInput] = useState("")
+  const [debouncedFilter, setDebouncedFilter] = useState("")
+  const filterDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleFilterChange = useCallback((value: string): void => {
+    setFilterInput(value)
+    if (filterDebounceRef.current) {
+      clearTimeout(filterDebounceRef.current)
+    }
+    filterDebounceRef.current = setTimeout(() => {
+      setDebouncedFilter(value)
+    }, 300)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (filterDebounceRef.current) {
+        clearTimeout(filterDebounceRef.current)
+      }
+    }
+  }, [])
 
   const handleSort = useCallback((column: SortableColumn): void => {
     setSortState((prev) => {
@@ -119,7 +140,14 @@ function StocksTable(): React.JSX.Element {
     stocks.refreshAll()
   }
 
+  const filterLower = debouncedFilter.toLowerCase().trim()
   const sortedQuotes = Array.from(stocks.quotes.values())
+    .filter((q) => {
+      if (!filterLower)
+        return true
+      return q.symbol.toLowerCase().includes(filterLower)
+        || q.name.toLowerCase().includes(filterLower)
+    })
   if (sortState.column == null) {
     sortedQuotes.sort((a, b) => a.symbol.localeCompare(b.symbol))
   }
@@ -135,7 +163,16 @@ function StocksTable(): React.JSX.Element {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
-        <Text fw={700} size="lg">Dividend Aristocrats</Text>
+        <Group gap="sm">
+          <Text fw={700} size="lg">Dividend Aristocrats</Text>
+          <TextInput
+            size="xs"
+            placeholder="Filter by name or symbol"
+            value={filterInput}
+            onChange={e => handleFilterChange(e.currentTarget.value)}
+            styles={{ input: { width: 180 } }}
+          />
+        </Group>
         <Group gap="sm">
           <NumberInput
             size="xs"
