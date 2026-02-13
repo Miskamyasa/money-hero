@@ -9,7 +9,7 @@ export const ThemedApp = observer(({ children }: PropsWithChildren): React.JSX.E
   const { theme } = useStores()
 
   return (
-    <MantineProvider forceColorScheme={theme.colorScheme} getRootElement={() => document.documentElement} cssVariablesSelector=":root">
+    <MantineProvider forceColorScheme={theme.colorScheme}>
       <Notifications position="top-right" />
       {children}
     </MantineProvider>
