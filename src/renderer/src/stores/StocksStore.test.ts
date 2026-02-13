@@ -292,11 +292,11 @@ describe("stocksStore", () => {
     store.stopFetchQueue()
   })
 
-  it("returns totalCount of 71", () => {
+  it("returns totalCount of 69", () => {
     const root = new RootStore()
     const store = new StocksStore(root)
 
-    expect(store.totalCount).toBe(71)
+    expect(store.totalCount).toBe(69)
   })
 
   it("computes progress correctly", () => {
@@ -306,9 +306,9 @@ describe("stocksStore", () => {
     expect(store.progress).toBe(0)
 
     store.fetchedCount = 10
-    expect(store.progress).toBeCloseTo(10 / 71)
+    expect(store.progress).toBeCloseTo(10 / store.totalCount)
 
-    store.fetchedCount = 71
+    store.fetchedCount = store.totalCount
     expect(store.progress).toBe(1)
   })
 

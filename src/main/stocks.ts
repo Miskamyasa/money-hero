@@ -15,6 +15,10 @@ export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
 
 export const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF-B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
 
+function normalizeYahooSymbol(symbol: string): string {
+  return symbol.trim().toUpperCase().replaceAll(".", "-")
+}
+
 function computeChangePercent(currentPrice: number, historicalPrice: number | undefined): number | null {
   if (historicalPrice == null || historicalPrice === 0 || !Number.isFinite(historicalPrice)) {
     return null
@@ -86,8 +90,9 @@ export function clearYahooSession(): void {
 
 export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
   try {
+    const normalizedSymbol = normalizeYahooSymbol(symbol)
     const session = await getYahooSession()
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=2y&interval=1mo&crumb=${encodeURIComponent(session.crumb)}`
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&crumb=${encodeURIComponent(session.crumb)}`
     const response = await fetch(url, {
       headers: { "Cookie": session.cookie, "User-Agent": "Mozilla/5.0" },
     })
@@ -95,7 +100,7 @@ export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
     if (response.status === 401 || response.status === 403) {
       clearYahooSession()
       const freshSession = await getYahooSession()
-      const retryUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=2y&interval=1mo&crumb=${encodeURIComponent(freshSession.crumb)}`
+      const retryUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&crumb=${encodeURIComponent(freshSession.crumb)}`
       const retryResponse = await fetch(retryUrl, {
         headers: { "Cookie": freshSession.cookie, "User-Agent": "Mozilla/5.0" },
       })
@@ -104,14 +109,14 @@ export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
         throw new Error(`Yahoo Finance API returned status ${retryResponse.status}: ${retryResponse.statusText}`)
       }
 
-      return parseChartResponse(await retryResponse.json())
+      return parseChartResponse(await retryResponse.json(), normalizedSymbol)
     }
 
     if (!response.ok) {
       throw new Error(`Yahoo Finance API returned status ${response.status}: ${response.statusText}`)
     }
 
-    return parseChartResponse(await response.json())
+    return parseChartResponse(await response.json(), normalizedSymbol)
   }
   catch (error) {
     if (error instanceof Error) {
@@ -121,7 +126,7 @@ export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
   }
 }
 
-function parseChartResponse(data: unknown): StockQuote {
+function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote {
   const chart = (data as Record<string, unknown>)?.chart as Record<string, unknown> | undefined
   const error = chart?.error as Record<string, unknown> | undefined
 
@@ -137,11 +142,11 @@ function parseChartResponse(data: unknown): StockQuote {
   }
 
   const meta = results[0].meta as Record<string, unknown>
-  const symbolResponse = meta.symbol
+  const symbolResponse = typeof meta.symbol === "string" ? meta.symbol : requestedSymbol
   const currency = meta.currency
 
-  if (typeof currency !== "string" || typeof symbolResponse !== "string") {
-    throw new TypeError("Yahoo Finance API response missing required string fields (currency or symbol)")
+  if (typeof currency !== "string") {
+    throw new TypeError("Yahoo Finance API response missing required string field (currency)")
   }
 
   const name = typeof meta.longName === "string" ? meta.longName : (typeof meta.shortName === "string" ? meta.shortName : symbolResponse)
