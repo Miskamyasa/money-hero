@@ -9,14 +9,12 @@ const CACHE_SAVE_BATCH_SIZE = 5
 
 export class StocksDataStore {
   quotes = new Map<string, StockQuote>()
-  amounts = new Map<string, number>()
   loading = false
   fetchedCount = 0
   errors = new Map<string, string>()
 
   private queueAbortController: AbortController | null = null
   private fetchQueuePromise: Promise<void> | null = null
-  private amountWriteVersion = new Map<string, number>()
 
   constructor(private root: RootStore, private symbols: string[]) {
     makeAutoObservable(this)
@@ -67,24 +65,11 @@ export class StocksDataStore {
   }
 
   getAmount(symbol: string): number {
-    return this.amounts.get(symbol) ?? 0
+    return this.root.stockAmounts.getAmount(symbol)
   }
 
   setAmount(symbol: string, value: number): void {
-    const previousValue = this.getAmount(symbol)
-    this.amounts.set(symbol, value)
-    const writeVersion = (this.amountWriteVersion.get(symbol) ?? 0) + 1
-    this.amountWriteVersion.set(symbol, writeVersion)
-
-    void window.api.setStockAmount(symbol, value).catch((error) => {
-      if (this.amountWriteVersion.get(symbol) !== writeVersion)
-        return
-
-      runInAction(() => {
-        this.amounts.set(symbol, previousValue)
-      })
-      notifyError(`Failed to save amount for ${symbol}`, error)
-    })
+    this.root.stockAmounts.setAmount(symbol, value)
   }
 
   async loadFromCache(): Promise<void> {
@@ -235,16 +220,6 @@ export class StocksDataStore {
   }
 
   async loadAmounts(): Promise<void> {
-    try {
-      const amounts = await window.api.getStockAmounts()
-      runInAction(() => {
-        for (const [symbol, amount] of Object.entries(amounts)) {
-          this.amounts.set(symbol, amount)
-        }
-      })
-    }
-    catch (error) {
-      notifyError("Failed to load stock amounts", error)
-    }
+    await this.root.stockAmounts.loadAmounts()
   }
 }
