@@ -36,8 +36,8 @@ function Dashboard(): React.JSX.Element {
           <SymbolStats store={vt} />
           <SymbolStats store={voo} />
         </Group>
-        <StocksTable store={stocks} title="Dividend Aristocrats" />
         <StocksTable store={highYield} title="High Yield" />
+        <StocksTable store={stocks} title="Dividend Aristocrats" />
       </Stack>
       <FilterDrawer opened={drawerOpened} onClose={() => setDrawerOpened(false)} />
     </div>

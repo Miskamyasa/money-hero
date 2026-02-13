@@ -1,6 +1,6 @@
 import type { StocksStore } from "@renderer/stores/StocksStore"
 
-import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
+import { ActionIcon, Button, Card, Center, Collapse, Group, NumberInput, Progress, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
 
 import { observer } from "mobx-react-lite"
 
@@ -53,6 +53,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: "desc" })
   const [filterInput, setFilterInput] = useState("")
   const [debouncedFilter, setDebouncedFilter] = useState("")
+  const [tableVisible, setTableVisible] = useState(true)
   const filterDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleFilterChange = useCallback((value: string): void => {
@@ -218,195 +219,204 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
           >
             Refresh
           </Button>
+          <Button
+            variant="light"
+            size="xs"
+            onClick={() => setTableVisible(prev => !prev)}
+          >
+            {tableVisible ? "Hide" : "Show"}
+          </Button>
         </Group>
       </Group>
 
-      {data.loading && (
-        <>
-          <Progress value={data.progress * 100} size="sm" mb="xs" />
-          <Text size="xs" c="dimmed" mb="md">
-            Loading stocks... (
-            {data.fetchedCount}
-            /
-            {data.totalCount}
-            )
-          </Text>
-        </>
-      )}
-
-      {data.quotes.size === 0 && !data.loading && (
-        <Center>
-          <Button
-            variant="light"
-            onClick={handleRefresh}
-          >
-            Load Stocks
-          </Button>
-        </Center>
-      )}
-
-      {data.quotes.size > 0 && (
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Symbol</Table.Th>
-              <Table.Th>Currency</Table.Th>
-              <Table.Th>Price</Table.Th>
-              <Table.Th>Change</Table.Th>
-              <Table.Th>Change %</Table.Th>
-              <Table.Th><SortableHeader label="1M" column="change1m" sortState={sortState} onSort={handleSort} /></Table.Th>
-              <Table.Th><SortableHeader label="6M" column="change6m" sortState={sortState} onSort={handleSort} /></Table.Th>
-              <Table.Th><SortableHeader label="2Y" column="change2y" sortState={sortState} onSort={handleSort} /></Table.Th>
-              <Table.Th>Balance</Table.Th>
-              <Table.Th>Amount</Table.Th>
-              <Table.Th />
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {sortedQuotes.map((quote) => {
-              const allocation = allocations.get(quote.symbol) ?? 0
-              const allocationBalance = allocation * quote.price
-
-              return (
-                <Table.Tr key={quote.symbol}>
-                  <Table.Td>
-                    <Tooltip label={quote.name} withArrow>
-                      <Text size="sm" style={{ cursor: "default" }}>{quote.symbol}</Text>
-                    </Tooltip>
-                  </Table.Td>
-                  <Table.Td><Text size="sm">{quote.currency}</Text></Table.Td>
-                  <Table.Td>
-                    <Tooltip label={formatDividendYield(quote.symbol)} withArrow>
-                      <span>{formatPrice(quote.price, quote.currency)}</span>
-                    </Tooltip>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text c={getChangeColor(quote.change)}>
-                      {formatChange(quote.change, quote.currency)}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text c={getChangeColor(quote.changePercent)}>
-                      {formatChangePercent(quote.changePercent)}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    {quote.change1m != null
-                      ? (
-                          <Text c={getChangeColor(quote.change1m)}>
-                            {formatChangePercent(quote.change1m)}
-                          </Text>
-                        )
-                      : <Text c="dimmed">N/A</Text>}
-                  </Table.Td>
-                  <Table.Td>
-                    {quote.change6m != null
-                      ? (
-                          <Text c={getChangeColor(quote.change6m)}>
-                            {formatChangePercent(quote.change6m)}
-                          </Text>
-                        )
-                      : <Text c="dimmed">N/A</Text>}
-                  </Table.Td>
-                  <Table.Td>
-                    {quote.change2y != null
-                      ? (
-                          <Text c={getChangeColor(quote.change2y)}>
-                            {formatChangePercent(quote.change2y)}
-                          </Text>
-                        )
-                      : <Text c="dimmed">N/A</Text>}
-                  </Table.Td>
-                  <Table.Td style={{ position: "relative" }}>
-                    {formatPrice(data.getBalance(quote.symbol), quote.currency)}
-                    {ui.buyingMode && allocationBalance > 0 && (
-                      <Text
-                        size="sm"
-                        fw={700}
-                        c="teal"
-                        style={{
-                          position: "absolute",
-                          top: "50%",
-                          left: 0,
-                          right: 0,
-                          transform: "translateY(-50%)",
-                          textAlign: "center",
-                          backgroundColor: "var(--mantine-color-dark-7)",
-                          padding: "0 4px",
-                        }}
-                      >
-                        {formatPrice(allocationBalance, quote.currency)}
-                      </Text>
-                    )}
-                  </Table.Td>
-                  <Table.Td style={{ position: "relative" }}>
-                    <NumberInput
-                      size="xs"
-                      value={data.getAmount(quote.symbol)}
-                      onChange={value => data.setAmount(quote.symbol, Number(value) || 0)}
-                      min={0}
-                      step={1}
-                      hideControls
-                      disabled={!ui.isEditing(quote.symbol)}
-                      styles={{ input: { width: 80 } }}
-                    />
-                    {ui.buyingMode && allocation > 0 && (
-                      <Text
-                        size="sm"
-                        fw={700}
-                        c="teal"
-                        style={{
-                          position: "absolute",
-                          top: "50%",
-                          left: 0,
-                          right: 0,
-                          transform: "translateY(-50%)",
-                          textAlign: "center",
-                          backgroundColor: "var(--mantine-color-dark-7)",
-                          padding: "0 4px",
-                        }}
-                      >
-                        +
-                        {allocation}
-                      </Text>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap={4} wrap="nowrap">
-                      <ActionIcon
-                        variant={ui.isEditing(quote.symbol) ? "filled" : "subtle"}
-                        size="sm"
-                        aria-label={ui.isEditing(quote.symbol) ? "Stop editing" : "Edit amount"}
-                        onClick={() => ui.isEditing(quote.symbol) ? ui.stopEditing() : ui.startEditing(quote.symbol)}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-                          <path d="M13.5 6.5l4 4" />
-                        </svg>
-                      </ActionIcon>
-                      <ActionIcon
-                        variant="subtle"
-                        size="sm"
-                        aria-label="Open on Yahoo Finance"
-                        component="a"
-                        href={`https://finance.yahoo.com/quote/${quote.symbol}/`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                          <path d="M11 13l9 -9" />
-                          <path d="M15 4h5v5" />
-                        </svg>
-                      </ActionIcon>
-                    </Group>
-                  </Table.Td>
-                </Table.Tr>
+      <Collapse in={tableVisible}>
+        {data.loading && (
+          <>
+            <Progress value={data.progress * 100} size="sm" mb="xs" />
+            <Text size="xs" c="dimmed" mb="md">
+              Loading stocks... (
+              {data.fetchedCount}
+              /
+              {data.totalCount}
               )
-            })}
-          </Table.Tbody>
-        </Table>
-      )}
+            </Text>
+          </>
+        )}
+
+        {data.quotes.size === 0 && !data.loading && (
+          <Center>
+            <Button
+              variant="light"
+              onClick={handleRefresh}
+            >
+              Load Stocks
+            </Button>
+          </Center>
+        )}
+
+        {data.quotes.size > 0 && (
+          <Table striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Symbol</Table.Th>
+                <Table.Th>Currency</Table.Th>
+                <Table.Th>Price</Table.Th>
+                <Table.Th>Change</Table.Th>
+                <Table.Th>Change %</Table.Th>
+                <Table.Th><SortableHeader label="1M" column="change1m" sortState={sortState} onSort={handleSort} /></Table.Th>
+                <Table.Th><SortableHeader label="6M" column="change6m" sortState={sortState} onSort={handleSort} /></Table.Th>
+                <Table.Th><SortableHeader label="2Y" column="change2y" sortState={sortState} onSort={handleSort} /></Table.Th>
+                <Table.Th>Balance</Table.Th>
+                <Table.Th>Amount</Table.Th>
+                <Table.Th />
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {sortedQuotes.map((quote) => {
+                const allocation = allocations.get(quote.symbol) ?? 0
+                const allocationBalance = allocation * quote.price
+
+                return (
+                  <Table.Tr key={quote.symbol}>
+                    <Table.Td>
+                      <Tooltip label={quote.name} withArrow>
+                        <Text size="sm" style={{ cursor: "default" }}>{quote.symbol}</Text>
+                      </Tooltip>
+                    </Table.Td>
+                    <Table.Td><Text size="sm">{quote.currency}</Text></Table.Td>
+                    <Table.Td>
+                      <Tooltip label={formatDividendYield(quote.symbol)} withArrow>
+                        <span>{formatPrice(quote.price, quote.currency)}</span>
+                      </Tooltip>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text c={getChangeColor(quote.change)}>
+                        {formatChange(quote.change, quote.currency)}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text c={getChangeColor(quote.changePercent)}>
+                        {formatChangePercent(quote.changePercent)}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      {quote.change1m != null
+                        ? (
+                            <Text c={getChangeColor(quote.change1m)}>
+                              {formatChangePercent(quote.change1m)}
+                            </Text>
+                          )
+                        : <Text c="dimmed">N/A</Text>}
+                    </Table.Td>
+                    <Table.Td>
+                      {quote.change6m != null
+                        ? (
+                            <Text c={getChangeColor(quote.change6m)}>
+                              {formatChangePercent(quote.change6m)}
+                            </Text>
+                          )
+                        : <Text c="dimmed">N/A</Text>}
+                    </Table.Td>
+                    <Table.Td>
+                      {quote.change2y != null
+                        ? (
+                            <Text c={getChangeColor(quote.change2y)}>
+                              {formatChangePercent(quote.change2y)}
+                            </Text>
+                          )
+                        : <Text c="dimmed">N/A</Text>}
+                    </Table.Td>
+                    <Table.Td style={{ position: "relative" }}>
+                      {formatPrice(data.getBalance(quote.symbol), quote.currency)}
+                      {ui.buyingMode && allocationBalance > 0 && (
+                        <Text
+                          size="sm"
+                          fw={700}
+                          c="teal"
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: 0,
+                            right: 0,
+                            transform: "translateY(-50%)",
+                            textAlign: "center",
+                            backgroundColor: "var(--mantine-color-dark-7)",
+                            padding: "0 4px",
+                          }}
+                        >
+                          {formatPrice(allocationBalance, quote.currency)}
+                        </Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td style={{ position: "relative" }}>
+                      <NumberInput
+                        size="xs"
+                        value={data.getAmount(quote.symbol)}
+                        onChange={value => data.setAmount(quote.symbol, Number(value) || 0)}
+                        min={0}
+                        step={1}
+                        hideControls
+                        disabled={!ui.isEditing(quote.symbol)}
+                        styles={{ input: { width: 80 } }}
+                      />
+                      {ui.buyingMode && allocation > 0 && (
+                        <Text
+                          size="sm"
+                          fw={700}
+                          c="teal"
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: 0,
+                            right: 0,
+                            transform: "translateY(-50%)",
+                            textAlign: "center",
+                            backgroundColor: "var(--mantine-color-dark-7)",
+                            padding: "0 4px",
+                          }}
+                        >
+                          +
+                          {allocation}
+                        </Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={4} wrap="nowrap">
+                        <ActionIcon
+                          variant={ui.isEditing(quote.symbol) ? "filled" : "subtle"}
+                          size="sm"
+                          aria-label={ui.isEditing(quote.symbol) ? "Stop editing" : "Edit amount"}
+                          onClick={() => ui.isEditing(quote.symbol) ? ui.stopEditing() : ui.startEditing(quote.symbol)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                            <path d="M13.5 6.5l4 4" />
+                          </svg>
+                        </ActionIcon>
+                        <ActionIcon
+                          variant="subtle"
+                          size="sm"
+                          aria-label="Open on Yahoo Finance"
+                          component="a"
+                          href={`https://finance.yahoo.com/quote/${quote.symbol}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                            <path d="M11 13l9 -9" />
+                            <path d="M15 4h5v5" />
+                          </svg>
+                        </ActionIcon>
+                      </Group>
+                    </Table.Td>
+                  </Table.Tr>
+                )
+              })}
+            </Table.Tbody>
+          </Table>
+        )}
+      </Collapse>
     </Card>
   )
 }
