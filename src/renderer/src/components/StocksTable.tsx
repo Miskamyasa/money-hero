@@ -234,8 +234,8 @@ function StocksTable(): React.JSX.Element {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Symbol</Table.Th>
-              <Table.Th>Name</Table.Th>
               <Table.Th>Price</Table.Th>
+              <Table.Th>Currency</Table.Th>
               <Table.Th>Change</Table.Th>
               <Table.Th>Change %</Table.Th>
               <Table.Th><SortableHeader label="1M" column="change1m" sortState={sortState} onSort={handleSort} /></Table.Th>
@@ -249,8 +249,12 @@ function StocksTable(): React.JSX.Element {
           <Table.Tbody>
             {sortedQuotes.map(quote => (
               <Table.Tr key={quote.symbol}>
-                <Table.Td>{quote.symbol}</Table.Td>
-                <Table.Td><Text size="sm" truncate="end" maw={200}>{quote.name}</Text></Table.Td>
+                <Table.Td>
+                  <Tooltip label={quote.name} withArrow>
+                    <Text size="sm" style={{ cursor: "default" }}>{quote.symbol}</Text>
+                  </Tooltip>
+                </Table.Td>
+                <Table.Td><Text size="sm">{quote.currency}</Text></Table.Td>
                 <Table.Td>
                   <Tooltip label={formatDividendYield(quote.symbol)} withArrow>
                     <span>{formatPrice(quote.price)}</span>
