@@ -1,0 +1,22 @@
+{
+  "name": "money-hero",
+  "image": "miskamyasa/mise-ub-24-04:1",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+  "remoteUser": "ubuntu",
+  "containerEnv": {
+    "MISE_TRUSTED_CONFIG_PATHS": "${localWorkspaceFolder}",
+    "OPENCODE_YOLO": true
+  },
+  "mounts": [
+    "source=containers-cache,target=/home/ubuntu/.cache,type=volume",
+    "source=containers-local-share,target=/home/ubuntu/.local/share,type=volume",
+    "source=${localEnv:HOME}/.local/share/opencode,target=/home/ubuntu/.local/share/opencode,type=bind",
+    "source=${localEnv:HOME}/.config/opencode,target=/home/ubuntu/.config/opencode,type=bind,readonly",
+    "source=${localWorkspaceFolder}/../main,target=${localWorkspaceFolder}/../main,type=bind,readonly"
+  ],
+  "runArgs": [
+    "--name=money-hero--${localWorkspaceFolderBasename}"
+  ],
+  "postCreateCommand": "mise install"
+}
