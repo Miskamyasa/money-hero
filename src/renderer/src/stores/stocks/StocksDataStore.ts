@@ -11,7 +11,6 @@ export class StocksDataStore {
   quotes = new Map<string, StockQuote>()
   loading = false
   fetchedCount = 0
-  errors = new Map<string, string>()
 
   private queueAbortController: AbortController | null = null
   private fetchQueuePromise: Promise<void> | null = null
@@ -156,10 +155,6 @@ export class StocksDataStore {
             break
           }
 
-          const errorMessage = error instanceof Error ? error.message : "Failed to fetch quote"
-          runInAction(() => {
-            this.errors.set(symbol, errorMessage)
-          })
           notifyError(`Failed to fetch ${symbol}`, error)
         }
 
@@ -219,7 +214,6 @@ export class StocksDataStore {
     await this.stopFetchQueueAndWait()
     runInAction(() => {
       this.quotes.clear()
-      this.errors.clear()
     })
     try {
       await window.api.clearStockCache([...this.symbols])
