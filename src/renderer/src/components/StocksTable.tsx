@@ -263,19 +263,16 @@ function StocksTable(): React.JSX.Element {
                   )}
                 </Table.Td>
                 <Table.Td style={{ position: "relative" }}>
-                  {stocks.isEditing(quote.symbol)
-                    ? (
-                        <NumberInput
-                          size="xs"
-                          value={stocks.getAmount(quote.symbol)}
-                          onChange={value => stocks.setAmount(quote.symbol, Number(value) || 0)}
-                          min={0}
-                          step={1}
-                          hideControls
-                          styles={{ input: { width: 80 } }}
-                        />
-                      )
-                    : stocks.getAmount(quote.symbol)}
+                  <NumberInput
+                    size="xs"
+                    value={stocks.getAmount(quote.symbol)}
+                    onChange={value => stocks.setAmount(quote.symbol, Number(value) || 0)}
+                    min={0}
+                    step={1}
+                    hideControls
+                    disabled={!stocks.isEditing(quote.symbol)}
+                    styles={{ input: { width: 80 } }}
+                  />
                   {stocks.buyingMode && stocks.getAllocation(quote.symbol) > 0 && (
                     <Text
                       size="sm"
