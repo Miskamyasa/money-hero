@@ -4,6 +4,38 @@ import { electronAPI } from "@electron-toolkit/preload"
 import { contextBridge, ipcRenderer } from "electron"
 import { parseStockAmounts, parseStockQuote, parseStockQuotes } from "../shared/stocks"
 
+function parseStockSymbols(value: unknown, label: string): string[] {
+  if (!Array.isArray(value)) {
+    throw new TypeError(`${label} must be an array`)
+  }
+
+  return value.map((item, index) => {
+    if (typeof item !== "string") {
+      throw new TypeError(`${label}[${index}] must be a string`)
+    }
+    return item
+  })
+}
+
+function parseStockAmountWrite(value: unknown): { symbol: string, amount: number } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError("stock amount write payload must be an object")
+  }
+
+  const payload = value as { symbol?: unknown, amount?: unknown }
+  if (typeof payload.symbol !== "string") {
+    throw new TypeError("stock amount write payload.symbol must be a string")
+  }
+  if (typeof payload.amount !== "number" || !Number.isFinite(payload.amount)) {
+    throw new TypeError("stock amount write payload.amount must be a finite number")
+  }
+
+  return {
+    symbol: payload.symbol,
+    amount: payload.amount,
+  }
+}
+
 // Custom APIs for renderer
 const api = {
   fetchCurrencyRates: (): Promise<unknown> => ipcRenderer.invoke("currency:fetch-rates"),
@@ -39,7 +71,10 @@ const api = {
     }
     await ipcRenderer.invoke("db:save-stock-cache", quotes)
   },
-  clearStockCache: (symbols: string[]): Promise<void> => ipcRenderer.invoke("db:clear-stock-cache", symbols),
+  clearStockCache: (symbols: string[]): Promise<void> => {
+    const parsedSymbols = parseStockSymbols(symbols, "clearStockCache symbols")
+    return ipcRenderer.invoke("db:clear-stock-cache", parsedSymbols)
+  },
   getStockAmounts: async (): Promise<Record<string, number>> => {
     const payload = await ipcRenderer.invoke("db:get-stock-amounts")
     try {
@@ -50,7 +85,10 @@ const api = {
       throw new Error(`Invalid IPC payload for db:get-stock-amounts: ${message}`)
     }
   },
-  setStockAmount: (symbol: string, amount: number): Promise<unknown> => ipcRenderer.invoke("db:set-stock-amount", symbol, amount),
+  setStockAmount: (symbol: string, amount: number): Promise<void> => {
+    const parsed = parseStockAmountWrite({ symbol, amount })
+    return ipcRenderer.invoke("db:set-stock-amount", parsed.symbol, parsed.amount)
+  },
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

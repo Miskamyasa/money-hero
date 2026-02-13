@@ -52,49 +52,7 @@ function parseDividendEvent(value: unknown, path: string): DividendEvent {
   }
 }
 
-export function parseStockQuote(value: unknown): StockQuote {
-  assertObject(value, "stockQuote")
-  assertString(value.symbol, "stockQuote.symbol")
-  assertString(value.name, "stockQuote.name")
-  assertFiniteNumber(value.price, "stockQuote.price")
-  assertFiniteNumber(value.previousClose, "stockQuote.previousClose")
-  assertFiniteNumber(value.change, "stockQuote.change")
-  assertFiniteNumber(value.changePercent, "stockQuote.changePercent")
-  assertString(value.currency, "stockQuote.currency")
-  assertNullableFiniteNumber(value.change1m, "stockQuote.change1m")
-  assertNullableFiniteNumber(value.change6m, "stockQuote.change6m")
-  assertNullableFiniteNumber(value.change2y, "stockQuote.change2y")
-
-  if (!Array.isArray(value.dividends)) {
-    throw new TypeError("stockQuote.dividends must be an array")
-  }
-
-  const dividends = value.dividends.map((event, index) => parseDividendEvent(event, `stockQuote.dividends[${index}]`))
-
-  return {
-    symbol: value.symbol,
-    name: value.name,
-    price: value.price,
-    previousClose: value.previousClose,
-    change: value.change,
-    changePercent: value.changePercent,
-    currency: value.currency,
-    change1m: value.change1m,
-    change6m: value.change6m,
-    change2y: value.change2y,
-    dividends,
-  }
-}
-
-export function parseStockQuotes(value: unknown): StockQuote[] {
-  if (!Array.isArray(value)) {
-    throw new TypeError("stockQuotes must be an array")
-  }
-
-  return value.map((quote, index) => parseStockQuoteWithPath(quote, `stockQuotes[${index}]`))
-}
-
-function parseStockQuoteWithPath(value: unknown, path: string): StockQuote {
+function parseStockQuoteAtPath(value: unknown, path: string): StockQuote {
   assertObject(value, path)
   assertString(value.symbol, `${path}.symbol`)
   assertString(value.name, `${path}.name`)
@@ -124,6 +82,18 @@ function parseStockQuoteWithPath(value: unknown, path: string): StockQuote {
     change2y: value.change2y,
     dividends: value.dividends.map((event, index) => parseDividendEvent(event, `${path}.dividends[${index}]`)),
   }
+}
+
+export function parseStockQuote(value: unknown): StockQuote {
+  return parseStockQuoteAtPath(value, "stockQuote")
+}
+
+export function parseStockQuotes(value: unknown): StockQuote[] {
+  if (!Array.isArray(value)) {
+    throw new TypeError("stockQuotes must be an array")
+  }
+
+  return value.map((quote, index) => parseStockQuoteAtPath(quote, `stockQuotes[${index}]`))
 }
 
 export function parseStockAmounts(value: unknown): Record<string, number> {
