@@ -2,7 +2,7 @@ import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
 
-import { notifyError } from "./notify"
+import { notifyError } from "../utils/notify"
 
 interface DividendEvent {
   amount: number
