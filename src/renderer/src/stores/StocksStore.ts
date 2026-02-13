@@ -2,6 +2,8 @@ import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
 
+import { notifyError } from "./notify"
+
 interface DividendEvent {
   amount: number
   date: number
@@ -22,11 +24,18 @@ interface StockQuote {
 }
 
 const FETCH_INTERVAL = 1000
-const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF-B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
+export const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF-B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
+export const HIGH_YIELD = ["MPLX", "EPD", "VICI", "VZ", "HPQ", "OKE", "NNN", "O", "MO", "PFE", "DOC", "CAG", "KHC", "BBY", "EIX", "CPB", "PRU", "AMCR", "LYB", "UPS", "DUK", "ABBV", "VEDL.NS", "HINDZINC.NS", "RECLTD.NS", "LGEN.L", "PHNX.L", "IMB.L", "LAND.L", "AV.L", "MNG.L"]
 
 export class StocksStore {
-  constructor(private root: RootStore) {
+  private symbols: string[]
+  private storageKey: string
+
+  constructor(private root: RootStore, symbols: string[], storageKey: string = "default") {
+    this.symbols = symbols
+    this.storageKey = storageKey
     makeAutoObservable(this)
+    this.loadDisabledSymbols()
   }
 
   quotes = new Map<string, StockQuote>()
@@ -37,11 +46,20 @@ export class StocksStore {
   editingSymbol: string | null = null
   buyingMode = false
   investmentAmount = 0
+  disabledSymbols = new Set<string>()
 
   private queueAbortController: AbortController | null = null
 
   get rootStore(): RootStore {
     return this.root
+  }
+
+  get allSymbols(): string[] {
+    return this.symbols
+  }
+
+  get activeQuotes(): StockQuote[] {
+    return Array.from(this.quotes.values()).filter(q => !this.disabledSymbols.has(q.symbol))
   }
 
   getBalance(symbol: string): number {
@@ -88,6 +106,20 @@ export class StocksStore {
 
   isEditing(symbol: string): boolean {
     return this.editingSymbol === symbol
+  }
+
+  toggleSymbol(symbol: string): void {
+    if (this.disabledSymbols.has(symbol)) {
+      this.disabledSymbols.delete(symbol)
+    }
+    else {
+      this.disabledSymbols.add(symbol)
+    }
+    this.saveDisabledSymbols()
+  }
+
+  isSymbolEnabled(symbol: string): boolean {
+    return !this.disabledSymbols.has(symbol)
   }
 
   toggleBuyingMode(): void {
@@ -157,17 +189,8 @@ export class StocksStore {
     return allocation * (quote?.price ?? 0)
   }
 
-  get totalAllocated(): number {
-    let total = 0
-    for (const [symbol, count] of this.allocations) {
-      const quote = this.quotes.get(symbol)
-      total += count * (quote?.price ?? 0)
-    }
-    return total
-  }
-
   get totalCount(): number {
-    return DIVIDEND_ARISTOCRATS.length
+    return this.symbols.length
   }
 
   get progress(): number {
@@ -184,7 +207,7 @@ export class StocksStore {
       }
     }
     catch (error) {
-      console.error("Failed to load stocks cache:", error)
+      notifyError("Failed to load stocks cache", error)
     }
   }
 
@@ -201,12 +224,12 @@ export class StocksStore {
         change1m: quote.change1m,
         change6m: quote.change6m,
         change2y: quote.change2y,
-        dividends: quote.dividends,
+        dividends: quote.dividends.map(d => ({ amount: d.amount, date: d.date })),
       }))
       await window.api.saveStockCache(quotes)
     }
     catch (error) {
-      console.error("Failed to save stocks cache:", error)
+      notifyError("Failed to save stocks cache", error)
     }
   }
 
@@ -217,11 +240,11 @@ export class StocksStore {
       this.fetchedCount = 0
     })
 
-    for (let i = 0; i < DIVIDEND_ARISTOCRATS.length; i++) {
+    for (let i = 0; i < this.symbols.length; i++) {
       if (this.queueAbortController.signal.aborted)
         break
 
-      const symbol = DIVIDEND_ARISTOCRATS[i]
+      const symbol = this.symbols[i]
       try {
         const data = await window.api.fetchStockQuote(symbol)
         runInAction(() => {
@@ -234,13 +257,14 @@ export class StocksStore {
         runInAction(() => {
           this.errors.set(symbol, errorMessage)
         })
+        notifyError(`Failed to fetch ${symbol}`, error)
       }
 
       runInAction(() => {
         this.fetchedCount++
       })
 
-      if (i < DIVIDEND_ARISTOCRATS.length - 1 && !this.queueAbortController.signal.aborted) {
+      if (i < this.symbols.length - 1 && !this.queueAbortController.signal.aborted) {
         await new Promise(resolve => setTimeout(resolve, FETCH_INTERVAL))
       }
     }
@@ -277,7 +301,27 @@ export class StocksStore {
       })
     }
     catch (error) {
-      console.error("Failed to load stock amounts:", error)
+      notifyError("Failed to load stock amounts", error)
+    }
+  }
+
+  private saveDisabledSymbols(): void {
+    const key = `money-hero-disabled-stocks-${this.storageKey}`
+    const array = Array.from(this.disabledSymbols)
+    localStorage.setItem(key, JSON.stringify(array))
+  }
+
+  private loadDisabledSymbols(): void {
+    const key = `money-hero-disabled-stocks-${this.storageKey}`
+    const stored = localStorage.getItem(key)
+    if (stored) {
+      try {
+        const array = JSON.parse(stored) as string[]
+        this.disabledSymbols = new Set(array)
+      }
+      catch (error) {
+        console.error("Failed to parse disabled symbols from localStorage", error)
+      }
     }
   }
 }

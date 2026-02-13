@@ -1,12 +1,18 @@
+import type { StocksStore } from "@renderer/stores/StocksStore"
+
 import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
 
-import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
 type SortableColumn = "change1m" | "change6m" | "change2y"
 type SortDirection = "asc" | "desc"
+
+interface StocksTableProps {
+  store: StocksStore
+  title: string
+}
 
 interface SortState {
   column: SortableColumn | null
@@ -40,8 +46,7 @@ function SortableHeader({ label, column, sortState, onSort }: {
   )
 }
 
-function StocksTable(): React.JSX.Element {
-  const { stocks } = useStores()
+function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Element {
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: "desc" })
   const [filterInput, setFilterInput] = useState("")
   const [debouncedFilter, setDebouncedFilter] = useState("")
@@ -110,12 +115,17 @@ function StocksTable(): React.JSX.Element {
     stocks.loadAmounts()
   }, [stocks])
 
-  const formatPrice = (value: number): string => {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
+  const formatPrice = (value: number, currency = "USD"): string => {
+    try {
+      return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(value)
+    }
+    catch {
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
+    }
   }
 
-  const formatChange = (value: number): string => {
-    const formatted = formatPrice(value)
+  const formatChange = (value: number, currency = "USD"): string => {
+    const formatted = formatPrice(value, currency)
     return value >= 0 ? `+${formatted}` : formatted
   }
 
@@ -141,7 +151,7 @@ function StocksTable(): React.JSX.Element {
   }
 
   const filterLower = debouncedFilter.toLowerCase().trim()
-  const sortedQuotes = Array.from(stocks.quotes.values())
+  const sortedQuotes = [...stocks.activeQuotes]
     .filter((q) => {
       if (!filterLower)
         return true
@@ -164,7 +174,7 @@ function StocksTable(): React.JSX.Element {
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
         <Group gap="sm">
-          <Text fw={700} size="lg">Dividend Aristocrats</Text>
+          <Text fw={700} size="lg">{title}</Text>
           <TextInput
             size="xs"
             placeholder="Filter by name or symbol"
@@ -234,8 +244,8 @@ function StocksTable(): React.JSX.Element {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Symbol</Table.Th>
-              <Table.Th>Price</Table.Th>
               <Table.Th>Currency</Table.Th>
+              <Table.Th>Price</Table.Th>
               <Table.Th>Change</Table.Th>
               <Table.Th>Change %</Table.Th>
               <Table.Th><SortableHeader label="1M" column="change1m" sortState={sortState} onSort={handleSort} /></Table.Th>
@@ -257,12 +267,12 @@ function StocksTable(): React.JSX.Element {
                 <Table.Td><Text size="sm">{quote.currency}</Text></Table.Td>
                 <Table.Td>
                   <Tooltip label={formatDividendYield(quote.symbol)} withArrow>
-                    <span>{formatPrice(quote.price)}</span>
+                    <span>{formatPrice(quote.price, quote.currency)}</span>
                   </Tooltip>
                 </Table.Td>
                 <Table.Td>
                   <Text c={getChangeColor(quote.change)}>
-                    {formatChange(quote.change)}
+                    {formatChange(quote.change, quote.currency)}
                   </Text>
                 </Table.Td>
                 <Table.Td>
@@ -298,7 +308,7 @@ function StocksTable(): React.JSX.Element {
                     : <Text c="dimmed">N/A</Text>}
                 </Table.Td>
                 <Table.Td style={{ position: "relative" }}>
-                  {formatPrice(stocks.getBalance(quote.symbol))}
+                  {formatPrice(stocks.getBalance(quote.symbol), quote.currency)}
                   {stocks.buyingMode && stocks.getAllocationBalance(quote.symbol) > 0 && (
                     <Text
                       size="sm"
@@ -315,7 +325,7 @@ function StocksTable(): React.JSX.Element {
                         padding: "0 4px",
                       }}
                     >
-                      {formatPrice(stocks.getAllocationBalance(quote.symbol))}
+                      {formatPrice(stocks.getAllocationBalance(quote.symbol), quote.currency)}
                     </Text>
                   )}
                 </Table.Td>

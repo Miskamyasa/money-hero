@@ -2,6 +2,8 @@ import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
 
+import { notifyError } from "./notify"
+
 interface CurrencyRate {
   symbol: string
   label: string
@@ -47,6 +49,7 @@ export class CurrencyStore {
         this.error = error instanceof Error ? error.message : "Failed to fetch currency rates"
         this.loading = false
       })
+      notifyError("Failed to fetch currency rates", error)
     }
   }
 }

@@ -24,31 +24,6 @@ pnpm typecheck:node   # tsc --noEmit -p tsconfig.node.json --composite false
 pnpm typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
 ```
 
-## Testing
-
-**Vitest** with two projects in `vitest.config.ts`:
-
-- **renderer** — `jsdom` environment, `src/renderer/**/*.test.{ts,tsx}`
-- **main** — `node` environment, `src/main/**/*.test.ts`
-
-```bash
-pnpm test                                # Run all tests once
-pnpm test:watch                          # Watch mode
-pnpm test:renderer                       # Renderer tests only
-pnpm test:main                           # Main-process tests only
-pnpm vitest run path/to/file.test.ts     # Single file
-pnpm vitest run -t "test name"           # Single test by name
-```
-
-### Test Conventions
-
-- Test files live next to source: `AppStore.ts` → `AppStore.test.ts`
-- `describe` block names must start with **lowercase** (`test/prefer-lowercase-title`)
-- **MobX stores** — test directly as plain classes, no DOM/React rendering needed
-- **Renderer components** — use `@testing-library/react`; `jest-dom` matchers available via setup
-- **Main-process tests** — mock electron: `vi.mock("electron", () => import("../../test/__mocks__/electron"))`
-- Mock `window.api` in `beforeEach` for renderer tests that call IPC methods
-
 ## Code Style
 
 Enforced by **@antfu/eslint-config** (`formatters: true`, `typescript: true`, `react: true`).
@@ -163,7 +138,4 @@ src/
     ├── assets/        # CSS files
     ├── components/    # React components (GoldStats, StocksTable, etc.)
     └── stores/        # MobX stores (RootStore, AppStore, GoldStore, etc.)
-test/
-├── __mocks__/electron.ts   # Electron mock for main-process tests
-└── setup-renderer.ts       # jsdom setup (matchMedia polyfill, jest-dom)
 ```

@@ -19,10 +19,8 @@ export interface StockQuote {
 
 export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
 
-export const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF-B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
-
 function normalizeYahooSymbol(symbol: string): string {
-  return symbol.trim().toUpperCase().replaceAll(".", "-")
+  return symbol.trim().toUpperCase()
 }
 
 function computeChangePercent(currentPrice: number, historicalPrice: number | undefined): number | null {

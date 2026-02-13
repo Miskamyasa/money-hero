@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client"
 
 import App from "./App"
 import "@mantine/core/styles.css"
+import "@mantine/notifications/styles.css"
 import "./assets/main.css"
 
 createRoot(document.getElementById("root")!).render(

@@ -2,6 +2,8 @@ import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
 
+import { notifyError } from "./notify"
+
 interface GoldQuote {
   price: number
   previousClose: number
@@ -54,7 +56,7 @@ export class GoldStore {
       })
     }
     catch (error) {
-      console.error("Failed to load gold amount:", error)
+      notifyError("Failed to load gold amount", error)
     }
   }
 
@@ -81,6 +83,7 @@ export class GoldStore {
         this.error = error instanceof Error ? error.message : "Failed to fetch gold quote"
         this.loading = false
       })
+      notifyError("Failed to fetch gold quote", error)
     }
   }
 
@@ -99,6 +102,7 @@ export class GoldStore {
         this.historyError = error instanceof Error ? error.message : "Failed to fetch gold history"
         this.historyLoading = false
       })
+      notifyError("Failed to fetch gold history", error)
     }
   }
 }

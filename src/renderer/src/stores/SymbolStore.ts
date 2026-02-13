@@ -2,6 +2,8 @@ import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
 
+import { notifyError } from "./notify"
+
 interface SymbolQuote {
   symbol: string
   name: string
@@ -47,7 +49,7 @@ export class SymbolStore {
       })
     }
     catch (error) {
-      console.error(`Failed to load amount for ${this.symbol}:`, error)
+      notifyError(`Failed to load amount for ${this.symbol}`, error)
     }
   }
 
@@ -74,6 +76,7 @@ export class SymbolStore {
         this.error = error instanceof Error ? error.message : `Failed to fetch ${this.symbol} quote`
         this.loading = false
       })
+      notifyError(`Failed to fetch ${this.symbol} quote`, error)
     }
   }
 }

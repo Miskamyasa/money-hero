@@ -19,21 +19,19 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:renderer": "vitest run --project renderer",
-    "test:main": "vitest run --project main"
+    "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@mantine/core": "8.3.14",
     "@mantine/hooks": "8.3.14",
+    "@mantine/notifications": "8.3.14",
     "better-sqlite3": "^12.6.2",
     "knex": "^3.1.0",
     "mobx": "^6.15.0",
-    "mobx-react-lite": "^4.1.1"
+    "mobx-react-lite": "^4.1.1",
+    "zod": "4.3.6"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.3.0",
@@ -41,9 +39,6 @@
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
     "@electron/rebuild": "^4.0.3",
-    "@testing-library/jest-dom": "6.9.1",
-    "@testing-library/react": "16.3.2",
-    "@testing-library/user-event": "14.6.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.19.1",
     "@types/react": "^19.2.7",
@@ -57,14 +52,12 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
-    "jsdom": "28.0.0",
     "postcss": "8.5.6",
     "postcss-preset-mantine": "1.18.0",
     "postcss-simple-vars": "7.0.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6",
-    "vitest": "4.0.18"
+    "vite": "^7.2.6"
   }
 }
