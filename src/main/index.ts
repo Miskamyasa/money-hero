@@ -2,6 +2,7 @@ import { join } from "node:path"
 import { electronApp, is, optimizer } from "@electron-toolkit/utils"
 import { app, BrowserWindow, ipcMain, shell } from "electron"
 import icon from "../../resources/icon.png?asset"
+import { fetchGoldQuote, GOLD_IPC_CHANNEL } from "./gold"
 
 function createWindow(): void {
   // Create the browser window.
@@ -12,7 +13,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
+      preload: join(__dirname, "../preload/index.mjs"),
       sandbox: false,
     },
   })
@@ -52,6 +53,7 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on("ping", () => console.log("pong"))
+  ipcMain.handle(GOLD_IPC_CHANNEL, fetchGoldQuote)
 
   createWindow()
 
