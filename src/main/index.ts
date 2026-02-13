@@ -1,3 +1,5 @@
+import type { StockQuote } from "../shared/stocks"
+
 import { join } from "node:path"
 import { electronApp, is, optimizer } from "@electron-toolkit/utils"
 import { app, BrowserWindow, ipcMain, shell } from "electron"
@@ -65,9 +67,9 @@ app.whenReady().then(async () => {
   ipcMain.handle(CURRENCY_IPC_CHANNEL, fetchCurrencyRates)
 
   // Database IPC handlers
-  ipcMain.handle("db:get-stock-cache", () => getStockQuotesCache())
-  ipcMain.handle("db:save-stock-cache", (_event, quotes) => saveStockQuotesCache(quotes))
-  ipcMain.handle("db:clear-stock-cache", () => clearStockQuotesCache())
+  ipcMain.handle("db:get-stock-cache", (_event, symbols: string[]) => getStockQuotesCache(symbols))
+  ipcMain.handle("db:save-stock-cache", (_event, quotes: StockQuote[]) => saveStockQuotesCache(quotes))
+  ipcMain.handle("db:clear-stock-cache", (_event, symbols: string[]) => clearStockQuotesCache(symbols))
   ipcMain.handle("db:get-stock-amounts", () => getStockAmounts())
   ipcMain.handle("db:set-stock-amount", (_event, symbol, amount) => setStockAmount(symbol, amount))
 

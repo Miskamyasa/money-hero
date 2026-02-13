@@ -38,9 +38,9 @@ export interface Api {
   fetchGoldQuote: () => Promise<GoldQuote>
   fetchGoldHistory: () => Promise<GoldHistory>
   fetchStockQuote: (symbol: string) => Promise<StockQuote>
-  getStockCache: () => Promise<StockQuote[]>
+  getStockCache: (symbols: string[]) => Promise<StockQuote[]>
   saveStockCache: (quotes: StockQuote[]) => Promise<void>
-  clearStockCache: () => Promise<void>
+  clearStockCache: (symbols: string[]) => Promise<void>
   getStockAmounts: () => Promise<Record<string, number>>
   setStockAmount: (symbol: string, amount: number) => Promise<void>
 }

@@ -19,8 +19,8 @@ const api = {
       throw new Error(`Invalid IPC payload for stock:fetch-quote: ${message}`)
     }
   },
-  getStockCache: async (): Promise<StockQuote[]> => {
-    const payload = await ipcRenderer.invoke("db:get-stock-cache")
+  getStockCache: async (symbols: string[]): Promise<StockQuote[]> => {
+    const payload = await ipcRenderer.invoke("db:get-stock-cache", symbols)
     try {
       return parseStockQuotes(payload)
     }
@@ -39,7 +39,7 @@ const api = {
     }
     await ipcRenderer.invoke("db:save-stock-cache", quotes)
   },
-  clearStockCache: (): Promise<unknown> => ipcRenderer.invoke("db:clear-stock-cache"),
+  clearStockCache: (symbols: string[]): Promise<void> => ipcRenderer.invoke("db:clear-stock-cache", symbols),
   getStockAmounts: async (): Promise<Record<string, number>> => {
     const payload = await ipcRenderer.invoke("db:get-stock-amounts")
     try {

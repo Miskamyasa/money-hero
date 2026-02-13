@@ -181,10 +181,12 @@ export class StocksStore {
 
   async loadFromCache(): Promise<void> {
     try {
-      const cached = await window.api.getStockCache()
-      if (cached.length > 0) {
+      const allowedSymbols = new Set(this.symbols)
+      const cached = await window.api.getStockCache(this.symbols)
+      const scopedCached = cached.filter(quote => allowedSymbols.has(quote.symbol))
+      if (scopedCached.length > 0) {
         runInAction(() => {
-          this.quotes = new Map(cached.map(q => [q.symbol, q]))
+          this.quotes = new Map(scopedCached.map(q => [q.symbol, q]))
         })
       }
     }
@@ -195,6 +197,7 @@ export class StocksStore {
 
   async saveToCache(): Promise<void> {
     try {
+      const allowedSymbols = new Set(this.symbols)
       const quotes = Array.from(this.quotes.values(), quote => ({
         symbol: quote.symbol,
         name: quote.name,
@@ -207,7 +210,7 @@ export class StocksStore {
         change6m: quote.change6m,
         change2y: quote.change2y,
         dividends: quote.dividends.map(d => ({ amount: d.amount, date: d.date })),
-      }))
+      })).filter(quote => allowedSymbols.has(quote.symbol))
       await window.api.saveStockCache(quotes)
     }
     catch (error) {
@@ -269,7 +272,7 @@ export class StocksStore {
       this.quotes.clear()
       this.errors.clear()
     })
-    window.api.clearStockCache()
+    window.api.clearStockCache(this.symbols)
     this.startFetchQueue()
   }
 

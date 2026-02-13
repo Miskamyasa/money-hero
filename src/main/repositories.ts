@@ -4,9 +4,15 @@ import { getDb } from "./database"
 
 const CACHE_TTL = 60 * 60 * 1000
 
-export async function getStockQuotesCache(): Promise<StockQuote[]> {
+export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote[]> {
+  if (symbols.length === 0) {
+    return []
+  }
+
   const db = getDb()
-  const rows = await db("stock_quotes").select("*")
+  const rows = await db("stock_quotes")
+    .whereIn("symbol", symbols)
+    .select("*")
 
   if (rows.length === 0) {
     return []
@@ -71,9 +77,15 @@ export async function saveStockQuotesCache(quotes: StockQuote[]): Promise<void> 
     .merge()
 }
 
-export async function clearStockQuotesCache(): Promise<void> {
+export async function clearStockQuotesCache(symbols: string[]): Promise<void> {
+  if (symbols.length === 0) {
+    return
+  }
+
   const db = getDb()
-  await db("stock_quotes").delete()
+  await db("stock_quotes")
+    .whereIn("symbol", symbols)
+    .delete()
 }
 
 export async function getStockAmounts(): Promise<Record<string, number>> {
