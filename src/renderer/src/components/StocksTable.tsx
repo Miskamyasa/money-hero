@@ -3,7 +3,7 @@ import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, 
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 type SortableColumn = "change1m" | "change6m" | "change2y"
 type SortDirection = "asc" | "desc"
@@ -111,18 +111,18 @@ function StocksTable(): React.JSX.Element {
     stocks.refreshAll()
   }
 
-  const sortedQuotes = useMemo(() => {
-    const quotes = Array.from(stocks.quotes.values())
-    if (sortState.column == null) {
-      return quotes.sort((a, b) => a.symbol.localeCompare(b.symbol))
-    }
+  const sortedQuotes = Array.from(stocks.quotes.values())
+  if (sortState.column == null) {
+    sortedQuotes.sort((a, b) => a.symbol.localeCompare(b.symbol))
+  }
+  else {
     const col = sortState.column
     const dir = sortState.direction
-    return quotes.sort((a, b) => {
+    sortedQuotes.sort((a, b) => {
       const cmp = compareSortableValues(a[col], b[col], dir)
       return cmp !== 0 ? cmp : a.symbol.localeCompare(b.symbol)
     })
-  }, [stocks.quotes, sortState])
+  }
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
