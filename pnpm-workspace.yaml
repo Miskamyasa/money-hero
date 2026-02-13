@@ -1,6 +1,7 @@
 shellEmulator: true
 
 trustPolicy: no-downgrade
+
 overrides:
   brace-expansion@>=2.0.0 <=2.0.1: ">=2.0.2"
   glob@>=10.2.0 <10.5.0: ">=10.5.0"
@@ -11,3 +12,10 @@ onlyBuiltDependencies:
   - electron
   - electron-winstaller
   - esbuild
+
+supportedArchitectures:
+  cpu:
+    - arm64
+  os:
+    - darwin
+    - linux
