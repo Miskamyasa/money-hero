@@ -7,8 +7,6 @@ import { notifyError } from "../utils/notify"
 
 const FETCH_INTERVAL = 1000
 const CACHE_SAVE_BATCH_SIZE = 5
-export const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF-B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
-export const HIGH_YIELD = ["MPLX", "EPD", "VICI", "VZ", "HPQ", "OKE", "NNN", "O", "MO", "PFE", "DOC", "CAG", "KHC", "BBY", "EIX", "CPB", "PRU", "AMCR", "LYB", "UPS", "DUK", "ABBV", "VEDL.NS", "HINDZINC.NS", "RECLTD.NS", "LGEN.L", "PHNX.L", "IMB.L", "LAND.L", "AV.L", "MNG.L"]
 
 export class StocksStore {
   private symbols: string[]

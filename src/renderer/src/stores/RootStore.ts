@@ -1,7 +1,9 @@
+import { DIVIDEND_ARISTOCRATS, HIGH_YIELD } from "@renderer/config/stockUniverses"
+
 import { AppStore } from "./AppStore"
 import { CurrencyStore } from "./CurrencyStore"
 import { GoldStore } from "./GoldStore"
-import { DIVIDEND_ARISTOCRATS, HIGH_YIELD, StocksStore } from "./StocksStore"
+import { StocksStore } from "./StocksStore"
 import { SymbolStore } from "./SymbolStore"
 import { ThemeStore } from "./ThemeStore"
 
