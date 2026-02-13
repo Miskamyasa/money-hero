@@ -4,6 +4,8 @@ import { contextBridge, ipcRenderer } from "electron"
 // Custom APIs for renderer
 const api = {
   fetchGoldQuote: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-quote"),
+  fetchGoldHistory: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-history"),
+  fetchStockQuote: (symbol: string): Promise<unknown> => ipcRenderer.invoke("stock:fetch-quote", symbol),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

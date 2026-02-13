@@ -2,7 +2,8 @@ import { join } from "node:path"
 import { electronApp, is, optimizer } from "@electron-toolkit/utils"
 import { app, BrowserWindow, ipcMain, shell } from "electron"
 import icon from "../../resources/icon.png?asset"
-import { fetchGoldQuote, GOLD_IPC_CHANNEL } from "./gold"
+import { fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CHANNEL } from "./gold"
+import { fetchStockQuote, STOCK_IPC_CHANNEL } from "./stocks"
 
 function createWindow(): void {
   // Create the browser window.
@@ -54,6 +55,8 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on("ping", () => console.log("pong"))
   ipcMain.handle(GOLD_IPC_CHANNEL, fetchGoldQuote)
+  ipcMain.handle(GOLD_HISTORY_IPC_CHANNEL, fetchGoldHistory)
+  ipcMain.handle(STOCK_IPC_CHANNEL, (_event, symbol: string) => fetchStockQuote(symbol))
 
   createWindow()
 

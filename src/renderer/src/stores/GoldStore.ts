@@ -11,6 +11,12 @@ interface GoldQuote {
   symbol: string
 }
 
+interface GoldHistory {
+  change1m: number | null
+  change6m: number | null
+  change2y: number | null
+}
+
 export class GoldStore {
   constructor(private root: RootStore) {
     makeAutoObservable(this)
@@ -19,6 +25,10 @@ export class GoldStore {
   quote: GoldQuote | null = null
   loading = false
   error: string | null = null
+
+  history: GoldHistory | null = null
+  historyLoading = false
+  historyError: string | null = null
 
   get rootStore(): RootStore {
     return this.root
@@ -38,6 +48,24 @@ export class GoldStore {
       runInAction(() => {
         this.error = error instanceof Error ? error.message : "Failed to fetch gold quote"
         this.loading = false
+      })
+    }
+  }
+
+  async fetchHistory(): Promise<void> {
+    this.historyLoading = true
+    this.historyError = null
+    try {
+      const data = await window.api.fetchGoldHistory()
+      runInAction(() => {
+        this.history = data as GoldHistory
+        this.historyLoading = false
+      })
+    }
+    catch (error) {
+      runInAction(() => {
+        this.historyError = error instanceof Error ? error.message : "Failed to fetch gold history"
+        this.historyLoading = false
       })
     }
   }

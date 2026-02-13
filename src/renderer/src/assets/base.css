@@ -10,7 +10,9 @@
   --ev-c-gray-1: #515c67;
   --ev-c-gray-2: #414853;
   --ev-c-gray-3: #32363f;
+}
 
+[data-mantine-color-scheme="dark"] {
   --ev-c-text-1: rgba(255, 255, 245, 0.86);
   --ev-c-text-2: rgba(235, 235, 245, 0.6);
   --ev-c-text-3: rgba(235, 235, 245, 0.38);
@@ -21,13 +23,28 @@
   --ev-button-alt-hover-border: transparent;
   --ev-button-alt-hover-text: var(--ev-c-text-1);
   --ev-button-alt-hover-bg: var(--ev-c-gray-2);
-}
 
-:root {
   --color-background: var(--ev-c-black);
   --color-background-soft: var(--ev-c-black-soft);
   --color-background-mute: var(--ev-c-black-mute);
+  --color-text: var(--ev-c-text-1);
+}
 
+[data-mantine-color-scheme="light"] {
+  --ev-c-text-1: rgba(30, 30, 30, 0.9);
+  --ev-c-text-2: rgba(60, 60, 60, 0.7);
+  --ev-c-text-3: rgba(60, 60, 60, 0.5);
+
+  --ev-button-alt-border: #e0e0e0;
+  --ev-button-alt-text: var(--ev-c-text-1);
+  --ev-button-alt-bg: var(--ev-c-white-mute);
+  --ev-button-alt-hover-border: #ccc;
+  --ev-button-alt-hover-text: var(--ev-c-text-1);
+  --ev-button-alt-hover-bg: var(--ev-c-white-soft);
+
+  --color-background: var(--ev-c-white);
+  --color-background-soft: var(--ev-c-white-soft);
+  --color-background-mute: var(--ev-c-white-mute);
   --color-text: var(--ev-c-text-1);
 }
 
@@ -47,6 +64,9 @@ body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
+  transition:
+    color 0.2s,
+    background 0.2s;
   line-height: 1.6;
   font-family:
     Inter,

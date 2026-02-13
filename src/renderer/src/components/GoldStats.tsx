@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Center, Group, Loader, Stack, Text } from "@mantine/core"
+import { Alert, Button, Card, Center, Group, Loader, Paper, Stack, Text } from "@mantine/core"
 
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
@@ -10,6 +10,7 @@ function GoldStats(): React.JSX.Element {
 
   useEffect(() => {
     gold.fetchQuote()
+    gold.fetchHistory()
   }, [gold])
 
   const formatPrice = (value: number): string => {
@@ -30,6 +31,11 @@ function GoldStats(): React.JSX.Element {
     return value >= 0 ? "teal" : "red"
   }
 
+  const handleRefresh = (): void => {
+    gold.fetchQuote()
+    gold.fetchHistory()
+  }
+
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Stack gap="md">
@@ -38,7 +44,7 @@ function GoldStats(): React.JSX.Element {
           <Button
             variant="light"
             size="xs"
-            onClick={() => gold.fetchQuote()}
+            onClick={handleRefresh}
             loading={gold.loading}
           >
             Refresh
@@ -77,8 +83,69 @@ function GoldStats(): React.JSX.Element {
             </Stack>
           </Group>
         )}
+
+        {gold.historyLoading && gold.history === null && (
+          <Center>
+            <Loader size="sm" />
+          </Center>
+        )}
+
+        {gold.historyError && (
+          <Alert color="red" title="History Error" variant="light">
+            {gold.historyError}
+          </Alert>
+        )}
+
+        {gold.history && (
+          <Group grow>
+            <PriceChangeCard
+              label="1 Month"
+              value={gold.history.change1m}
+              formatChangePercent={formatChangePercent}
+              getChangeColor={getChangeColor}
+            />
+            <PriceChangeCard
+              label="6 Months"
+              value={gold.history.change6m}
+              formatChangePercent={formatChangePercent}
+              getChangeColor={getChangeColor}
+            />
+            <PriceChangeCard
+              label="2 Years"
+              value={gold.history.change2y}
+              formatChangePercent={formatChangePercent}
+              getChangeColor={getChangeColor}
+            />
+          </Group>
+        )}
       </Stack>
     </Card>
+  )
+}
+
+interface PriceChangeCardProps {
+  label: string
+  value: number | null
+  formatChangePercent: (value: number) => string
+  getChangeColor: (value: number) => string
+}
+
+function PriceChangeCard({ label, value, formatChangePercent, getChangeColor }: PriceChangeCardProps): React.JSX.Element {
+  return (
+    <Paper radius="sm" p="sm" withBorder>
+      <Stack gap={4} align="center">
+        <Text size="xs" c="dimmed">{label}</Text>
+        {value != null
+          ? (
+              <Text size="lg" fw={700} c={getChangeColor(value)}>
+                {formatChangePercent(value)}
+              </Text>
+            )
+          : (
+              <Text size="lg" fw={700} c="dimmed">N/A</Text>
+            )}
+      </Stack>
+    </Paper>
   )
 }
 

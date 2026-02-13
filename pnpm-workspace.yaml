@@ -1,5 +1,11 @@
 shellEmulator: true
 
+supportedArchitectures:
+  cpu:
+    - arm64
+  os:
+    - darwin
+    - linux
 trustPolicy: no-downgrade
 
 overrides:
@@ -12,10 +18,3 @@ onlyBuiltDependencies:
   - electron
   - electron-winstaller
   - esbuild
-
-supportedArchitectures:
-  cpu:
-    - arm64
-  os:
-    - darwin
-    - linux

@@ -2,9 +2,9 @@
 
 body {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  overflow: hidden;
+  overflow: auto;
   background-image: url("./wavy-lines.svg");
   background-size: cover;
   user-select: none;
@@ -31,7 +31,7 @@ code {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-bottom: 80px;
+  width: 100%;
 }
 
 .logo {
@@ -134,7 +134,7 @@ code {
   overflow: hidden;
   align-items: center;
   border-radius: 22px;
-  background-color: #202127;
+  background-color: var(--color-background-mute);
   backdrop-filter: blur(24px);
 }
 
