@@ -2,7 +2,7 @@ import type { StockQuote } from "../../../shared/stocks"
 
 import type { RootStore } from "./RootStore"
 
-import { makeAutoObservable, runInAction } from "mobx"
+import { computed, makeAutoObservable, runInAction } from "mobx"
 import { notifyError } from "../utils/notify"
 
 const FETCH_INTERVAL = 1000
@@ -17,7 +17,9 @@ export class StocksStore {
   constructor(private root: RootStore, symbols: string[], storageKey: string = "default") {
     this.symbols = symbols
     this.storageKey = storageKey
-    makeAutoObservable(this)
+    makeAutoObservable(this, {
+      allocations: computed({ keepAlive: true }),
+    })
     this.loadDisabledSymbols()
   }
 
@@ -196,8 +198,9 @@ export class StocksStore {
 
   async loadFromCache(): Promise<void> {
     try {
-      const allowedSymbols = new Set(this.symbols)
-      const cached = await window.api.getStockCache(this.symbols)
+      const symbols = [...this.symbols]
+      const allowedSymbols = new Set(symbols)
+      const cached = await window.api.getStockCache(symbols)
       const scopedCached = cached.filter(quote => allowedSymbols.has(quote.symbol))
       if (scopedCached.length > 0) {
         runInAction(() => {
@@ -332,7 +335,7 @@ export class StocksStore {
       this.errors.clear()
     })
     try {
-      await window.api.clearStockCache(this.symbols)
+      await window.api.clearStockCache([...this.symbols])
     }
     catch (error) {
       notifyError("Failed to clear stocks cache", error)
