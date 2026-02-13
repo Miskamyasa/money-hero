@@ -31,11 +31,11 @@ export class StocksStore {
   }
 
   quotes = new Map<string, StockQuote>()
-  balances = new Map<string, number>()
   amounts = new Map<string, number>()
   loading = false
   fetchedCount = 0
   errors = new Map<string, string>()
+  editingSymbol: string | null = null
 
   private queueAbortController: AbortController | null = null
 
@@ -44,11 +44,9 @@ export class StocksStore {
   }
 
   getBalance(symbol: string): number {
-    return this.balances.get(symbol) ?? 0
-  }
-
-  setBalance(symbol: string, value: number): void {
-    this.balances.set(symbol, value)
+    const amount = this.getAmount(symbol)
+    const quote = this.quotes.get(symbol)
+    return amount * (quote?.price ?? 0)
   }
 
   getAmount(symbol: string): number {
@@ -57,6 +55,18 @@ export class StocksStore {
 
   setAmount(symbol: string, value: number): void {
     this.amounts.set(symbol, value)
+  }
+
+  startEditing(symbol: string): void {
+    this.editingSymbol = symbol
+  }
+
+  stopEditing(): void {
+    this.editingSymbol = null
+  }
+
+  isEditing(symbol: string): boolean {
+    return this.editingSymbol === symbol
   }
 
   get totalCount(): number {

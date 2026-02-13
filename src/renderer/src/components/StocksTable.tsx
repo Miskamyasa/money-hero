@@ -1,4 +1,4 @@
-import { Button, Card, Center, Group, Progress, Table, Text, UnstyledButton } from "@mantine/core"
+import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, Text, UnstyledButton } from "@mantine/core"
 
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
@@ -144,6 +144,7 @@ function StocksTable(): React.JSX.Element {
               <Table.Th><SortableHeader label="2Y" column="change2y" sortState={sortState} onSort={handleSort} /></Table.Th>
               <Table.Th>Balance</Table.Th>
               <Table.Th>Amount</Table.Th>
+              <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -190,7 +191,31 @@ function StocksTable(): React.JSX.Element {
                     : <Text c="dimmed">N/A</Text>}
                 </Table.Td>
                 <Table.Td>{formatPrice(stocks.getBalance(quote.symbol))}</Table.Td>
-                <Table.Td>{stocks.getAmount(quote.symbol)}</Table.Td>
+                <Table.Td>
+                  {stocks.isEditing(quote.symbol)
+                    ? (
+                        <NumberInput
+                          size="xs"
+                          value={stocks.getAmount(quote.symbol)}
+                          onChange={value => stocks.setAmount(quote.symbol, Number(value) || 0)}
+                          min={0}
+                          step={1}
+                          hideControls
+                          styles={{ input: { width: 80 } }}
+                        />
+                      )
+                    : stocks.getAmount(quote.symbol)}
+                </Table.Td>
+                <Table.Td>
+                  <ActionIcon
+                    variant={stocks.isEditing(quote.symbol) ? "filled" : "subtle"}
+                    size="sm"
+                    aria-label={stocks.isEditing(quote.symbol) ? "Stop editing" : "Edit amount"}
+                    onClick={() => stocks.isEditing(quote.symbol) ? stocks.stopEditing() : stocks.startEditing(quote.symbol)}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-pencil "><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path><path d="M13.5 6.5l4 4"></path></svg>
+                  </ActionIcon>
+                </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>
