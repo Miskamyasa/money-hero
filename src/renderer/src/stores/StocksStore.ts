@@ -165,7 +165,18 @@ export class StocksStore {
 
   async saveToCache(): Promise<void> {
     try {
-      const quotes = Array.from(this.quotes.values())
+      const quotes = Array.from(this.quotes.values(), quote => ({
+        symbol: quote.symbol,
+        name: quote.name,
+        price: quote.price,
+        previousClose: quote.previousClose,
+        change: quote.change,
+        changePercent: quote.changePercent,
+        currency: quote.currency,
+        change1m: quote.change1m,
+        change6m: quote.change6m,
+        change2y: quote.change2y,
+      }))
       await window.api.saveStockCache(quotes)
     }
     catch (error) {
