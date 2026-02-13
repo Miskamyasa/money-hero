@@ -7,12 +7,12 @@ describe("stocksStore", () => {
     vi.useFakeTimers()
     window.api = {
       fetchStockQuote: vi.fn(),
+      getStockCache: vi.fn().mockResolvedValue([]),
+      saveStockCache: vi.fn().mockResolvedValue(undefined),
+      clearStockCache: vi.fn().mockResolvedValue(undefined),
+      getStockAmounts: vi.fn().mockResolvedValue({}),
+      setStockAmount: vi.fn().mockResolvedValue(undefined),
     } as any
-    vi.stubGlobal("localStorage", {
-      getItem: vi.fn(),
-      setItem: vi.fn(),
-      removeItem: vi.fn(),
-    })
   })
 
   afterEach(() => {
@@ -30,9 +30,9 @@ describe("stocksStore", () => {
     expect(store.errors.size).toBe(0)
   })
 
-  it("loads from cache with valid cache", () => {
-    const mockData = {
-      ABBV: {
+  it("loads from cache with valid cache", async () => {
+    const mockQuotes = [
+      {
         symbol: "ABBV",
         name: "AbbVie Inc.",
         price: 150.25,
@@ -44,7 +44,7 @@ describe("stocksStore", () => {
         change6m: 10.0,
         change2y: 25.0,
       },
-      ABT: {
+      {
         symbol: "ABT",
         name: "Abbott Laboratories",
         price: 110.50,
@@ -56,76 +56,43 @@ describe("stocksStore", () => {
         change6m: 5.0,
         change2y: null,
       },
-    }
-    const cache = {
-      data: mockData,
-      timestamp: Date.now() - 30 * 60 * 1000,
-    }
+    ]
 
-    vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify(cache))
+    vi.mocked(window.api.getStockCache).mockResolvedValue(mockQuotes)
 
     const root = new RootStore()
     const store = new StocksStore(root)
 
-    store.loadFromCache()
+    await store.loadFromCache()
 
     expect(store.quotes.size).toBe(2)
-    expect(store.quotes.get("ABBV")).toEqual(mockData.ABBV)
-    expect(store.quotes.get("ABT")).toEqual(mockData.ABT)
+    expect(store.quotes.get("ABBV")).toEqual(mockQuotes[0])
+    expect(store.quotes.get("ABT")).toEqual(mockQuotes[1])
   })
 
-  it("loads from cache with expired cache", () => {
-    const mockData = {
-      ABBV: {
-        symbol: "ABBV",
-        name: "AbbVie Inc.",
-        price: 150.25,
-        previousClose: 149.00,
-        change: 1.25,
-        changePercent: 0.84,
-        currency: "USD",
-        change1m: 2.5,
-        change6m: 10.0,
-        change2y: 25.0,
-      },
-    }
-    const cache = {
-      data: mockData,
-      timestamp: Date.now() - 2 * 60 * 60 * 1000,
-    }
-
-    vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify(cache))
+  it("loads from cache with expired cache", async () => {
+    vi.mocked(window.api.getStockCache).mockResolvedValue([])
 
     const root = new RootStore()
     const store = new StocksStore(root)
 
-    store.loadFromCache()
+    await store.loadFromCache()
 
     expect(store.quotes.size).toBe(0)
   })
 
-  it("loads from cache with no cache", () => {
-    vi.mocked(localStorage.getItem).mockReturnValue(null)
+  it("loads from cache with no cache", async () => {
+    vi.mocked(window.api.getStockCache).mockResolvedValue([])
 
     const root = new RootStore()
     const store = new StocksStore(root)
 
-    store.loadFromCache()
+    await store.loadFromCache()
 
     expect(store.quotes.size).toBe(0)
   })
 
-  it("loads from cache with invalid JSON", () => {
-    vi.mocked(localStorage.getItem).mockReturnValue("invalid json {")
-
-    const root = new RootStore()
-    const store = new StocksStore(root)
-
-    expect(() => store.loadFromCache()).not.toThrow()
-    expect(store.quotes.size).toBe(0)
-  })
-
-  it("saves to cache", () => {
+  it("saves to cache", async () => {
     const root = new RootStore()
     const store = new StocksStore(root)
 
@@ -143,17 +110,9 @@ describe("stocksStore", () => {
     }
 
     store.quotes.set("ABBV", mockQuote)
-    store.saveToCache()
+    await store.saveToCache()
 
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      "stocks-cache",
-      expect.stringContaining("ABBV"),
-    )
-
-    const callArgs = vi.mocked(localStorage.setItem).mock.calls[0]
-    const savedData = JSON.parse(callArgs[1])
-    expect(savedData.data.ABBV).toEqual(mockQuote)
-    expect(savedData.timestamp).toBeDefined()
+    expect(window.api.saveStockCache).toHaveBeenCalledWith([mockQuote])
   })
 
   it("fetches tickers sequentially in queue", async () => {
@@ -325,7 +284,7 @@ describe("stocksStore", () => {
 
     expect(store.quotes.size).toBe(0)
     expect(store.errors.size).toBe(0)
-    expect(localStorage.removeItem).toHaveBeenCalledWith("stocks-cache")
+    expect(window.api.clearStockCache).toHaveBeenCalled()
 
     await vi.advanceTimersByTimeAsync(0)
     expect(store.loading).toBe(true)
@@ -675,5 +634,26 @@ describe("stocksStore", () => {
     // Should buy 2 shares at $75 = $150
     expect(store.getAllocation("TEST")).toBe(2)
     expect(store.getAllocationBalance("TEST")).toBe(150)
+  })
+
+  it("persists amount via setStockAmount", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.setAmount("ABBV", 5)
+
+    expect(window.api.setStockAmount).toHaveBeenCalledWith("ABBV", 5)
+  })
+
+  it("loads amounts from database", async () => {
+    vi.mocked(window.api.getStockAmounts).mockResolvedValue({ ABBV: 10, ABT: 5 })
+
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    await store.loadAmounts()
+
+    expect(store.getAmount("ABBV")).toBe(10)
+    expect(store.getAmount("ABT")).toBe(5)
   })
 })

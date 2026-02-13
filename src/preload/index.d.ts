@@ -32,6 +32,11 @@ export interface Api {
   fetchGoldQuote: () => Promise<GoldQuote>
   fetchGoldHistory: () => Promise<GoldHistory>
   fetchStockQuote: (symbol: string) => Promise<StockQuote>
+  getStockCache: () => Promise<StockQuote[]>
+  saveStockCache: (quotes: StockQuote[]) => Promise<void>
+  clearStockCache: () => Promise<void>
+  getStockAmounts: () => Promise<Record<string, number>>
+  setStockAmount: (symbol: string, amount: number) => Promise<void>
 }
 
 declare global {

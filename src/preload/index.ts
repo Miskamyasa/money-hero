@@ -6,6 +6,11 @@ const api = {
   fetchGoldQuote: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-quote"),
   fetchGoldHistory: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-history"),
   fetchStockQuote: (symbol: string): Promise<unknown> => ipcRenderer.invoke("stock:fetch-quote", symbol),
+  getStockCache: (): Promise<unknown> => ipcRenderer.invoke("db:get-stock-cache"),
+  saveStockCache: (quotes: unknown[]): Promise<unknown> => ipcRenderer.invoke("db:save-stock-cache", quotes),
+  clearStockCache: (): Promise<unknown> => ipcRenderer.invoke("db:clear-stock-cache"),
+  getStockAmounts: (): Promise<unknown> => ipcRenderer.invoke("db:get-stock-amounts"),
+  setStockAmount: (symbol: string, amount: number): Promise<unknown> => ipcRenderer.invoke("db:set-stock-amount", symbol, amount),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

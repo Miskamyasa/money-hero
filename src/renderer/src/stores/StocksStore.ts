@@ -15,13 +15,6 @@ interface StockQuote {
   change2y: number | null
 }
 
-interface StocksCache {
-  data: Record<string, StockQuote>
-  timestamp: number
-}
-
-const STOCKS_CACHE_KEY = "stocks-cache"
-const CACHE_TTL = 60 * 60 * 1000
 const FETCH_INTERVAL = 1000
 const DIVIDEND_ARISTOCRATS = ["ABBV", "ABT", "ADM", "ADP", "AFL", "ALB", "AMCR", "AOS", "APD", "ATO", "BDX", "BEN", "BF.B", "BRO", "CAH", "CAT", "CB", "CHD", "CINF", "CL", "CLX", "CTAS", "CVX", "DOV", "ECL", "ED", "EMR", "ESS", "EXPD", "FRT", "GD", "GPC", "GWW", "HRL", "IBM", "ITW", "JNJ", "KMB", "KO", "LIN", "LOW", "MCD", "MDT", "MKC", "MMM", "NEE", "NUE", "O", "PBCT", "PEP", "PG", "PNR", "PPG", "ROP", "SHW", "SPGI", "SWK", "SYY", "TGT", "TROW", "VFC", "WBA", "WMT", "WST", "XOM", "DHR", "XYL", "AWK", "WTRG", "SJW", "YORW"]
 
@@ -57,6 +50,7 @@ export class StocksStore {
 
   setAmount(symbol: string, value: number): void {
     this.amounts.set(symbol, value)
+    window.api.setStockAmount(symbol, value)
   }
 
   startEditing(symbol: string): void {
@@ -155,16 +149,12 @@ export class StocksStore {
     return this.fetchedCount / this.totalCount
   }
 
-  loadFromCache(): void {
+  async loadFromCache(): Promise<void> {
     try {
-      const cached = localStorage.getItem(STOCKS_CACHE_KEY)
-      if (!cached)
-        return
-
-      const cache: StocksCache = JSON.parse(cached)
-      if (Date.now() - cache.timestamp < CACHE_TTL) {
+      const cached = await window.api.getStockCache()
+      if (cached.length > 0) {
         runInAction(() => {
-          this.quotes = new Map(Object.entries(cache.data))
+          this.quotes = new Map(cached.map(q => [q.symbol, q]))
         })
       }
     }
@@ -173,13 +163,10 @@ export class StocksStore {
     }
   }
 
-  saveToCache(): void {
+  async saveToCache(): Promise<void> {
     try {
-      const cache: StocksCache = {
-        data: Object.fromEntries(this.quotes),
-        timestamp: Date.now(),
-      }
-      localStorage.setItem(STOCKS_CACHE_KEY, JSON.stringify(cache))
+      const quotes = Array.from(this.quotes.values())
+      await window.api.saveStockCache(quotes)
     }
     catch (error) {
       console.error("Failed to save stocks cache:", error)
@@ -239,7 +226,21 @@ export class StocksStore {
       this.quotes.clear()
       this.errors.clear()
     })
-    localStorage.removeItem(STOCKS_CACHE_KEY)
+    window.api.clearStockCache()
     this.startFetchQueue()
+  }
+
+  async loadAmounts(): Promise<void> {
+    try {
+      const amounts = await window.api.getStockAmounts()
+      runInAction(() => {
+        for (const [symbol, amount] of Object.entries(amounts)) {
+          this.amounts.set(symbol, amount)
+        }
+      })
+    }
+    catch (error) {
+      console.error("Failed to load stock amounts:", error)
+    }
   }
 }

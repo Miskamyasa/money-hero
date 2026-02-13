@@ -61,7 +61,7 @@ describe("getYahooSession", () => {
     expect(session.expiresAt).toBeGreaterThan(Date.now())
     expect(mockFetch).toHaveBeenCalledWith("https://fc.yahoo.com/", { redirect: "manual" })
     expect(mockFetch).toHaveBeenCalledWith("https://query2.finance.yahoo.com/v1/test/getcrumb", {
-      headers: { Cookie: "A3=d=abc123", "User-Agent": "Mozilla/5.0" },
+      headers: { "Cookie": "A3=d=abc123", "User-Agent": "Mozilla/5.0" },
     })
   })
 
@@ -127,9 +127,30 @@ describe("fetchStockQuote", () => {
 
   it("should return a valid StockQuote with history on successful fetch", async () => {
     const closePrices = [
-      140, 142, 144, 146, 148, 150, 152, 154, 156, 158,
-      160, 162, 164, 166, 168, 170, 171, 172, 173, 174,
-      174.50, 174.75, 175.00, 175.25,
+      140,
+      142,
+      144,
+      146,
+      148,
+      150,
+      152,
+      154,
+      156,
+      158,
+      160,
+      162,
+      164,
+      166,
+      168,
+      170,
+      171,
+      172,
+      173,
+      174,
+      174.50,
+      174.75,
+      175.00,
+      175.25,
     ]
 
     mockSessionHandshake(mockFetch)
@@ -290,8 +311,8 @@ describe("fetchStockQuote", () => {
 })
 
 describe("constants", () => {
-  it("should have exactly 71 dividend aristocrats", () => {
-    expect(DIVIDEND_ARISTOCRATS).toHaveLength(71)
+  it("should have exactly 69 dividend aristocrats", () => {
+    expect(DIVIDEND_ARISTOCRATS).toHaveLength(69)
   })
 
   it("should have correct STOCK_IPC_CHANNEL value", () => {

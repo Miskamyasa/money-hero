@@ -2,7 +2,9 @@ import { join } from "node:path"
 import { electronApp, is, optimizer } from "@electron-toolkit/utils"
 import { app, BrowserWindow, ipcMain, shell } from "electron"
 import icon from "../../resources/icon.png?asset"
+import { initDatabase } from "./database"
 import { fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CHANNEL } from "./gold"
+import { clearStockQuotesCache, getStockAmounts, getStockQuotesCache, saveStockQuotesCache, setStockAmount } from "./repositories"
 import { fetchStockQuote, STOCK_IPC_CHANNEL } from "./stocks"
 
 function createWindow(): void {
@@ -43,7 +45,7 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId("com.electron")
 
@@ -59,6 +61,15 @@ app.whenReady().then(() => {
   ipcMain.handle(GOLD_IPC_CHANNEL, fetchGoldQuote)
   ipcMain.handle(GOLD_HISTORY_IPC_CHANNEL, fetchGoldHistory)
   ipcMain.handle(STOCK_IPC_CHANNEL, (_event, symbol: string) => fetchStockQuote(symbol))
+
+  // Database IPC handlers
+  ipcMain.handle("db:get-stock-cache", () => getStockQuotesCache())
+  ipcMain.handle("db:save-stock-cache", (_event, quotes) => saveStockQuotesCache(quotes))
+  ipcMain.handle("db:clear-stock-cache", () => clearStockQuotesCache())
+  ipcMain.handle("db:get-stock-amounts", () => getStockAmounts())
+  ipcMain.handle("db:set-stock-amount", (_event, symbol, amount) => setStockAmount(symbol, amount))
+
+  await initDatabase()
 
   createWindow()
 
