@@ -52,6 +52,16 @@ export async function initDatabase(): Promise<void> {
       table.float("amount").notNullable()
     })
   }
+
+  // Create stock_disabled_symbols table
+  const hasStockDisabledSymbols = await db.schema.hasTable("stock_disabled_symbols")
+  if (!hasStockDisabledSymbols) {
+    await db.schema.createTable("stock_disabled_symbols", (table) => {
+      table.string("storage_key").notNullable()
+      table.string("symbol").notNullable()
+      table.primary(["storage_key", "symbol"])
+    })
+  }
 }
 
 export function getDb(): Knex {

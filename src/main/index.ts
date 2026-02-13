@@ -7,7 +7,15 @@ import icon from "../../resources/icon.png?asset"
 import { CURRENCY_IPC_CHANNEL, fetchCurrencyRates } from "./currency"
 import { initDatabase } from "./database"
 import { fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CHANNEL } from "./gold"
-import { clearStockQuotesCache, getStockAmounts, getStockQuotesCache, saveStockQuotesCache, setStockAmount } from "./repositories"
+import {
+  clearStockQuotesCache,
+  getDisabledStockSymbols,
+  getStockAmounts,
+  getStockQuotesCache,
+  saveStockQuotesCache,
+  setDisabledStockSymbols,
+  setStockAmount,
+} from "./repositories"
 import { fetchStockQuote, STOCK_IPC_CHANNEL } from "./stocks"
 
 function createWindow(): void {
@@ -72,6 +80,8 @@ app.whenReady().then(async () => {
   ipcMain.handle("db:clear-stock-cache", (_event, symbols: string[]) => clearStockQuotesCache(symbols))
   ipcMain.handle("db:get-stock-amounts", () => getStockAmounts())
   ipcMain.handle("db:set-stock-amount", (_event, symbol, amount) => setStockAmount(symbol, amount))
+  ipcMain.handle("db:get-disabled-stock-symbols", (_event, storageKey: string) => getDisabledStockSymbols(storageKey))
+  ipcMain.handle("db:set-disabled-stock-symbols", (_event, storageKey: string, symbols: string[]) => setDisabledStockSymbols(storageKey, symbols))
 
   await initDatabase()
 

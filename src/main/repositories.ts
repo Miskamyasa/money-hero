@@ -135,3 +135,34 @@ export async function setStockAmount(symbol: string, amount: number): Promise<vo
       .merge()
   }
 }
+
+export async function getDisabledStockSymbols(storageKey: string): Promise<string[]> {
+  const db = getDb()
+  const rows = await db("stock_disabled_symbols")
+    .where("storage_key", storageKey)
+    .select("symbol")
+
+  return rows
+    .map(row => row.symbol)
+    .filter((symbol): symbol is string => typeof symbol === "string")
+}
+
+export async function setDisabledStockSymbols(storageKey: string, symbols: string[]): Promise<void> {
+  const db = getDb()
+  const uniqueSymbols = Array.from(new Set(symbols))
+
+  await db.transaction(async (trx) => {
+    await trx("stock_disabled_symbols")
+      .where("storage_key", storageKey)
+      .delete()
+
+    if (uniqueSymbols.length > 0) {
+      await trx("stock_disabled_symbols").insert(
+        uniqueSymbols.map(symbol => ({
+          storage_key: storageKey,
+          symbol,
+        })),
+      )
+    }
+  })
+}

@@ -15,7 +15,7 @@ export class StocksStore {
   constructor(private root: RootStore, symbols: string[], storageKey: string = "default") {
     this.symbols = symbols
     this.data = new StocksDataStore(root, symbols)
-    this.ui = new StocksUiStore(storageKey)
+    this.ui = new StocksUiStore(storageKey, symbols)
     this.allocation = new StocksAllocationStore(this.data, this.ui)
     makeAutoObservable(this)
   }

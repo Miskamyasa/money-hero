@@ -43,6 +43,8 @@ export interface Api {
   clearStockCache: (symbols: string[]) => Promise<void>
   getStockAmounts: () => Promise<Record<string, number>>
   setStockAmount: (symbol: string, amount: number) => Promise<void>
+  getDisabledStockSymbols: (storageKey: string) => Promise<string[]>
+  setDisabledStockSymbols: (storageKey: string, symbols: string[]) => Promise<void>
 }
 
 declare global {
