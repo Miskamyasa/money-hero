@@ -31,8 +31,17 @@ export async function initDatabase(): Promise<void> {
       table.float("change_1m").nullable()
       table.float("change_6m").nullable()
       table.float("change_2y").nullable()
+      table.text("dividends").nullable()
       table.integer("updated_at").notNullable()
     })
+  }
+  else {
+    const hasDividends = await db.schema.hasColumn("stock_quotes", "dividends")
+    if (!hasDividends) {
+      await db.schema.alterTable("stock_quotes", (table) => {
+        table.text("dividends").nullable()
+      })
+    }
   }
 
   // Create stock_amounts table

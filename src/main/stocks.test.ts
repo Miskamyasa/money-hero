@@ -4,6 +4,7 @@ import { clearYahooSession, DIVIDEND_ARISTOCRATS, fetchStockQuote, getYahooSessi
 function makeChartResponse(overrides?: {
   meta?: Record<string, unknown>
   closePrices?: (number | null)[]
+  dividends?: Record<string, { amount: number, date: number }>
 }): object {
   return {
     chart: {
@@ -18,6 +19,9 @@ function makeChartResponse(overrides?: {
         },
         ...(overrides?.closePrices !== undefined
           ? { indicators: { quote: [{ close: overrides.closePrices }] } }
+          : {}),
+        ...(overrides?.dividends !== undefined
+          ? { events: { dividends: overrides.dividends } }
           : {}),
       }],
       error: null,
@@ -177,7 +181,7 @@ describe("fetchStockQuote", () => {
     expect(result.change2y).toBeCloseTo(((175.50 - 140) / 140) * 100, 2)
   })
 
-  it("should include crumb in the chart URL", async () => {
+  it("should include crumb and events=div in the chart URL", async () => {
     mockSessionHandshake(mockFetch)
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -190,6 +194,7 @@ describe("fetchStockQuote", () => {
     // Third call is the chart request (after cookie + crumb)
     const chartCall = mockFetch.mock.calls[2]
     expect(chartCall[0]).toContain("crumb=test-crumb-value")
+    expect(chartCall[0]).toContain("events=div")
     expect(chartCall[0]).toContain("ABBV")
     expect(chartCall[1].headers.Cookie).toBe("A3=d=abc123")
   })
@@ -288,6 +293,39 @@ describe("fetchStockQuote", () => {
     expect(result.price).toBe(175.50)
     // 2 handshakes (2 calls each) + 2 chart requests = 6 total
     expect(mockFetch).toHaveBeenCalledTimes(6)
+  })
+
+  it("should parse dividend events from response", async () => {
+    mockSessionHandshake(mockFetch)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => makeChartResponse({
+        dividends: {
+          1700000000: { amount: 1.41, date: 1700000000 },
+          1690000000: { amount: 1.35, date: 1690000000 },
+        },
+      }),
+    })
+
+    const result = await fetchStockQuote("ABBV")
+
+    expect(result.dividends).toHaveLength(2)
+    expect(result.dividends[0]).toEqual({ amount: 1.35, date: 1690000000 })
+    expect(result.dividends[1]).toEqual({ amount: 1.41, date: 1700000000 })
+  })
+
+  it("should return empty dividends when no events in response", async () => {
+    mockSessionHandshake(mockFetch)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => makeChartResponse(),
+    })
+
+    const result = await fetchStockQuote("ABBV")
+
+    expect(result.dividends).toEqual([])
   })
 
   it("should retry with fresh session on 403", async () => {

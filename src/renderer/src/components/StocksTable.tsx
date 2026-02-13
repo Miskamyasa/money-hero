@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, Text, UnstyledButton } from "@mantine/core"
+import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, Text, Tooltip, UnstyledButton } from "@mantine/core"
 
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
@@ -107,6 +107,14 @@ function StocksTable(): React.JSX.Element {
     return value >= 0 ? "teal" : "red"
   }
 
+  const formatDividendYield = (symbol: string): string => {
+    const yieldValue = stocks.getDividendYield(symbol, 24)
+    if (yieldValue == null) {
+      return "No dividends"
+    }
+    return `Div yield: ${yieldValue.toFixed(2)}% ann.`
+  }
+
   const handleRefresh = (): void => {
     stocks.refreshAll()
   }
@@ -206,7 +214,11 @@ function StocksTable(): React.JSX.Element {
               <Table.Tr key={quote.symbol}>
                 <Table.Td>{quote.symbol}</Table.Td>
                 <Table.Td><Text size="sm" truncate="end" maw={200}>{quote.name}</Text></Table.Td>
-                <Table.Td>{formatPrice(quote.price)}</Table.Td>
+                <Table.Td>
+                  <Tooltip label={formatDividendYield(quote.symbol)} withArrow>
+                    <span>{formatPrice(quote.price)}</span>
+                  </Tooltip>
+                </Table.Td>
                 <Table.Td>
                   <Text c={getChangeColor(quote.change)}>
                     {formatChange(quote.change)}

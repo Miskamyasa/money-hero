@@ -1,4 +1,4 @@
-import type { StockQuote } from "./stocks"
+import type { DividendEvent, StockQuote } from "./stocks"
 
 import { getDb } from "./database"
 
@@ -19,18 +19,31 @@ export async function getStockQuotesCache(): Promise<StockQuote[]> {
     return []
   }
 
-  return rows.map(row => ({
-    symbol: row.symbol as string,
-    name: row.name as string,
-    price: row.price as number,
-    previousClose: row.previous_close as number,
-    change: row.change as number,
-    changePercent: row.change_percent as number,
-    currency: row.currency as string,
-    change1m: row.change_1m as number | null,
-    change6m: row.change_6m as number | null,
-    change2y: row.change_2y as number | null,
-  }))
+  return rows.map((row) => {
+    let dividends: DividendEvent[] = []
+    if (typeof row.dividends === "string") {
+      try {
+        dividends = JSON.parse(row.dividends) as DividendEvent[]
+      }
+      catch {
+        dividends = []
+      }
+    }
+
+    return {
+      symbol: row.symbol as string,
+      name: row.name as string,
+      price: row.price as number,
+      previousClose: row.previous_close as number,
+      change: row.change as number,
+      changePercent: row.change_percent as number,
+      currency: row.currency as string,
+      change1m: row.change_1m as number | null,
+      change6m: row.change_6m as number | null,
+      change2y: row.change_2y as number | null,
+      dividends,
+    }
+  })
 }
 
 export async function saveStockQuotesCache(quotes: StockQuote[]): Promise<void> {
@@ -48,6 +61,7 @@ export async function saveStockQuotesCache(quotes: StockQuote[]): Promise<void> 
     change_1m: quote.change1m,
     change_6m: quote.change6m,
     change_2y: quote.change2y,
+    dividends: JSON.stringify(quote.dividends ?? []),
     updated_at: now,
   }))
 

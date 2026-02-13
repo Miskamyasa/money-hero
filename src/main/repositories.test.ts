@@ -46,6 +46,7 @@ describe("repositories", () => {
       table.float("change_1m").nullable()
       table.float("change_6m").nullable()
       table.float("change_2y").nullable()
+      table.text("dividends").nullable()
       table.integer("updated_at").notNullable()
     })
 
@@ -108,6 +109,7 @@ describe("repositories", () => {
         change1m: 0.5,
         change6m: 2.0,
         change2y: 25.0,
+        dividends: [],
       })
     })
 
@@ -191,6 +193,7 @@ describe("repositories", () => {
           change1m: 0.5,
           change6m: 2.0,
           change2y: 25.0,
+          dividends: [{ amount: 1.41, date: 1700000000 }],
         },
       ]
 
@@ -200,6 +203,7 @@ describe("repositories", () => {
       expect(rows).toHaveLength(1)
       expect(rows[0].symbol).toBe("ABBV")
       expect(rows[0].price).toBe(175.50)
+      expect(rows[0].dividends).toBe(JSON.stringify([{ amount: 1.41, date: 1700000000 }]))
     })
 
     it("should upsert existing quotes", async () => {
@@ -217,6 +221,7 @@ describe("repositories", () => {
         change_1m: 0.5,
         change_6m: 2.0,
         change_2y: 25.0,
+        dividends: JSON.stringify([]),
         updated_at: now,
       })
 
@@ -232,6 +237,7 @@ describe("repositories", () => {
           change1m: 1.0,
           change6m: 3.0,
           change2y: 28.0,
+          dividends: [{ amount: 1.50, date: 1710000000 }],
         },
       ]
 
@@ -242,6 +248,35 @@ describe("repositories", () => {
       expect(rows[0].symbol).toBe("ABBV")
       expect(rows[0].price).toBe(180.00)
       expect(rows[0].previous_close).toBe(175.50)
+      expect(rows[0].dividends).toBe(JSON.stringify([{ amount: 1.50, date: 1710000000 }]))
+    })
+
+    it("should round-trip dividends through save and load", async () => {
+      const { getStockQuotesCache, saveStockQuotesCache } = await import("./repositories")
+
+      const dividends = [
+        { amount: 1.41, date: 1690000000 },
+        { amount: 1.41, date: 1700000000 },
+      ]
+
+      await saveStockQuotesCache([{
+        symbol: "ABBV",
+        name: "AbbVie Inc.",
+        price: 175.50,
+        previousClose: 173.25,
+        change: 2.25,
+        changePercent: 1.2987,
+        currency: "USD",
+        change1m: 0.5,
+        change6m: 2.0,
+        change2y: 25.0,
+        dividends,
+      }])
+
+      const result = await getStockQuotesCache()
+
+      expect(result).toHaveLength(1)
+      expect(result[0].dividends).toEqual(dividends)
     })
   })
 

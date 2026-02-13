@@ -43,6 +43,7 @@ describe("stocksStore", () => {
         change1m: 2.5,
         change6m: 10.0,
         change2y: 25.0,
+        dividends: [],
       },
       {
         symbol: "ABT",
@@ -55,6 +56,7 @@ describe("stocksStore", () => {
         change1m: 1.2,
         change6m: 5.0,
         change2y: null,
+        dividends: [],
       },
     ]
 
@@ -107,6 +109,7 @@ describe("stocksStore", () => {
       change1m: 2.5,
       change6m: 10.0,
       change2y: 25.0,
+      dividends: [],
     }
 
     store.quotes.set("ABBV", mockQuote)
@@ -127,6 +130,7 @@ describe("stocksStore", () => {
       change1m: 2.5,
       change6m: 10.0,
       change2y: 25.0,
+      dividends: [],
     }
     const mockQuote2 = {
       symbol: "ABT",
@@ -139,6 +143,7 @@ describe("stocksStore", () => {
       change1m: 1.2,
       change6m: 5.0,
       change2y: null,
+      dividends: [],
     }
 
     vi.mocked(window.api.fetchStockQuote)
@@ -155,6 +160,7 @@ describe("stocksStore", () => {
         change1m: null,
         change6m: null,
         change2y: null,
+        dividends: [],
       })
 
     const root = new RootStore()
@@ -188,6 +194,7 @@ describe("stocksStore", () => {
       change1m: 1.2,
       change6m: 5.0,
       change2y: null,
+      dividends: [],
     }
 
     vi.mocked(window.api.fetchStockQuote)
@@ -204,6 +211,7 @@ describe("stocksStore", () => {
         change1m: null,
         change6m: null,
         change2y: null,
+        dividends: [],
       })
 
     const root = new RootStore()
@@ -234,6 +242,7 @@ describe("stocksStore", () => {
       change1m: 2.5,
       change6m: 10.0,
       change2y: 25.0,
+      dividends: [],
     })
 
     const root = new RootStore()
@@ -264,6 +273,7 @@ describe("stocksStore", () => {
       change1m: 2.5,
       change6m: 10.0,
       change2y: 25.0,
+      dividends: [],
     })
     store.errors.set("ABT", "Some error")
 
@@ -278,6 +288,7 @@ describe("stocksStore", () => {
       change1m: 1.0,
       change6m: 8.0,
       change2y: 20.0,
+      dividends: [],
     })
 
     store.refreshAll()
@@ -350,6 +361,7 @@ describe("stocksStore", () => {
       change1m: 5,
       change6m: 10,
       change2y: 20,
+      dividends: [],
     })
 
     store.setInvestmentAmount(1000)
@@ -372,6 +384,7 @@ describe("stocksStore", () => {
       change1m: 5,
       change6m: 10,
       change2y: 20,
+      dividends: [],
     })
 
     expect(store.allocations.size).toBe(0)
@@ -392,6 +405,7 @@ describe("stocksStore", () => {
       change1m: 5,
       change6m: 10,
       change2y: 20,
+      dividends: [],
     })
 
     store.toggleBuyingMode()
@@ -417,6 +431,7 @@ describe("stocksStore", () => {
       change1m: 5,
       change6m: 10,
       change2y: 50,
+      dividends: [],
     })
     store.quotes.set("LOW", {
       symbol: "LOW",
@@ -429,6 +444,7 @@ describe("stocksStore", () => {
       change1m: 2,
       change6m: 5,
       change2y: 10,
+      dividends: [],
     })
 
     store.toggleBuyingMode()
@@ -457,6 +473,7 @@ describe("stocksStore", () => {
       change1m: 5,
       change6m: 10,
       change2y: 30,
+      dividends: [],
     })
     store.quotes.set("FRESH", {
       symbol: "FRESH",
@@ -469,6 +486,7 @@ describe("stocksStore", () => {
       change1m: 5,
       change6m: 10,
       change2y: 25,
+      dividends: [],
     })
 
     // OWNED already held heavily, FRESH not owned at all
@@ -502,6 +520,7 @@ describe("stocksStore", () => {
       change1m: 5,
       change6m: 10,
       change2y: 20,
+      dividends: [],
     })
     store.quotes.set("NODATA", {
       symbol: "NODATA",
@@ -514,6 +533,7 @@ describe("stocksStore", () => {
       change1m: 3,
       change6m: 7,
       change2y: null,
+      dividends: [],
     })
 
     store.toggleBuyingMode()
@@ -538,6 +558,7 @@ describe("stocksStore", () => {
       change1m: 1,
       change6m: 5,
       change2y: 15,
+      dividends: [],
     })
 
     store.toggleBuyingMode()
@@ -562,6 +583,7 @@ describe("stocksStore", () => {
       change1m: 3,
       change6m: 8,
       change2y: 40,
+      dividends: [],
     })
     store.quotes.set("MID", {
       symbol: "MID",
@@ -574,6 +596,7 @@ describe("stocksStore", () => {
       change1m: 2,
       change6m: 6,
       change2y: 25,
+      dividends: [],
     })
     store.quotes.set("PRICEY", {
       symbol: "PRICEY",
@@ -586,6 +609,7 @@ describe("stocksStore", () => {
       change1m: 1,
       change6m: 4,
       change2y: 10,
+      dividends: [],
     })
 
     store.toggleBuyingMode()
@@ -626,6 +650,7 @@ describe("stocksStore", () => {
       change1m: 2,
       change6m: 5,
       change2y: 15,
+      dividends: [],
     })
 
     store.toggleBuyingMode()
@@ -655,5 +680,152 @@ describe("stocksStore", () => {
 
     expect(store.getAmount("ABBV")).toBe(10)
     expect(store.getAmount("ABT")).toBe(5)
+  })
+
+  describe("getDividendYield", () => {
+    it("returns null for unknown symbol", () => {
+      const root = new RootStore()
+      const store = new StocksStore(root)
+
+      expect(store.getDividendYield("UNKNOWN", 6)).toBeNull()
+    })
+
+    it("returns null when no dividends exist", () => {
+      const root = new RootStore()
+      const store = new StocksStore(root)
+
+      store.quotes.set("ABBV", {
+        symbol: "ABBV",
+        name: "AbbVie Inc.",
+        price: 175.50,
+        previousClose: 173.25,
+        change: 2.25,
+        changePercent: 1.30,
+        currency: "USD",
+        change1m: 0.5,
+        change6m: 2.0,
+        change2y: 25.0,
+        dividends: [],
+      })
+
+      expect(store.getDividendYield("ABBV", 6)).toBeNull()
+    })
+
+    it("returns null when no dividends fall within the period", () => {
+      const root = new RootStore()
+      const store = new StocksStore(root)
+
+      const twoYearsAgo = Math.floor(Date.now() / 1000) - (25 * 30.44 * 24 * 60 * 60)
+
+      store.quotes.set("ABBV", {
+        symbol: "ABBV",
+        name: "AbbVie Inc.",
+        price: 175.50,
+        previousClose: 173.25,
+        change: 2.25,
+        changePercent: 1.30,
+        currency: "USD",
+        change1m: 0.5,
+        change6m: 2.0,
+        change2y: 25.0,
+        dividends: [{ amount: 1.41, date: twoYearsAgo }],
+      })
+
+      expect(store.getDividendYield("ABBV", 1)).toBeNull()
+    })
+
+    it("computes annualized yield for 6-month period", () => {
+      const root = new RootStore()
+      const store = new StocksStore(root)
+
+      const now = Math.floor(Date.now() / 1000)
+      const threeMonthsAgo = now - (3 * 30.44 * 24 * 60 * 60)
+      const oneMonthAgo = now - (1 * 30.44 * 24 * 60 * 60)
+
+      store.quotes.set("ABBV", {
+        symbol: "ABBV",
+        name: "AbbVie Inc.",
+        price: 100,
+        previousClose: 99,
+        change: 1,
+        changePercent: 1,
+        currency: "USD",
+        change1m: 0.5,
+        change6m: 2.0,
+        change2y: 25.0,
+        dividends: [
+          { amount: 1.50, date: threeMonthsAgo },
+          { amount: 1.50, date: oneMonthAgo },
+        ],
+      })
+
+      // Total divs in 6 months: $3.00
+      // Annualized: $3.00 * (12/6) = $6.00
+      // Yield: ($6.00 / $100) * 100 = 6.0%
+      const result = store.getDividendYield("ABBV", 6)
+      expect(result).toBeCloseTo(6.0, 1)
+    })
+
+    it("computes annualized yield for 1-month period", () => {
+      const root = new RootStore()
+      const store = new StocksStore(root)
+
+      const now = Math.floor(Date.now() / 1000)
+      const twoWeeksAgo = now - (14 * 24 * 60 * 60)
+
+      store.quotes.set("O", {
+        symbol: "O",
+        name: "Realty Income",
+        price: 50,
+        previousClose: 49.50,
+        change: 0.50,
+        changePercent: 1.01,
+        currency: "USD",
+        change1m: 0.5,
+        change6m: 3.0,
+        change2y: 10.0,
+        dividends: [
+          { amount: 0.25, date: twoWeeksAgo },
+        ],
+      })
+
+      // Total divs in 1 month: $0.25
+      // Annualized: $0.25 * (12/1) = $3.00
+      // Yield: ($3.00 / $50) * 100 = 6.0%
+      const result = store.getDividendYield("O", 1)
+      expect(result).toBeCloseTo(6.0, 1)
+    })
+
+    it("computes annualized yield for 24-month period", () => {
+      const root = new RootStore()
+      const store = new StocksStore(root)
+
+      const now = Math.floor(Date.now() / 1000)
+      // Place 7 quarterly dividends well within the 24-month window
+      const divDates = Array.from(
+        { length: 7 },
+        (_, i) => now - ((i + 1) * 3 * 30.44 * 24 * 60 * 60),
+      )
+
+      store.quotes.set("KO", {
+        symbol: "KO",
+        name: "Coca-Cola",
+        price: 60,
+        previousClose: 59.50,
+        change: 0.50,
+        changePercent: 0.84,
+        currency: "USD",
+        change1m: 0.3,
+        change6m: 2.0,
+        change2y: 12.0,
+        dividends: divDates.map(date => ({ amount: 0.46, date })),
+      })
+
+      // Total divs in 24 months: 7 * $0.46 = $3.22
+      // Annualized: $3.22 * (12/24) = $1.61
+      // Yield: ($1.61 / $60) * 100 = 2.683%
+      const result = store.getDividendYield("KO", 24)
+      expect(result).toBeCloseTo(2.683, 1)
+    })
   })
 })

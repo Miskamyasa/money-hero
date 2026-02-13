@@ -2,6 +2,11 @@ import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
 
+interface DividendEvent {
+  amount: number
+  date: number
+}
+
 interface StockQuote {
   symbol: string
   name: string
@@ -13,6 +18,7 @@ interface StockQuote {
   change1m: number | null
   change6m: number | null
   change2y: number | null
+  dividends: DividendEvent[]
 }
 
 const FETCH_INTERVAL = 1000
@@ -42,6 +48,25 @@ export class StocksStore {
     const amount = this.getAmount(symbol)
     const quote = this.quotes.get(symbol)
     return amount * (quote?.price ?? 0)
+  }
+
+  getDividendYield(symbol: string, months: number): number | null {
+    const quote = this.quotes.get(symbol)
+    if (!quote || quote.price <= 0 || !quote.dividends || quote.dividends.length === 0) {
+      return null
+    }
+
+    const now = Date.now() / 1000
+    const cutoff = now - (months * 30.44 * 24 * 60 * 60)
+    const divsInPeriod = quote.dividends.filter(d => d.date >= cutoff)
+
+    if (divsInPeriod.length === 0) {
+      return null
+    }
+
+    const totalDivs = divsInPeriod.reduce((sum, d) => sum + d.amount, 0)
+    const annualized = totalDivs * (12 / months)
+    return (annualized / quote.price) * 100
   }
 
   getAmount(symbol: string): number {
@@ -176,6 +201,7 @@ export class StocksStore {
         change1m: quote.change1m,
         change6m: quote.change6m,
         change2y: quote.change2y,
+        dividends: quote.dividends,
       }))
       await window.api.saveStockCache(quotes)
     }

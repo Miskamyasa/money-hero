@@ -1,3 +1,8 @@
+export interface DividendEvent {
+  amount: number
+  date: number // Unix timestamp in seconds
+}
+
 export interface StockQuote {
   symbol: string
   name: string
@@ -9,6 +14,7 @@ export interface StockQuote {
   change1m: number | null
   change6m: number | null
   change2y: number | null
+  dividends: DividendEvent[]
 }
 
 export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
@@ -92,7 +98,7 @@ export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
   try {
     const normalizedSymbol = normalizeYahooSymbol(symbol)
     const session = await getYahooSession()
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&crumb=${encodeURIComponent(session.crumb)}`
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&events=div&crumb=${encodeURIComponent(session.crumb)}`
     const response = await fetch(url, {
       headers: { "Cookie": session.cookie, "User-Agent": "Mozilla/5.0" },
     })
@@ -100,7 +106,7 @@ export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
     if (response.status === 401 || response.status === 403) {
       clearYahooSession()
       const freshSession = await getYahooSession()
-      const retryUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&crumb=${encodeURIComponent(freshSession.crumb)}`
+      const retryUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&events=div&crumb=${encodeURIComponent(freshSession.crumb)}`
       const retryResponse = await fetch(retryUrl, {
         headers: { "Cookie": freshSession.cookie, "User-Agent": "Mozilla/5.0" },
       })
@@ -181,6 +187,16 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
   const price6m = totalPoints >= 7 ? validCloses[totalPoints - 7] : undefined
   const price2y = totalPoints >= 1 ? validCloses[0] : undefined
 
+  const events = results[0]?.events as Record<string, unknown> | undefined
+  const dividendsRaw = events?.dividends as Record<string, { amount: number, date: number }> | undefined
+
+  const dividends: DividendEvent[] = dividendsRaw
+    ? Object.values(dividendsRaw)
+        .filter(d => typeof d.amount === "number" && typeof d.date === "number")
+        .map(d => ({ amount: d.amount, date: d.date }))
+        .sort((a, b) => a.date - b.date)
+    : []
+
   return {
     symbol: symbolResponse,
     name: name as string,
@@ -192,5 +208,6 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
     change1m: computeChangePercent(price, price1m),
     change6m: computeChangePercent(price, price6m),
     change2y: computeChangePercent(price, price2y),
+    dividends,
   }
 }

@@ -15,6 +15,11 @@ export interface GoldHistory {
   change2y: number | null
 }
 
+export interface DividendEvent {
+  amount: number
+  date: number
+}
+
 export interface StockQuote {
   symbol: string
   name: string
@@ -26,6 +31,7 @@ export interface StockQuote {
   change1m: number | null
   change6m: number | null
   change2y: number | null
+  dividends: DividendEvent[]
 }
 
 export interface Api {
