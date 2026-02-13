@@ -1,7 +1,6 @@
-import { Alert, Button, Card, Center, Group, Loader, Paper, Stack, Text } from "@mantine/core"
-
 import type { SymbolStore } from "@renderer/stores/SymbolStore"
 
+import { Alert, Button, Card, Center, Group, Loader, Paper, Stack, Text } from "@mantine/core"
 import { observer } from "mobx-react-lite"
 
 import { useEffect } from "react"
@@ -37,8 +36,12 @@ function SymbolStats({ store }: SymbolStatsProps): React.JSX.Element {
     store.fetchQuote()
   }
 
+  const truncateName = (name: string, maxWords: number): string => {
+    return name.split(/\s+/).slice(0, maxWords).join(" ")
+  }
+
   const title = store.quote?.name
-    ? `${store.quote.name} (${store.symbol})`
+    ? `${truncateName(store.quote.name, 3)} (${store.symbol})`
     : store.symbol
 
   return (

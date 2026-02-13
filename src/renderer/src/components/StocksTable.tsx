@@ -1,4 +1,4 @@
-import { Button, Card, Group, Progress, Table, Text, UnstyledButton } from "@mantine/core"
+import { Button, Card, Center, Group, Progress, Table, Text, UnstyledButton } from "@mantine/core"
 
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
@@ -55,11 +55,6 @@ function StocksTable(): React.JSX.Element {
 
   useEffect(() => {
     stocks.loadFromCache()
-    stocks.startFetchQueue()
-
-    return () => {
-      stocks.stopFetchQueue()
-    }
   }, [stocks])
 
   const formatPrice = (value: number): string => {
@@ -125,7 +120,14 @@ function StocksTable(): React.JSX.Element {
       )}
 
       {stocks.quotes.size === 0 && !stocks.loading && (
-        <Text c="dimmed">No stock data available</Text>
+        <Center>
+          <Button
+            variant="light"
+            onClick={handleRefresh}
+          >
+            Load Stocks
+          </Button>
+        </Center>
       )}
 
       {stocks.quotes.size > 0 && (
@@ -135,13 +137,13 @@ function StocksTable(): React.JSX.Element {
               <Table.Th>Symbol</Table.Th>
               <Table.Th>Name</Table.Th>
               <Table.Th>Price</Table.Th>
-              <Table.Th>Prev Close</Table.Th>
               <Table.Th>Change</Table.Th>
               <Table.Th>Change %</Table.Th>
               <Table.Th><SortableHeader label="1M" column="change1m" sortState={sortState} onSort={handleSort} /></Table.Th>
               <Table.Th><SortableHeader label="6M" column="change6m" sortState={sortState} onSort={handleSort} /></Table.Th>
               <Table.Th><SortableHeader label="2Y" column="change2y" sortState={sortState} onSort={handleSort} /></Table.Th>
-              <Table.Th>Currency</Table.Th>
+              <Table.Th>Balance</Table.Th>
+              <Table.Th>Amount</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -150,7 +152,6 @@ function StocksTable(): React.JSX.Element {
                 <Table.Td>{quote.symbol}</Table.Td>
                 <Table.Td><Text size="sm" truncate="end" maw={200}>{quote.name}</Text></Table.Td>
                 <Table.Td>{formatPrice(quote.price)}</Table.Td>
-                <Table.Td>{formatPrice(quote.previousClose)}</Table.Td>
                 <Table.Td>
                   <Text c={getChangeColor(quote.change)}>
                     {formatChange(quote.change)}
@@ -188,7 +189,8 @@ function StocksTable(): React.JSX.Element {
                       )
                     : <Text c="dimmed">N/A</Text>}
                 </Table.Td>
-                <Table.Td>{quote.currency}</Table.Td>
+                <Table.Td>{formatPrice(stocks.getBalance(quote.symbol))}</Table.Td>
+                <Table.Td>{stocks.getAmount(quote.symbol)}</Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>

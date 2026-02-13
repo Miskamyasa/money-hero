@@ -31,6 +31,8 @@ export class StocksStore {
   }
 
   quotes = new Map<string, StockQuote>()
+  balances = new Map<string, number>()
+  amounts = new Map<string, number>()
   loading = false
   fetchedCount = 0
   errors = new Map<string, string>()
@@ -39,6 +41,22 @@ export class StocksStore {
 
   get rootStore(): RootStore {
     return this.root
+  }
+
+  getBalance(symbol: string): number {
+    return this.balances.get(symbol) ?? 0
+  }
+
+  setBalance(symbol: string, value: number): void {
+    this.balances.set(symbol, value)
+  }
+
+  getAmount(symbol: string): number {
+    return this.amounts.get(symbol) ?? 0
+  }
+
+  setAmount(symbol: string, value: number): void {
+    this.amounts.set(symbol, value)
   }
 
   get totalCount(): number {
