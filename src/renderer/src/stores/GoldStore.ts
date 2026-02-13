@@ -1,10 +1,9 @@
 import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
+import { AMOUNT_SCOPE_GOLD } from "../../../shared/amountScopes"
 
 import { notifyError } from "../utils/notify"
-
-const GOLD_AMOUNT_SCOPE = "gold"
 
 interface GoldQuote {
   price: number
@@ -47,14 +46,14 @@ export class GoldStore {
 
   setAmount(value: number): void {
     this.amount = value
-    void window.api.setScopedStockAmount(GOLD_AMOUNT_SCOPE, "GC=F", value).catch((error) => {
+    void window.api.setScopedStockAmount(AMOUNT_SCOPE_GOLD, "GC=F", value).catch((error) => {
       notifyError("Failed to save gold amount", error)
     })
   }
 
   async loadAmount(): Promise<void> {
     try {
-      const amounts = await window.api.getScopedStockAmounts(GOLD_AMOUNT_SCOPE)
+      const amounts = await window.api.getScopedStockAmounts(AMOUNT_SCOPE_GOLD)
       runInAction(() => {
         this.amount = amounts["GC=F"] ?? 0
       })

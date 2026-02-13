@@ -1,6 +1,7 @@
 import { ActionIcon, Alert, Button, Card, Center, Group, Loader, NumberInput, Paper, Stack, Text } from "@mantine/core"
 
 import { useStores } from "@renderer/stores/useStores"
+import { formatChange, formatChangePercent, formatPrice, getChangeColor } from "@renderer/utils/quoteFormatters"
 import { observer } from "mobx-react-lite"
 
 import { useEffect } from "react"
@@ -13,24 +14,6 @@ function GoldStats(): React.JSX.Element {
     gold.fetchHistory()
     gold.loadAmount()
   }, [gold])
-
-  const formatPrice = (value: number): string => {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
-  }
-
-  const formatChange = (value: number): string => {
-    const formatted = formatPrice(value)
-    return value >= 0 ? `+${formatted}` : formatted
-  }
-
-  const formatChangePercent = (value: number): string => {
-    const formatted = value.toFixed(2)
-    return value >= 0 ? `+${formatted}%` : `${formatted}%`
-  }
-
-  const getChangeColor = (value: number): string => {
-    return value >= 0 ? "teal" : "red"
-  }
 
   const handleRefresh = (): void => {
     gold.fetchQuote()

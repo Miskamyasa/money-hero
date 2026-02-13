@@ -1,5 +1,6 @@
 import type { DividendEvent, StockQuote } from "../shared/stocks"
 
+import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../shared/amountScopes"
 import { getDb } from "./database"
 
 const CACHE_TTL = 60 * 60 * 1000
@@ -150,7 +151,30 @@ export async function getScopedStockAmounts(scope: string): Promise<Record<strin
     return scopedResult
   }
 
-  return getStockAmounts()
+  if (scope !== AMOUNT_SCOPE_STOCK_HOLDINGS) {
+    return {}
+  }
+
+  const legacyRows = await db("stock_amounts").select("symbol", "amount")
+  if (legacyRows.length === 0) {
+    return {}
+  }
+
+  await db("stock_amounts_scoped")
+    .insert(legacyRows.map(row => ({
+      scope,
+      symbol: row.symbol as string,
+      amount: row.amount as number,
+    })))
+    .onConflict(["scope", "symbol"])
+    .merge()
+
+  const migratedResult: Record<string, number> = {}
+  for (const row of legacyRows) {
+    migratedResult[row.symbol as string] = row.amount as number
+  }
+
+  return migratedResult
 }
 
 export async function setScopedStockAmount(scope: string, symbol: string, amount: number): Promise<void> {

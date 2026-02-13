@@ -33,15 +33,16 @@ export class StocksAllocationStore {
     const byGrowth = [...scoreable].sort((a, b) => b.change2y! - a.change2y!)
     const growthRank = new Map(byGrowth.map((q, i) => [q.symbol, i + 1]))
 
-    const byAmount = [...scoreable].sort(
-      (a, b) => this.data.getAmount(a.symbol) - this.data.getAmount(b.symbol),
+    const byBalance = [...scoreable].sort(
+      (a, b) => this.data.getBalance(a.symbol) - this.data.getBalance(b.symbol),
     )
-    const scarcityRank = new Map(byAmount.map((q, i) => [q.symbol, i + 1]))
+    const scarcityRank = new Map(byBalance.map((q, i) => [q.symbol, i + 1]))
 
     const ranked = scoreable
       .map(q => ({
         symbol: q.symbol,
         price: q.price,
+        currentBalance: this.data.getBalance(q.symbol),
         priority: growthRank.get(q.symbol)! + scarcityRank.get(q.symbol)!,
       }))
       .sort((a, b) => a.priority - b.priority || a.symbol.localeCompare(b.symbol))
@@ -49,18 +50,49 @@ export class StocksAllocationStore {
     const allocations = new Map<string, number>()
     const balances = new Map<string, number>()
     let remaining = this.ui.investmentAmount
-    let changed = true
+    while (remaining > 0) {
+      let candidate: typeof ranked[number] | null = null
+      let candidateProjectedBalance = Number.POSITIVE_INFINITY
 
-    while (changed) {
-      changed = false
       for (const stock of ranked) {
-        if (stock.price > 0 && stock.price <= remaining) {
-          allocations.set(stock.symbol, (allocations.get(stock.symbol) ?? 0) + 1)
-          balances.set(stock.symbol, (balances.get(stock.symbol) ?? 0) + stock.price)
-          remaining -= stock.price
-          changed = true
+        if (stock.price <= 0 || stock.price > remaining) {
+          continue
+        }
+
+        const allocatedBalance = balances.get(stock.symbol) ?? 0
+        const projectedBalance = stock.currentBalance + allocatedBalance
+
+        if (candidate == null) {
+          candidate = stock
+          candidateProjectedBalance = projectedBalance
+          continue
+        }
+
+        if (projectedBalance < candidateProjectedBalance) {
+          candidate = stock
+          candidateProjectedBalance = projectedBalance
+          continue
+        }
+
+        if (projectedBalance === candidateProjectedBalance) {
+          const isHigherPriority = stock.priority < candidate.priority
+          const isSamePriorityFirstSymbol = stock.priority === candidate.priority
+            && stock.symbol.localeCompare(candidate.symbol) < 0
+
+          if (isHigherPriority || isSamePriorityFirstSymbol) {
+            candidate = stock
+            candidateProjectedBalance = projectedBalance
+          }
         }
       }
+
+      if (candidate == null) {
+        break
+      }
+
+      allocations.set(candidate.symbol, (allocations.get(candidate.symbol) ?? 0) + 1)
+      balances.set(candidate.symbol, (balances.get(candidate.symbol) ?? 0) + candidate.price)
+      remaining -= candidate.price
     }
 
     return {

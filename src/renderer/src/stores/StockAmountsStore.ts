@@ -1,16 +1,19 @@
 import { notifyError } from "@renderer/utils/notify"
 import { makeAutoObservable, runInAction } from "mobx"
+import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../../../shared/amountScopes"
 
-const STOCK_AMOUNT_SCOPE = "stocks"
+const PERSIST_DEBOUNCE_MS = 400
 
 export class StockAmountsStore {
   amounts = new Map<string, number>()
 
   private amountWriteVersion = new Map<string, number>()
+  private amountPersistTimers = new Map<string, ReturnType<typeof setTimeout>>()
+  private persistedAmounts = new Map<string, number>()
   private loadPromise: Promise<void> | null = null
   private loaded = false
 
-  constructor() {
+  constructor(private amountScope: string = AMOUNT_SCOPE_STOCK_HOLDINGS) {
     makeAutoObservable(this)
   }
 
@@ -19,20 +22,42 @@ export class StockAmountsStore {
   }
 
   setAmount(symbol: string, value: number): void {
-    const previousValue = this.getAmount(symbol)
     this.amounts.set(symbol, value)
     const writeVersion = (this.amountWriteVersion.get(symbol) ?? 0) + 1
     this.amountWriteVersion.set(symbol, writeVersion)
 
-    void window.api.setScopedStockAmount(STOCK_AMOUNT_SCOPE, symbol, value).catch((error) => {
+    const pendingTimer = this.amountPersistTimers.get(symbol)
+    if (pendingTimer) {
+      clearTimeout(pendingTimer)
+    }
+
+    const nextTimer = setTimeout(() => {
+      this.amountPersistTimers.delete(symbol)
+      void this.persistAmount(symbol, value, writeVersion)
+    }, PERSIST_DEBOUNCE_MS)
+    this.amountPersistTimers.set(symbol, nextTimer)
+  }
+
+  private async persistAmount(symbol: string, value: number, writeVersion: number): Promise<void> {
+    try {
+      await window.api.setScopedStockAmount(this.amountScope, symbol, value)
       if (this.amountWriteVersion.get(symbol) !== writeVersion)
         return
 
       runInAction(() => {
-        this.amounts.set(symbol, previousValue)
+        this.persistedAmounts.set(symbol, value)
+      })
+    }
+    catch (error) {
+      if (this.amountWriteVersion.get(symbol) !== writeVersion)
+        return
+
+      const rollbackValue = this.persistedAmounts.get(symbol) ?? 0
+      runInAction(() => {
+        this.amounts.set(symbol, rollbackValue)
       })
       notifyError(`Failed to save amount for ${symbol}`, error)
-    })
+    }
   }
 
   async loadAmounts(): Promise<void> {
@@ -46,10 +71,11 @@ export class StockAmountsStore {
 
     const runPromise = (async () => {
       try {
-        const amounts = await window.api.getScopedStockAmounts(STOCK_AMOUNT_SCOPE)
+        const amounts = await window.api.getScopedStockAmounts(this.amountScope)
         runInAction(() => {
           for (const [symbol, amount] of Object.entries(amounts)) {
             this.amounts.set(symbol, amount)
+            this.persistedAmounts.set(symbol, amount)
           }
           this.loaded = true
         })

@@ -27,6 +27,7 @@ pnpm typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
 ## Code Style
 
 Enforced by **@antfu/eslint-config** (`formatters: true`, `typescript: true`, `react: true`).
+If you see an ESLint error, fix it through running `pnpm lint:fix` before making changes. Change code manually only if auto-fix can't handle it.
 
 ### Formatting
 

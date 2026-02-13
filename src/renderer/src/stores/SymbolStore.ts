@@ -1,10 +1,9 @@
 import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
+import { AMOUNT_SCOPE_SYMBOL_WIDGET } from "../../../shared/amountScopes"
 
 import { notifyError } from "../utils/notify"
-
-const SYMBOL_WIDGET_AMOUNT_SCOPE = "symbol-widget"
 
 interface SymbolQuote {
   symbol: string
@@ -40,14 +39,14 @@ export class SymbolStore {
 
   setAmount(value: number): void {
     this.amount = value
-    void window.api.setScopedStockAmount(SYMBOL_WIDGET_AMOUNT_SCOPE, this.symbol, value).catch((error) => {
+    void window.api.setScopedStockAmount(AMOUNT_SCOPE_SYMBOL_WIDGET, this.symbol, value).catch((error) => {
       notifyError(`Failed to save amount for ${this.symbol}`, error)
     })
   }
 
   async loadAmount(): Promise<void> {
     try {
-      const amounts = await window.api.getScopedStockAmounts(SYMBOL_WIDGET_AMOUNT_SCOPE)
+      const amounts = await window.api.getScopedStockAmounts(AMOUNT_SCOPE_SYMBOL_WIDGET)
       runInAction(() => {
         this.amount = amounts[this.symbol] ?? 0
       })

@@ -1,10 +1,12 @@
 import type { StocksStore } from "@renderer/stores/StocksStore"
 
 import { ActionIcon, Button, Card, Center, Collapse, Group, NumberInput, Progress, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
+import { useDebouncedCallback } from "@mantine/hooks"
+import { formatChange, formatChangePercent, formatPrice, getChangeColor } from "@renderer/utils/quoteFormatters"
 
 import { observer } from "mobx-react-lite"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 type SortableColumn = "change1m" | "change6m" | "change2y"
 type SortDirection = "asc" | "desc"
@@ -54,25 +56,15 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   const [filterInput, setFilterInput] = useState("")
   const [debouncedFilter, setDebouncedFilter] = useState("")
   const [tableVisible, setTableVisible] = useState(true)
-  const filterDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const debouncedSetFilter = useDebouncedCallback((value: string): void => {
+    setDebouncedFilter(value)
+  }, 300)
 
   const handleFilterChange = useCallback((value: string): void => {
     setFilterInput(value)
-    if (filterDebounceRef.current) {
-      clearTimeout(filterDebounceRef.current)
-    }
-    filterDebounceRef.current = setTimeout(() => {
-      setDebouncedFilter(value)
-    }, 300)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (filterDebounceRef.current) {
-        clearTimeout(filterDebounceRef.current)
-      }
-    }
-  }, [])
+    debouncedSetFilter(value)
+  }, [debouncedSetFilter])
 
   const handleSort = useCallback((column: SortableColumn): void => {
     setSortState((prev) => {
@@ -87,61 +79,34 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   }, [])
 
   const [localAmount, setLocalAmount] = useState<number | string>("")
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const debouncedSetInvestmentAmount = useDebouncedCallback((value: number | string): void => {
+    ui.setInvestmentAmount(Number(value) || 0)
+  }, 500)
 
   const handleAmountChange = useCallback((value: number | string): void => {
     setLocalAmount(value)
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-    debounceRef.current = setTimeout(() => {
-      ui.setInvestmentAmount(Number(value) || 0)
-    }, 500)
-  }, [ui])
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-    }
-  }, [])
+    debouncedSetInvestmentAmount(value)
+  }, [debouncedSetInvestmentAmount])
 
   const handleToggleBuy = useCallback((): void => {
     ui.toggleBuyingMode()
+  }, [ui])
+
+  useEffect(() => {
     if (!ui.buyingMode) {
       setLocalAmount("")
+      return
     }
-  }, [ui])
+
+    setLocalAmount(ui.investmentAmount === 0 ? "" : ui.investmentAmount)
+  }, [ui.buyingMode, ui.investmentAmount])
 
   useEffect(() => {
     void ui.loadDisabledSymbols()
     void data.loadFromCache()
     void data.loadAmounts()
   }, [data, ui])
-
-  const formatPrice = (value: number, currency = "USD"): string => {
-    try {
-      return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(value)
-    }
-    catch {
-      return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
-    }
-  }
-
-  const formatChange = (value: number, currency = "USD"): string => {
-    const formatted = formatPrice(value, currency)
-    return value >= 0 ? `+${formatted}` : formatted
-  }
-
-  const formatChangePercent = (value: number): string => {
-    const formatted = value.toFixed(2)
-    return value >= 0 ? `+${formatted}%` : `${formatted}%`
-  }
-
-  const getChangeColor = (value: number): string => {
-    return value >= 0 ? "teal" : "red"
-  }
 
   const formatDividendYield = (symbol: string): string => {
     const yieldValue = data.getDividendYield(symbol, 24)
@@ -174,8 +139,6 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
       return cmp !== 0 ? cmp : a.symbol.localeCompare(b.symbol)
     })
   }
-
-  const allocations = allocationStore.allocations
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -273,8 +236,8 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
             </Table.Thead>
             <Table.Tbody>
               {sortedQuotes.map((quote) => {
-                const allocation = allocations.get(quote.symbol) ?? 0
-                const allocationBalance = allocation * quote.price
+                const allocation = allocationStore.getAllocation(quote.symbol)
+                const allocationBalance = allocationStore.getAllocationBalance(quote.symbol)
 
                 return (
                   <Table.Tr key={quote.symbol}>
