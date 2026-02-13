@@ -36,6 +36,8 @@ export class StocksStore {
   fetchedCount = 0
   errors = new Map<string, string>()
   editingSymbol: string | null = null
+  buyingMode = false
+  investmentAmount = 0
 
   private queueAbortController: AbortController | null = null
 
@@ -67,6 +69,82 @@ export class StocksStore {
 
   isEditing(symbol: string): boolean {
     return this.editingSymbol === symbol
+  }
+
+  toggleBuyingMode(): void {
+    this.buyingMode = !this.buyingMode
+    if (!this.buyingMode) {
+      this.investmentAmount = 0
+    }
+  }
+
+  setInvestmentAmount(amount: number): void {
+    this.investmentAmount = amount
+  }
+
+  get allocations(): Map<string, number> {
+    if (!this.buyingMode || this.investmentAmount <= 0) {
+      return new Map()
+    }
+
+    const scoreable = Array.from(this.quotes.values())
+      .filter(q => q.change2y != null)
+
+    if (scoreable.length === 0) {
+      return new Map()
+    }
+
+    const byGrowth = [...scoreable].sort((a, b) => b.change2y! - a.change2y!)
+    const growthRank = new Map(byGrowth.map((q, i) => [q.symbol, i + 1]))
+
+    const byAmount = [...scoreable].sort(
+      (a, b) => this.getAmount(a.symbol) - this.getAmount(b.symbol),
+    )
+    const scarcityRank = new Map(byAmount.map((q, i) => [q.symbol, i + 1]))
+
+    const ranked = scoreable
+      .map(q => ({
+        symbol: q.symbol,
+        price: q.price,
+        priority: growthRank.get(q.symbol)! + scarcityRank.get(q.symbol)!,
+      }))
+      .sort((a, b) => a.priority - b.priority || a.symbol.localeCompare(b.symbol))
+
+    const result = new Map<string, number>()
+    let remaining = this.investmentAmount
+    let changed = true
+
+    while (changed) {
+      changed = false
+      for (const stock of ranked) {
+        if (stock.price > 0 && stock.price <= remaining) {
+          result.set(stock.symbol, (result.get(stock.symbol) ?? 0) + 1)
+          remaining -= stock.price
+          changed = true
+        }
+      }
+    }
+
+    return result
+  }
+
+  getAllocation(symbol: string): number {
+    return this.allocations.get(symbol) ?? 0
+  }
+
+  getAllocationBalance(symbol: string): number {
+    const allocation = this.getAllocation(symbol)
+    const quote = this.quotes.get(symbol)
+    return allocation * (quote?.price ?? 0)
+  }
+
+  get totalAllocated(): number {
+    let total = 0
+    for (const [symbol, count] of this.allocations) {
+      const quote = this.quotes.get(symbol)
+      total += count * (quote?.price ?? 0)
+    }
+    return total
   }
 
   get totalCount(): number {

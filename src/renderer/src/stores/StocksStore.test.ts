@@ -352,4 +352,328 @@ describe("stocksStore", () => {
     store.fetchedCount = 71
     expect(store.progress).toBe(1)
   })
+
+  it("starts with buyingMode false and investmentAmount 0", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    expect(store.buyingMode).toBe(false)
+    expect(store.investmentAmount).toBe(0)
+  })
+
+  it("toggles buying mode on and off", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.toggleBuyingMode()
+    expect(store.buyingMode).toBe(true)
+
+    store.setInvestmentAmount(1000)
+    expect(store.investmentAmount).toBe(1000)
+
+    store.toggleBuyingMode()
+    expect(store.buyingMode).toBe(false)
+    expect(store.investmentAmount).toBe(0)
+  })
+
+  it("returns empty allocations when buying mode is off", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.quotes.set("ABBV", {
+      symbol: "ABBV",
+      name: "AbbVie Inc.",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 5,
+      change6m: 10,
+      change2y: 20,
+    })
+
+    store.setInvestmentAmount(1000)
+    expect(store.allocations.size).toBe(0)
+  })
+
+  it("returns empty allocations when investment amount is 0", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.toggleBuyingMode()
+    store.quotes.set("ABBV", {
+      symbol: "ABBV",
+      name: "AbbVie Inc.",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 5,
+      change6m: 10,
+      change2y: 20,
+    })
+
+    expect(store.allocations.size).toBe(0)
+  })
+
+  it("allocates to a single stock", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.quotes.set("ABBV", {
+      symbol: "ABBV",
+      name: "AbbVie Inc.",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 5,
+      change6m: 10,
+      change2y: 20,
+    })
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(350)
+
+    expect(store.getAllocation("ABBV")).toBe(3)
+    expect(store.getAllocationBalance("ABBV")).toBe(300)
+    expect(store.totalAllocated).toBe(300)
+  })
+
+  it("prioritizes higher 2y growth stocks", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.quotes.set("HIGH", {
+      symbol: "HIGH",
+      name: "High Growth",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 5,
+      change6m: 10,
+      change2y: 50,
+    })
+    store.quotes.set("LOW", {
+      symbol: "LOW",
+      name: "Low Growth",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 2,
+      change6m: 5,
+      change2y: 10,
+    })
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(300)
+
+    // Both same price, no existing holdings
+    // HIGH has better growth rank (1) + same scarcity rank
+    // Round-robin: HIGH gets 1, LOW gets 1, then HIGH gets 1 (higher priority)
+    expect(store.getAllocation("HIGH")).toBe(2)
+    expect(store.getAllocation("LOW")).toBe(1)
+  })
+
+  it("prioritizes stocks with lower existing amounts", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    // Give OWNED worse growth so scarcity is the deciding factor
+    store.quotes.set("OWNED", {
+      symbol: "OWNED",
+      name: "Owned Stock",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 5,
+      change6m: 10,
+      change2y: 30,
+    })
+    store.quotes.set("FRESH", {
+      symbol: "FRESH",
+      name: "Fresh Stock",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 5,
+      change6m: 10,
+      change2y: 25,
+    })
+
+    // OWNED already held heavily, FRESH not owned at all
+    store.setAmount("OWNED", 10)
+    store.setAmount("FRESH", 0)
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(300)
+
+    // OWNED: growthRank=1 (30%) + scarcityRank=2 (10 owned) = 3
+    // FRESH: growthRank=2 (25%) + scarcityRank=1 (0 owned) = 3
+    // Tied at 3, tiebreaker is alphabetical: FRESH first
+    // Round 1: FRESH $100 (rem $200), OWNED $100 (rem $100)
+    // Round 2: FRESH $100 (rem $0)
+    expect(store.getAllocation("FRESH")).toBe(2)
+    expect(store.getAllocation("OWNED")).toBe(1)
+  })
+
+  it("skips stocks without change2y data", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.quotes.set("GOOD", {
+      symbol: "GOOD",
+      name: "Good Stock",
+      price: 100,
+      previousClose: 99,
+      change: 1,
+      changePercent: 1,
+      currency: "USD",
+      change1m: 5,
+      change6m: 10,
+      change2y: 20,
+    })
+    store.quotes.set("NODATA", {
+      symbol: "NODATA",
+      name: "No Data Stock",
+      price: 50,
+      previousClose: 49,
+      change: 1,
+      changePercent: 2,
+      currency: "USD",
+      change1m: 3,
+      change6m: 7,
+      change2y: null,
+    })
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(500)
+
+    expect(store.getAllocation("GOOD")).toBe(5)
+    expect(store.getAllocation("NODATA")).toBe(0)
+  })
+
+  it("handles budget too small for any stock", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.quotes.set("EXPENSIVE", {
+      symbol: "EXPENSIVE",
+      name: "Expensive Stock",
+      price: 500,
+      previousClose: 499,
+      change: 1,
+      changePercent: 0.2,
+      currency: "USD",
+      change1m: 1,
+      change6m: 5,
+      change2y: 15,
+    })
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(100)
+
+    expect(store.allocations.size).toBe(0)
+    expect(store.totalAllocated).toBe(0)
+  })
+
+  it("allocates across multiple stocks with different prices using round-robin", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.quotes.set("CHEAP", {
+      symbol: "CHEAP",
+      name: "Cheap Stock",
+      price: 50,
+      previousClose: 49,
+      change: 1,
+      changePercent: 2,
+      currency: "USD",
+      change1m: 3,
+      change6m: 8,
+      change2y: 40,
+    })
+    store.quotes.set("MID", {
+      symbol: "MID",
+      name: "Mid Stock",
+      price: 150,
+      previousClose: 149,
+      change: 1,
+      changePercent: 0.67,
+      currency: "USD",
+      change1m: 2,
+      change6m: 6,
+      change2y: 25,
+    })
+    store.quotes.set("PRICEY", {
+      symbol: "PRICEY",
+      name: "Pricey Stock",
+      price: 300,
+      previousClose: 299,
+      change: 1,
+      changePercent: 0.33,
+      currency: "USD",
+      change1m: 1,
+      change6m: 4,
+      change2y: 10,
+    })
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(1000)
+
+    // Priority order: CHEAP (best growth), MID, PRICEY
+    // Round 1: CHEAP $50 (rem $950), MID $150 (rem $800), PRICEY $300 (rem $500)
+    // Round 2: CHEAP $50 (rem $450), MID $150 (rem $300), PRICEY $300 (rem $0)
+    // Round 3: nothing fits
+    expect(store.getAllocation("CHEAP")).toBe(2)
+    expect(store.getAllocation("MID")).toBe(2)
+    expect(store.getAllocation("PRICEY")).toBe(2)
+    expect(store.totalAllocated).toBe(1000)
+  })
+
+  it("getAllocation returns 0 for unknown symbol", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(1000)
+
+    expect(store.getAllocation("UNKNOWN")).toBe(0)
+  })
+
+  it("getAllocationBalance computes correctly", () => {
+    const root = new RootStore()
+    const store = new StocksStore(root)
+
+    store.quotes.set("TEST", {
+      symbol: "TEST",
+      name: "Test Stock",
+      price: 75,
+      previousClose: 74,
+      change: 1,
+      changePercent: 1.35,
+      currency: "USD",
+      change1m: 2,
+      change6m: 5,
+      change2y: 15,
+    })
+
+    store.toggleBuyingMode()
+    store.setInvestmentAmount(200)
+
+    // Should buy 2 shares at $75 = $150
+    expect(store.getAllocation("TEST")).toBe(2)
+    expect(store.getAllocationBalance("TEST")).toBe(150)
+  })
 })

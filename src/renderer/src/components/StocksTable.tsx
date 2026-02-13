@@ -3,7 +3,7 @@ import { ActionIcon, Button, Card, Center, Group, NumberInput, Progress, Table, 
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 type SortableColumn = "change1m" | "change6m" | "change2y"
 type SortDirection = "asc" | "desc"
@@ -53,6 +53,34 @@ function StocksTable(): React.JSX.Element {
     })
   }, [])
 
+  const [localAmount, setLocalAmount] = useState<number | string>("")
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleAmountChange = useCallback((value: number | string): void => {
+    setLocalAmount(value)
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    debounceRef.current = setTimeout(() => {
+      stocks.setInvestmentAmount(Number(value) || 0)
+    }, 500)
+  }, [stocks])
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [])
+
+  const handleToggleBuy = useCallback((): void => {
+    stocks.toggleBuyingMode()
+    if (!stocks.buyingMode) {
+      setLocalAmount("")
+    }
+  }, [stocks])
+
   useEffect(() => {
     stocks.loadFromCache()
   }, [stocks])
@@ -96,14 +124,36 @@ function StocksTable(): React.JSX.Element {
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
         <Text fw={700} size="lg">Dividend Aristocrats</Text>
-        <Button
-          variant="light"
-          size="xs"
-          onClick={handleRefresh}
-          loading={stocks.loading}
-        >
-          Refresh
-        </Button>
+        <Group gap="sm">
+          <NumberInput
+            size="xs"
+            placeholder="Amount"
+            prefix="$"
+            min={0}
+            thousandSeparator=","
+            hideControls
+            disabled={!stocks.buyingMode}
+            value={localAmount}
+            onChange={handleAmountChange}
+            styles={{ input: { width: 120 } }}
+          />
+          <Button
+            variant={stocks.buyingMode ? "filled" : "light"}
+            color={stocks.buyingMode ? "teal" : undefined}
+            size="xs"
+            onClick={handleToggleBuy}
+          >
+            buy
+          </Button>
+          <Button
+            variant="light"
+            size="xs"
+            onClick={handleRefresh}
+            loading={stocks.loading}
+          >
+            Refresh
+          </Button>
+        </Group>
       </Group>
 
       {stocks.loading && (
@@ -190,8 +240,29 @@ function StocksTable(): React.JSX.Element {
                       )
                     : <Text c="dimmed">N/A</Text>}
                 </Table.Td>
-                <Table.Td>{formatPrice(stocks.getBalance(quote.symbol))}</Table.Td>
-                <Table.Td>
+                <Table.Td style={{ position: "relative" }}>
+                  {formatPrice(stocks.getBalance(quote.symbol))}
+                  {stocks.buyingMode && stocks.getAllocationBalance(quote.symbol) > 0 && (
+                    <Text
+                      size="sm"
+                      fw={700}
+                      c="teal"
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: 0,
+                        right: 0,
+                        transform: "translateY(-50%)",
+                        textAlign: "center",
+                        backgroundColor: "var(--mantine-color-dark-7)",
+                        padding: "0 4px",
+                      }}
+                    >
+                      {formatPrice(stocks.getAllocationBalance(quote.symbol))}
+                    </Text>
+                  )}
+                </Table.Td>
+                <Table.Td style={{ position: "relative" }}>
                   {stocks.isEditing(quote.symbol)
                     ? (
                         <NumberInput
@@ -205,6 +276,26 @@ function StocksTable(): React.JSX.Element {
                         />
                       )
                     : stocks.getAmount(quote.symbol)}
+                  {stocks.buyingMode && stocks.getAllocation(quote.symbol) > 0 && (
+                    <Text
+                      size="sm"
+                      fw={700}
+                      c="teal"
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: 0,
+                        right: 0,
+                        transform: "translateY(-50%)",
+                        textAlign: "center",
+                        backgroundColor: "var(--mantine-color-dark-7)",
+                        padding: "0 4px",
+                      }}
+                    >
+                      +
+                      {stocks.getAllocation(quote.symbol)}
+                    </Text>
+                  )}
                 </Table.Td>
                 <Table.Td>
                   <ActionIcon
