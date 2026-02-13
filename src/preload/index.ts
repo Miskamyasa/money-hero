@@ -17,8 +17,8 @@ if (process.contextIsolated) {
   }
 }
 else {
-  // @ts-ignore (define in dts)
+  // @ts-expect-error ts(2551)
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
+  // @ts-expect-error ts(2551)
   window.api = api
 }

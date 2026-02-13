@@ -10,4 +10,8 @@ export default antfu({
   ignores: [
     "AGENTS.md",
   ],
+  rules: {
+    "no-console": "off",
+    "node/prefer-global/process": "off",
+  },
 })

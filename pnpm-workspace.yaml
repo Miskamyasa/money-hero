@@ -1,7 +1,6 @@
 shellEmulator: true
 
 trustPolicy: no-downgrade
-
 overrides:
   brace-expansion@>=2.0.0 <=2.0.1: ">=2.0.2"
   glob@>=10.2.0 <10.5.0: ">=10.5.0"
@@ -9,4 +8,6 @@ overrides:
   vite@>=6.0.0 <=6.4.0: ">=6.4.1"
 
 onlyBuiltDependencies:
+  - electron
+  - electron-winstaller
   - esbuild
