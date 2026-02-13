@@ -20,6 +20,7 @@ export class StocksAllocationStore {
     }
 
     const scoreable = Array.from(this.data.quotes.values())
+      .filter(q => this.ui.isSymbolEnabled(q.symbol))
       .filter(q => q.change2y != null)
 
     if (scoreable.length === 0) {
