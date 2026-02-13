@@ -14,7 +14,7 @@ function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element
     <Drawer
       opened={opened}
       onClose={onClose}
-      position="right"
+      position="left"
       title="Filter Stocks"
       size="md"
       styles={{ inner: { inset: 0 } }}
