@@ -213,7 +213,7 @@ function StocksTable(): React.JSX.Element {
                     aria-label={stocks.isEditing(quote.symbol) ? "Stop editing" : "Edit amount"}
                     onClick={() => stocks.isEditing(quote.symbol) ? stocks.stopEditing() : stocks.startEditing(quote.symbol)}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-pencil "><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path><path d="M13.5 6.5l4 4"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
                   </ActionIcon>
                 </Table.Td>
               </Table.Tr>
