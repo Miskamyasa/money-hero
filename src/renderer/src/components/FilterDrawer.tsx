@@ -9,6 +9,8 @@ interface FilterDrawerProps {
 
 function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element {
   const { stocks, highYield } = useStores()
+  const stocksUi = stocks.ui
+  const highYieldUi = highYield.ui
 
   return (
     <Drawer
@@ -27,8 +29,8 @@ function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element
               <Button
                 key={symbol}
                 size="compact-xs"
-                variant={stocks.isSymbolEnabled(symbol) ? "filled" : "default"}
-                onClick={() => stocks.toggleSymbol(symbol)}
+                variant={stocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                onClick={() => stocksUi.toggleSymbol(symbol)}
               >
                 {symbol}
               </Button>
@@ -43,8 +45,8 @@ function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element
               <Button
                 key={symbol}
                 size="compact-xs"
-                variant={highYield.isSymbolEnabled(symbol) ? "filled" : "default"}
-                onClick={() => highYield.toggleSymbol(symbol)}
+                variant={highYieldUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                onClick={() => highYieldUi.toggleSymbol(symbol)}
               >
                 {symbol}
               </Button>

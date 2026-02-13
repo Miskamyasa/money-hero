@@ -47,6 +47,9 @@ function SortableHeader({ label, column, sortState, onSort }: {
 }
 
 function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Element {
+  const data = stocks.data
+  const ui = stocks.ui
+  const allocationStore = stocks.allocation
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: "desc" })
   const [filterInput, setFilterInput] = useState("")
   const [debouncedFilter, setDebouncedFilter] = useState("")
@@ -91,9 +94,9 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
       clearTimeout(debounceRef.current)
     }
     debounceRef.current = setTimeout(() => {
-      stocks.setInvestmentAmount(Number(value) || 0)
+      ui.setInvestmentAmount(Number(value) || 0)
     }, 500)
-  }, [stocks])
+  }, [ui])
 
   useEffect(() => {
     return () => {
@@ -104,17 +107,17 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   }, [])
 
   const handleToggleBuy = useCallback((): void => {
-    stocks.toggleBuyingMode()
-    if (!stocks.buyingMode) {
+    ui.toggleBuyingMode()
+    if (!ui.buyingMode) {
       setLocalAmount("")
     }
-  }, [stocks])
+  }, [ui])
 
   useEffect(() => {
-    stocks.loadDisabledSymbols()
-    stocks.loadFromCache()
-    stocks.loadAmounts()
-  }, [stocks])
+    ui.loadDisabledSymbols()
+    void data.loadFromCache()
+    void data.loadAmounts()
+  }, [data, ui])
 
   const formatPrice = (value: number, currency = "USD"): string => {
     try {
@@ -140,7 +143,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   }
 
   const formatDividendYield = (symbol: string): string => {
-    const yieldValue = stocks.getDividendYield(symbol, 24)
+    const yieldValue = data.getDividendYield(symbol, 24)
     if (yieldValue == null) {
       return "No dividends"
     }
@@ -148,7 +151,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   }
 
   const handleRefresh = (): void => {
-    void stocks.refreshAll()
+    void data.refreshAll()
   }
 
   const filterLower = debouncedFilter.toLowerCase().trim()
@@ -171,7 +174,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
     })
   }
 
-  const allocations = stocks.allocations
+  const allocations = allocationStore.allocations
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -194,14 +197,14 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
             min={0}
             thousandSeparator=","
             hideControls
-            disabled={!stocks.buyingMode}
+            disabled={!ui.buyingMode}
             value={localAmount}
             onChange={handleAmountChange}
             styles={{ input: { width: 120 } }}
           />
           <Button
-            variant={stocks.buyingMode ? "filled" : "light"}
-            color={stocks.buyingMode ? "teal" : undefined}
+            variant={ui.buyingMode ? "filled" : "light"}
+            color={ui.buyingMode ? "teal" : undefined}
             size="xs"
             onClick={handleToggleBuy}
           >
@@ -211,27 +214,27 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
             variant="light"
             size="xs"
             onClick={handleRefresh}
-            loading={stocks.loading}
+            loading={data.loading}
           >
             Refresh
           </Button>
         </Group>
       </Group>
 
-      {stocks.loading && (
+      {data.loading && (
         <>
-          <Progress value={stocks.progress * 100} size="sm" mb="xs" />
+          <Progress value={data.progress * 100} size="sm" mb="xs" />
           <Text size="xs" c="dimmed" mb="md">
             Loading stocks... (
-            {stocks.fetchedCount}
+            {data.fetchedCount}
             /
-            {stocks.totalCount}
+            {data.totalCount}
             )
           </Text>
         </>
       )}
 
-      {stocks.quotes.size === 0 && !stocks.loading && (
+      {data.quotes.size === 0 && !data.loading && (
         <Center>
           <Button
             variant="light"
@@ -242,7 +245,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
         </Center>
       )}
 
-      {stocks.quotes.size > 0 && (
+      {data.quotes.size > 0 && (
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
@@ -315,8 +318,8 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                       : <Text c="dimmed">N/A</Text>}
                   </Table.Td>
                   <Table.Td style={{ position: "relative" }}>
-                    {formatPrice(stocks.getBalance(quote.symbol), quote.currency)}
-                    {stocks.buyingMode && allocationBalance > 0 && (
+                    {formatPrice(data.getBalance(quote.symbol), quote.currency)}
+                    {ui.buyingMode && allocationBalance > 0 && (
                       <Text
                         size="sm"
                         fw={700}
@@ -339,15 +342,15 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                   <Table.Td style={{ position: "relative" }}>
                     <NumberInput
                       size="xs"
-                      value={stocks.getAmount(quote.symbol)}
-                      onChange={value => stocks.setAmount(quote.symbol, Number(value) || 0)}
+                      value={data.getAmount(quote.symbol)}
+                      onChange={value => data.setAmount(quote.symbol, Number(value) || 0)}
                       min={0}
                       step={1}
                       hideControls
-                      disabled={!stocks.isEditing(quote.symbol)}
+                      disabled={!ui.isEditing(quote.symbol)}
                       styles={{ input: { width: 80 } }}
                     />
-                    {stocks.buyingMode && allocation > 0 && (
+                    {ui.buyingMode && allocation > 0 && (
                       <Text
                         size="sm"
                         fw={700}
@@ -371,10 +374,10 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                   <Table.Td>
                     <Group gap={4} wrap="nowrap">
                       <ActionIcon
-                        variant={stocks.isEditing(quote.symbol) ? "filled" : "subtle"}
+                        variant={ui.isEditing(quote.symbol) ? "filled" : "subtle"}
                         size="sm"
-                        aria-label={stocks.isEditing(quote.symbol) ? "Stop editing" : "Edit amount"}
-                        onClick={() => stocks.isEditing(quote.symbol) ? stocks.stopEditing() : stocks.startEditing(quote.symbol)}
+                        aria-label={ui.isEditing(quote.symbol) ? "Stop editing" : "Edit amount"}
+                        onClick={() => ui.isEditing(quote.symbol) ? ui.stopEditing() : ui.startEditing(quote.symbol)}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
