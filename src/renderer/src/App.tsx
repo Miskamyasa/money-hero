@@ -19,8 +19,12 @@ function Dashboard(): React.JSX.Element {
   useEffect(() => {
     // Load persisted data (non-fetch)
     void gold.loadAmount()
+    void gold.loadFromCache()
     void vt.loadAmount()
+    void vt.loadFromCache()
     void voo.loadAmount()
+    void voo.loadFromCache()
+    void root.currency.loadFromCache()
     void stocks.data.loadFromCache()
     void stocks.data.loadAmounts()
     void stocks.ui.loadDisabledSymbols()

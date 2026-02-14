@@ -3,8 +3,6 @@ import type { DividendEvent, StockQuote } from "../shared/stocks"
 import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../shared/amountScopes"
 import { getDb } from "./database"
 
-const CACHE_TTL = 12 * 60 * 60 * 1000 // 1 hour in milliseconds
-
 function toFiniteNumber(value: unknown, fallback: number = 0): number {
   const numeric = typeof value === "number" ? value : Number(value)
   return Number.isFinite(numeric) ? numeric : fallback
@@ -30,13 +28,6 @@ export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote
     .select("*")
 
   if (rows.length === 0) {
-    return []
-  }
-
-  const now = Date.now()
-  const mostRecentUpdatedAt = Math.max(...rows.map(row => row.updated_at as number))
-
-  if (now - mostRecentUpdatedAt > CACHE_TTL) {
     return []
   }
 
@@ -222,4 +213,29 @@ export async function setDisabledStockSymbols(storageKey: string, symbols: strin
       )
     }
   })
+}
+
+export async function getKvCache(key: string): Promise<unknown> {
+  const db = getDb()
+  const row = await db("kv_cache").where("key", key).first()
+  if (!row) {
+    return null
+  }
+
+  try {
+    return JSON.parse(row.value as string) as unknown
+  }
+  catch {
+    return null
+  }
+}
+
+export async function setKvCache(key: string, value: unknown): Promise<void> {
+  const db = getDb()
+  const serialized = JSON.stringify(value)
+
+  await db("kv_cache")
+    .insert({ key, value: serialized })
+    .onConflict("key")
+    .merge()
 }

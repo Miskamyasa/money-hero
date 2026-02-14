@@ -63,6 +63,31 @@ export class SymbolStore {
     this.editingAmount = false
   }
 
+  async loadFromCache(): Promise<void> {
+    try {
+      const raw = await window.api.getKvCache(`symbol:${this.symbol}`)
+      if (raw != null) {
+        runInAction(() => {
+          this.quote = raw as SymbolQuote
+        })
+      }
+    }
+    catch (error) {
+      notifyError(`Failed to load ${this.symbol} cache`, error)
+    }
+  }
+
+  private async saveToCache(): Promise<void> {
+    try {
+      if (this.quote) {
+        await window.api.setKvCache(`symbol:${this.symbol}`, JSON.parse(JSON.stringify(this.quote)))
+      }
+    }
+    catch (error) {
+      notifyError(`Failed to save ${this.symbol} cache`, error)
+    }
+  }
+
   createFetchQuoteTask(): FetchTask {
     return {
       label: `${this.symbol} quote`,
@@ -71,6 +96,7 @@ export class SymbolStore {
         runInAction(() => {
           this.quote = data as SymbolQuote
         })
+        await this.saveToCache()
       },
     }
   }

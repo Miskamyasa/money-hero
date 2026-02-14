@@ -10,11 +10,13 @@ import { fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CH
 import {
   clearStockQuotesCache,
   getDisabledStockSymbols,
+  getKvCache,
   getScopedStockAmounts,
   getStockAmounts,
   getStockQuotesCache,
   saveStockQuotesCache,
   setDisabledStockSymbols,
+  setKvCache,
   setScopedStockAmount,
   setStockAmount,
 } from "./repositories"
@@ -86,6 +88,8 @@ app.whenReady().then(async () => {
   ipcMain.handle("db:set-scoped-stock-amount", (_event, scope: string, symbol: string, amount: number) => setScopedStockAmount(scope, symbol, amount))
   ipcMain.handle("db:get-disabled-stock-symbols", (_event, storageKey: string) => getDisabledStockSymbols(storageKey))
   ipcMain.handle("db:set-disabled-stock-symbols", (_event, storageKey: string, symbols: string[]) => setDisabledStockSymbols(storageKey, symbols))
+  ipcMain.handle("db:get-kv-cache", (_event, key: string) => getKvCache(key))
+  ipcMain.handle("db:set-kv-cache", (_event, key: string, value: unknown) => setKvCache(key, value))
 
   await initDatabase()
 

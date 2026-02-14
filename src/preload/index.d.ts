@@ -47,6 +47,8 @@ export interface Api {
   setScopedStockAmount: (scope: string, symbol: string, amount: number) => Promise<void>
   getDisabledStockSymbols: (storageKey: string) => Promise<string[]>
   setDisabledStockSymbols: (storageKey: string, symbols: string[]) => Promise<void>
+  getKvCache: (key: string) => Promise<unknown>
+  setKvCache: (key: string, value: unknown) => Promise<void>
 }
 
 declare global {

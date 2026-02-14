@@ -73,6 +73,15 @@ export async function initDatabase(): Promise<void> {
       table.primary(["storage_key", "symbol"])
     })
   }
+
+  // Create kv_cache table
+  const hasKvCache = await db.schema.hasTable("kv_cache")
+  if (!hasKvCache) {
+    await db.schema.createTable("kv_cache", (table) => {
+      table.string("key").primary()
+      table.text("value").notNullable()
+    })
+  }
 }
 
 export function getDb(): Knex {

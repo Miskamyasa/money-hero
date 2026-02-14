@@ -67,6 +67,42 @@ export class GoldStore {
     this.editingAmount = false
   }
 
+  async loadFromCache(): Promise<void> {
+    try {
+      const [quoteRaw, historyRaw] = await Promise.all([
+        window.api.getKvCache("gold:quote"),
+        window.api.getKvCache("gold:history"),
+      ])
+      runInAction(() => {
+        if (quoteRaw != null) {
+          this.quote = quoteRaw as GoldQuote
+        }
+        if (historyRaw != null) {
+          this.history = historyRaw as GoldHistory
+        }
+      })
+    }
+    catch (error) {
+      notifyError("Failed to load gold cache", error)
+    }
+  }
+
+  private async saveToCache(): Promise<void> {
+    try {
+      const promises: Promise<void>[] = []
+      if (this.quote) {
+        promises.push(window.api.setKvCache("gold:quote", JSON.parse(JSON.stringify(this.quote))))
+      }
+      if (this.history) {
+        promises.push(window.api.setKvCache("gold:history", JSON.parse(JSON.stringify(this.history))))
+      }
+      await Promise.all(promises)
+    }
+    catch (error) {
+      notifyError("Failed to save gold cache", error)
+    }
+  }
+
   createFetchQuoteTask(): FetchTask {
     return {
       label: "Gold quote",
@@ -75,6 +111,7 @@ export class GoldStore {
         runInAction(() => {
           this.quote = data as GoldQuote
         })
+        await this.saveToCache()
       },
     }
   }
@@ -87,6 +124,7 @@ export class GoldStore {
         runInAction(() => {
           this.history = data as GoldHistory
         })
+        await this.saveToCache()
       },
     }
   }

@@ -145,6 +145,12 @@ const api = {
     const parsedSymbols = parseStockSymbols(symbols, "setDisabledStockSymbols symbols")
     return ipcRenderer.invoke("db:set-disabled-stock-symbols", parsedStorageKey, parsedSymbols)
   },
+  getKvCache: (key: string): Promise<unknown> => {
+    return ipcRenderer.invoke("db:get-kv-cache", key)
+  },
+  setKvCache: (key: string, value: unknown): Promise<void> => {
+    return ipcRenderer.invoke("db:set-kv-cache", key, value)
+  },
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
