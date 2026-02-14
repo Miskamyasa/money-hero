@@ -93,7 +93,6 @@ export class RootStore {
   }
 
   loadStocks(store: StocksStore): void {
-    this.fetchQueue.clear()
     this.fetchQueue.enqueue([
       ...store.data.createFetchTasks(),
       store.data.createFlushCacheTask(),

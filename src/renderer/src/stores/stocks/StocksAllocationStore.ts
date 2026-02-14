@@ -12,6 +12,7 @@ export class StocksAllocationStore {
   }
 
   get allocationSnapshot(): { allocations: Map<string, number>, balances: Map<string, number> } {
+    // Allocation is only meaningful while buying mode is active with a positive budget.
     if (!this.ui.buyingMode || this.ui.investmentAmount <= 0) {
       return {
         allocations: new Map(),
@@ -19,6 +20,7 @@ export class StocksAllocationStore {
       }
     }
 
+    // Only score symbols that are enabled and have enough history for growth ranking.
     const scoreable = Array.from(this.data.quotes.values())
       .filter(q => this.ui.isSymbolEnabled(q.symbol))
       .filter(q => q.change2y != null)
@@ -30,6 +32,7 @@ export class StocksAllocationStore {
       }
     }
 
+    // Lower rank number means better growth / more scarce current allocation.
     const byGrowth = [...scoreable].sort((a, b) => b.change2y! - a.change2y!)
     const growthRank = new Map(byGrowth.map((q, i) => [q.symbol, i + 1]))
 
@@ -38,6 +41,7 @@ export class StocksAllocationStore {
     )
     const scarcityRank = new Map(byBalance.map((q, i) => [q.symbol, i + 1]))
 
+    // Composite priority: lower value is preferred, symbol name is the final deterministic tiebreaker.
     const ranked = scoreable
       .map(q => ({
         symbol: q.symbol,
@@ -50,6 +54,8 @@ export class StocksAllocationStore {
     const allocations = new Map<string, number>()
     const balances = new Map<string, number>()
     let remaining = this.ui.investmentAmount
+
+    // Greedy allocation loop: buy one share at a time while budget remains.
     while (remaining > 0) {
       let candidate: typeof ranked[number] | null = null
       let candidateProjectedBalance = Number.POSITIVE_INFINITY
@@ -87,6 +93,7 @@ export class StocksAllocationStore {
       }
 
       if (candidate == null) {
+        // No stock can be bought with the remaining cash.
         break
       }
 
