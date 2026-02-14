@@ -1,3 +1,8 @@
+import type { YahooChartResponse } from "./schemas/yahooChart"
+
+import { z } from "zod"
+import { formatYahooSchemaError, YahooChartResponseSchema } from "./schemas/yahooChart"
+
 export interface GoldQuote {
   price: number
   previousClose: number
@@ -19,6 +24,18 @@ export const GOLD_HISTORY_IPC_CHANNEL = "gold:fetch-history"
 const GOLD_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=1d&interval=1d"
 const GOLD_HISTORY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=2y&interval=1mo"
 
+function validateYahooResponse(data: unknown): YahooChartResponse {
+  try {
+    return YahooChartResponseSchema.parse(data)
+  }
+  catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(formatYahooSchemaError(error))
+    }
+    throw error
+  }
+}
+
 export async function fetchGoldQuote(): Promise<GoldQuote> {
   try {
     const response = await fetch(GOLD_CHART_URL)
@@ -27,25 +44,19 @@ export async function fetchGoldQuote(): Promise<GoldQuote> {
       throw new Error(`Yahoo Finance API returned status ${response.status}: ${response.statusText}`)
     }
 
-    const data = await response.json()
+    const parsed = validateYahooResponse(await response.json())
 
-    if (!data.chart?.result?.[0]?.meta) {
-      throw new Error("Yahoo Finance API response missing expected chart.result[0].meta structure")
+    if (!parsed.chart.result) {
+      throw new Error("Yahoo Finance API response missing chart results")
     }
 
-    const meta = data.chart.result[0].meta
+    const { meta } = parsed.chart.result[0]
 
     const price = meta.regularMarketPrice
     const previousClose = meta.chartPreviousClose
-    const currency = meta.currency
-    const symbol = meta.symbol
 
-    if (typeof price !== "number" || typeof previousClose !== "number") {
+    if (price == null || previousClose == null) {
       throw new TypeError("Yahoo Finance API response missing required numeric fields (regularMarketPrice or chartPreviousClose)")
-    }
-
-    if (typeof currency !== "string" || typeof symbol !== "string") {
-      throw new TypeError("Yahoo Finance API response missing required string fields (currency or symbol)")
     }
 
     const change = price - previousClose
@@ -56,8 +67,8 @@ export async function fetchGoldQuote(): Promise<GoldQuote> {
       previousClose,
       change,
       changePercent,
-      currency,
-      symbol,
+      currency: meta.currency,
+      symbol: meta.symbol,
     }
   }
   catch (error) {
@@ -83,17 +94,17 @@ export async function fetchGoldHistory(): Promise<GoldHistory> {
       throw new Error(`Yahoo Finance API returned status ${response.status}: ${response.statusText}`)
     }
 
-    const data = await response.json()
+    const parsed = validateYahooResponse(await response.json())
 
-    if (!data.chart?.result?.[0]?.meta) {
-      throw new Error("Yahoo Finance API response missing expected chart.result[0].meta structure")
+    if (!parsed.chart.result) {
+      throw new Error("Yahoo Finance API response missing chart results")
     }
 
-    const meta = data.chart.result[0].meta
-    const closePrices: (number | null)[] = data.chart.result[0]?.indicators?.quote?.[0]?.close ?? []
+    const { meta } = parsed.chart.result[0]
+    const closePrices = parsed.chart.result[0].indicators.quote[0].close
 
     const currentPrice = meta.regularMarketPrice
-    if (typeof currentPrice !== "number") {
+    if (currentPrice == null) {
       throw new TypeError("Yahoo Finance API response missing required numeric field (regularMarketPrice)")
     }
 

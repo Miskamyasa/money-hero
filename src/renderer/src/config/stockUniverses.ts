@@ -103,7 +103,6 @@ export const DIVIDEND_ARISTOCRATS = [
   "PPG", // PPG Industries Inc.
   "ROP", // Roper Technologies Inc.
   "SHW", // The Sherwin-Williams Company
-  "SJW", // SJW Group
   "SPGI", // S&P Global Inc.
   "SWK", // Stanley Black & Decker Inc.
   "SYY", // Sysco Corporation
