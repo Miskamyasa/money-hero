@@ -1,0 +1,4 @@
+[tools]
+node = "22.21.1"
+opencode = "1.1.63"
+pnpm = "10.28.2"

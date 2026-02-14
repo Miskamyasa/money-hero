@@ -1,0 +1,27 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+
+[*.{ts,tsx}]
+ij_any_catch_on_new_line = true
+ij_any_else_on_new_line = true
+ij_any_finally_on_new_line = true
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.md]
+trim_trailing_whitespace = false
