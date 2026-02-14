@@ -8,9 +8,10 @@ interface FilterDrawerProps {
 }
 
 function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element {
-  const { stocks, highYield } = useStores()
+  const { stocks, highYield, water } = useStores()
   const stocksUi = stocks.ui
   const highYieldUi = highYield.ui
+  const waterUi = water.ui
 
   return (
     <Drawer
@@ -47,6 +48,22 @@ function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element
                 size="compact-xs"
                 variant={highYieldUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                 onClick={() => highYieldUi.toggleSymbol(symbol)}
+              >
+                {symbol}
+              </Button>
+            ))}
+          </Group>
+        </div>
+
+        <div>
+          <Text fw={500} mb="xs">Water</Text>
+          <Group gap="xs">
+            {water.allSymbols.map(symbol => (
+              <Button
+                key={symbol}
+                size="compact-xs"
+                variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                onClick={() => waterUi.toggleSymbol(symbol)}
               >
                 {symbol}
               </Button>

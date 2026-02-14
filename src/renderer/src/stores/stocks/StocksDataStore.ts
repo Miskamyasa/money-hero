@@ -205,15 +205,6 @@ export class StocksDataStore {
 
   async refreshAll(): Promise<void> {
     await this.stopFetchQueueAndWait()
-    runInAction(() => {
-      this.quotes.clear()
-    })
-    try {
-      await window.api.clearStockCache([...this.symbols])
-    }
-    catch (error) {
-      notifyError("Failed to clear stocks cache", error)
-    }
     await this.startFetchQueue()
   }
 

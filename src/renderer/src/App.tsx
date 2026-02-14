@@ -11,7 +11,7 @@ import { ThemedApp } from "@renderer/ThemedApp"
 import { useState } from "react"
 
 function Dashboard(): React.JSX.Element {
-  const { vt, voo, stocks, highYield } = useStores()
+  const { vt, voo, stocks, highYield, water } = useStores()
   const [drawerOpened, setDrawerOpened] = useState(false)
 
   return (
@@ -36,6 +36,7 @@ function Dashboard(): React.JSX.Element {
           <SymbolStats store={vt} />
           <SymbolStats store={voo} />
         </Group>
+        <StocksTable store={water} title="Water" />
         <StocksTable store={highYield} title="High Yield" />
         <StocksTable store={stocks} title="Dividend Aristocrats" />
       </Stack>

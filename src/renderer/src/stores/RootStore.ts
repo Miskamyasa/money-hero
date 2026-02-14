@@ -1,4 +1,4 @@
-import { DIVIDEND_ARISTOCRATS, HIGH_YIELD } from "@renderer/config/stockUniverses"
+import { DIVIDEND_ARISTOCRATS, HIGH_YIELD, WATER } from "@renderer/config/stockUniverses"
 import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../../../shared/amountScopes"
 
 import { AppStore } from "./AppStore"
@@ -17,6 +17,7 @@ export class RootStore {
     this.stockAmounts = new StockAmountsStore(AMOUNT_SCOPE_STOCK_HOLDINGS)
     this.stocks = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
     this.highYield = new StocksStore(this, HIGH_YIELD, "high-yield")
+    this.water = new StocksStore(this, WATER, "water")
     this.theme = new ThemeStore(this)
     this.vt = new SymbolStore(this, "VT")
     this.voo = new SymbolStore(this, "VOO")
@@ -28,6 +29,7 @@ export class RootStore {
   readonly stockAmounts: StockAmountsStore
   readonly stocks: StocksStore
   readonly highYield: StocksStore
+  readonly water: StocksStore
   readonly theme: ThemeStore
   readonly vt: SymbolStore
   readonly voo: SymbolStore
