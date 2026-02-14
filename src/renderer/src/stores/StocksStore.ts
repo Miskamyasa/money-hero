@@ -16,7 +16,7 @@ export class StocksStore {
     this.symbols = symbols
     this.data = new StocksDataStore(root, symbols)
     this.ui = new StocksUiStore(storageKey, symbols)
-    this.allocation = new StocksAllocationStore(this.data, this.ui)
+    this.allocation = new StocksAllocationStore(this.data, this.ui, root)
     makeAutoObservable(this)
   }
 

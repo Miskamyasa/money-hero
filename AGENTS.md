@@ -4,15 +4,16 @@ Electron desktop app — React, TypeScript, Vite, MobX, Mantine UI.
 
 ## Architecture
 
-Three-process Electron architecture with two TS project references:
+Three-process Electron architecture with three source directories and two TS project references:
 
 - `src/main/` — Main process (Node.js). Tsconfig: `tsconfig.node.json`
-- `src/preload/` — Preload scripts (bridge). Tsconfig: `tsconfig.node.json`
+- `src/preload/` — Preload scripts (IPC bridge). Tsconfig: `tsconfig.node.json`
 - `src/renderer/` — Renderer (React UI). Tsconfig: `tsconfig.web.json`
+- `src/shared/` — Types and schemas shared across all processes. Included in both tsconfigs.
 
 ## Commands
 
-Package manager: **pnpm** (v10.28.2), Node 22.
+Package manager: **pnpm** (v10.28.2), Node 22. Versions pinned in `mise.toml`.
 
 ```bash
 pnpm dev              # Start dev server (electron-vite dev)
@@ -24,10 +25,12 @@ pnpm typecheck:node   # tsc --noEmit -p tsconfig.node.json --composite false
 pnpm typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
 ```
 
+There is **no test framework** configured (no vitest, jest, or test scripts). Validate changes with `pnpm typecheck && pnpm lint`.
+
 ## Code Style
 
 Enforced by **@antfu/eslint-config** (`formatters: true`, `typescript: true`, `react: true`).
-If you see an ESLint error, fix it through running `pnpm lint:fix` before making changes. Change code manually only if auto-fix can't handle it.
+If you see an ESLint error, fix it by running `pnpm lint:fix` before making manual changes. Change code manually only if auto-fix can't handle it.
 
 ### Formatting
 
@@ -38,7 +41,7 @@ If you see an ESLint error, fix it through running `pnpm lint:fix` before making
 
 ### Imports
 
-Separate type imports from value imports. Use `node:` protocol for Node built-ins. Use `@renderer/*` alias (maps to `src/renderer/src/*`) for renderer-internal imports:
+Separate type imports from value imports. Use `node:` protocol for Node built-ins. Use `@renderer/*` alias (maps to `src/renderer/src/*`) for renderer-internal imports. For shared code from renderer, use relative paths (`../../../shared/`):
 
 ```typescript
 import type { RootStore } from "./RootStore"
@@ -46,6 +49,7 @@ import type { RootStore } from "./RootStore"
 import { join } from "node:path"
 import { makeAutoObservable } from "mobx"
 import { StoreProvider } from "@renderer/stores/StoreProvider"
+import { AMOUNT_SCOPE_GOLD } from "../../../shared/amountScopes"
 ```
 
 ### TypeScript
@@ -81,7 +85,7 @@ export default GoldStatsObserver
 
 ### State Management (MobX)
 
-Class-based stores with `makeAutoObservable`. Each store takes `RootStore` in constructor. Use `runInAction` for state updates after `await`:
+Class-based stores with `makeAutoObservable`. Each store takes `RootStore` in constructor (except `FetchQueueStore` which is standalone). Use `runInAction` for state updates after `await`:
 
 ```typescript
 export class ExampleStore {
@@ -113,13 +117,30 @@ export class ExampleStore {
 }
 ```
 
-Stores are provided via React context with a singleton pattern in `useStores.ts`.
+Stores are provided via React context with a singleton pattern in `useStores.ts`. Stores expose `createFetch*Task()` methods returning `FetchTask` objects that are enqueued into `FetchQueueStore` for sequential execution with rate limiting.
+
+### IPC & Validation
+
+- IPC channels use namespaced kebab-case: `gold:fetch-quote`, `stock:fetch-quote`, `currency:fetch-rates`, `db:get-stock-cache`, etc.
+- Main process registers handlers in `src/main/index.ts` via `ipcMain.handle()`
+- Preload (`src/preload/index.ts`) exposes a typed `window.api` object; it validates all IPC payloads using Zod schemas before passing to renderer
+- Shared schemas live in `src/shared/schemas/` using **`zod/mini`** (required because preload runs in context-isolated environment where `new Function()` is blocked)
+- Main process schemas (`src/main/schemas/`) use standard **`zod`** (full version)
+- API type declarations are in `src/preload/index.d.ts` — update this when adding new IPC methods
 
 ### Error Handling
 
 - Use try/catch for IPC and async operations; log with `console.error`
+- Use `notifyError(title, error)` from `@renderer/utils/notify` for user-facing errors in the renderer
 - Guard clauses with descriptive `throw new Error(...)` for invalid state
 - Catch/else/finally go on new lines (enforced by `.editorconfig`)
+- Wrap unknown errors: `error instanceof Error ? error.message : "Unknown error occurred"`
+
+### Database
+
+- **better-sqlite3** via **Knex** query builder; schema defined in `src/main/database.ts`
+- Repository functions in `src/main/repositories.ts` — all async, return plain objects
+- Data passed over IPC must be serializable (use `JSON.parse(JSON.stringify(...))` for deep clone)
 
 ### Styling
 
@@ -132,11 +153,17 @@ Stores are provided via React context with a singleton pattern in `useStores.ts`
 
 ```
 src/
-├── main/              # Main process (index.ts, database.ts, stocks.ts, gold.ts, etc.)
+├── main/              # Main process (index.ts, database.ts, stocks.ts, gold.ts, currency.ts, repositories.ts)
+│   └── schemas/       # Zod schemas for external API responses (uses zod)
 ├── preload/           # Preload scripts (index.ts + index.d.ts for API types)
+├── shared/            # Code shared across processes (types, schemas, constants)
+│   └── schemas/       # Zod Mini schemas for IPC domain types (uses zod/mini)
 └── renderer/src/      # React UI
     ├── App.tsx, main.tsx, ThemedApp.tsx
     ├── assets/        # CSS files
     ├── components/    # React components (GoldStats, StocksTable, etc.)
-    └── stores/        # MobX stores (RootStore, AppStore, GoldStore, etc.)
+    ├── config/        # Static configuration (stock symbol lists)
+    ├── stores/        # MobX stores (RootStore, AppStore, GoldStore, etc.)
+    │   └── stocks/    # Sub-stores for stock table features
+    └── utils/         # Helpers (notify, quoteFormatters)
 ```
