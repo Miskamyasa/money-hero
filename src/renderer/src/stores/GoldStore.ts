@@ -1,3 +1,4 @@
+import type { FetchTask } from "./FetchQueueStore"
 import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
@@ -26,12 +27,7 @@ export class GoldStore {
   }
 
   quote: GoldQuote | null = null
-  loading = false
-  error: string | null = null
-
   history: GoldHistory | null = null
-  historyLoading = false
-  historyError: string | null = null
 
   amount = 0
   editingAmount = false
@@ -71,41 +67,27 @@ export class GoldStore {
     this.editingAmount = false
   }
 
-  async fetchQuote(): Promise<void> {
-    this.loading = true
-    this.error = null
-    try {
-      const data = await window.api.fetchGoldQuote()
-      runInAction(() => {
-        this.quote = data as GoldQuote
-        this.loading = false
-      })
-    }
-    catch (error) {
-      runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to fetch gold quote"
-        this.loading = false
-      })
-      notifyError("Failed to fetch gold quote", error)
+  createFetchQuoteTask(): FetchTask {
+    return {
+      label: "Gold quote",
+      execute: async () => {
+        const data = await window.api.fetchGoldQuote()
+        runInAction(() => {
+          this.quote = data as GoldQuote
+        })
+      },
     }
   }
 
-  async fetchHistory(): Promise<void> {
-    this.historyLoading = true
-    this.historyError = null
-    try {
-      const data = await window.api.fetchGoldHistory()
-      runInAction(() => {
-        this.history = data as GoldHistory
-        this.historyLoading = false
-      })
-    }
-    catch (error) {
-      runInAction(() => {
-        this.historyError = error instanceof Error ? error.message : "Failed to fetch gold history"
-        this.historyLoading = false
-      })
-      notifyError("Failed to fetch gold history", error)
+  createFetchHistoryTask(): FetchTask {
+    return {
+      label: "Gold history",
+      execute: async () => {
+        const data = await window.api.fetchGoldHistory()
+        runInAction(() => {
+          this.history = data as GoldHistory
+        })
+      },
     }
   }
 }

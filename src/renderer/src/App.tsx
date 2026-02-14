@@ -1,5 +1,6 @@
-import { ActionIcon, Group, Stack, Title } from "@mantine/core"
+import { ActionIcon, Button, Group, Stack, Title } from "@mantine/core"
 import CurrencyRates from "@renderer/components/CurrencyRates"
+import FetchProgress from "@renderer/components/FetchProgress"
 import FilterDrawer from "@renderer/components/FilterDrawer"
 import GoldStats from "@renderer/components/GoldStats"
 import StocksTable from "@renderer/components/StocksTable"
@@ -8,16 +9,51 @@ import ThemeToggle from "@renderer/components/ThemeToggle"
 import { StoreProvider } from "@renderer/stores/StoreProvider"
 import { useStores } from "@renderer/stores/useStores"
 import { ThemedApp } from "@renderer/ThemedApp"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 function Dashboard(): React.JSX.Element {
-  const { vt, voo, stocks, highYield, water } = useStores()
+  const root = useStores()
+  const { vt, voo, stocks, highYield, water, gold, fetchQueue } = root
   const [drawerOpened, setDrawerOpened] = useState(false)
 
+  useEffect(() => {
+    // Load persisted data (non-fetch)
+    void gold.loadAmount()
+    void vt.loadAmount()
+    void voo.loadAmount()
+    void stocks.data.loadFromCache()
+    void stocks.data.loadAmounts()
+    void stocks.ui.loadDisabledSymbols()
+    void highYield.data.loadFromCache()
+    void highYield.data.loadAmounts()
+    void highYield.ui.loadDisabledSymbols()
+    void water.data.loadFromCache()
+    void water.data.loadAmounts()
+    void water.ui.loadDisabledSymbols()
+
+    // Fetch startup items through the queue
+    root.fetchStartupItems()
+  }, [root, gold, vt, voo, stocks, highYield, water])
+
+  const handleRefreshAll = (): void => {
+    root.refreshAll()
+  }
+
   return (
-    <div style={{ display: "flex", justifyContent: "center", minHeight: "100vh", padding: "2rem" }}>
+    <div style={{ display: "flex", justifyContent: "center", minHeight: "100vh", minWidth: "100%", padding: "2rem" }}>
       <Stack align="stretch" gap="xl" w="100%" maw={1200}>
-        <Title order={1} size="4rem" ta="center">Money Hero</Title>
+        <Group justify="space-between" gap="sm">
+          <Title size="3rem" style={{ textTransform: "uppercase" }}>Money Hero</Title>
+          <Button
+            disabled={fetchQueue.running}
+            variant="light"
+            size="xs"
+            onClick={handleRefreshAll}
+            loading={fetchQueue.running}
+          >
+            Refresh
+          </Button>
+        </Group>
         <ActionIcon
           variant="default"
           size="lg"
@@ -39,6 +75,7 @@ function Dashboard(): React.JSX.Element {
         <StocksTable store={water} title="Water" />
         <StocksTable store={highYield} title="High Yield" />
         <StocksTable store={stocks} title="Dividend Aristocrats" />
+        <FetchProgress />
       </Stack>
       <FilterDrawer opened={drawerOpened} onClose={() => setDrawerOpened(false)} />
     </div>

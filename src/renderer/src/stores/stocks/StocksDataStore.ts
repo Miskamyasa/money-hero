@@ -1,10 +1,10 @@
 import type { StockQuote } from "../../../../shared/stocks"
+import type { FetchTask } from "../FetchQueueStore"
 import type { RootStore } from "../RootStore"
 
 import { notifyError } from "@renderer/utils/notify"
 import { makeAutoObservable, runInAction } from "mobx"
 
-const FETCH_INTERVAL = 1000
 const CACHE_SAVE_BATCH_SIZE = 5
 const SECONDS_PER_DAY = 24 * 60 * 60
 const DAYS_PER_MONTH = 30.44
@@ -12,11 +12,8 @@ const MONTHS_PER_YEAR = 12
 
 export class StocksDataStore {
   quotes = new Map<string, StockQuote>()
-  loading = false
-  fetchedCount = 0
 
-  private queueAbortController: AbortController | null = null
-  private fetchQueuePromise: Promise<void> | null = null
+  private pendingCacheWrites = 0
 
   constructor(private root: RootStore, private symbols: string[]) {
     makeAutoObservable(this)
@@ -28,13 +25,6 @@ export class StocksDataStore {
 
   get totalCount(): number {
     return this.symbols.length
-  }
-
-  get progress(): number {
-    if (this.totalCount === 0) {
-      return 0
-    }
-    return this.fetchedCount / this.totalCount
   }
 
   getBalance(symbol: string): number {
@@ -104,108 +94,31 @@ export class StocksDataStore {
     }
   }
 
-  async startFetchQueue(): Promise<void> {
-    if (this.fetchQueuePromise) {
-      if (!this.queueAbortController?.signal.aborted) {
-        return this.fetchQueuePromise
-      }
-      await this.fetchQueuePromise
-    }
-
-    const abortController = new AbortController()
-    this.queueAbortController = abortController
-
-    const runPromise = (async () => {
-      let pendingCacheWrites = 0
-      runInAction(() => {
-        this.loading = true
-        this.fetchedCount = 0
-      })
-
-      for (let i = 0; i < this.symbols.length; i++) {
-        if (abortController.signal.aborted)
-          break
-
-        const symbol = this.symbols[i]
-        try {
-          const data = await window.api.fetchStockQuote(symbol)
-
-          if (abortController.signal.aborted) {
-            break
-          }
-
-          runInAction(() => {
-            this.quotes.set(symbol, data)
-          })
-          pendingCacheWrites++
-          if (pendingCacheWrites >= CACHE_SAVE_BATCH_SIZE) {
-            await this.saveToCache()
-            pendingCacheWrites = 0
-          }
+  createFetchTasks(): FetchTask[] {
+    return this.symbols.map(symbol => ({
+      label: `Stock ${symbol}`,
+      execute: async () => {
+        const data = await window.api.fetchStockQuote(symbol)
+        runInAction(() => {
+          this.quotes.set(symbol, data)
+        })
+        this.pendingCacheWrites++
+        if (this.pendingCacheWrites >= CACHE_SAVE_BATCH_SIZE) {
+          await this.saveToCache()
+          this.pendingCacheWrites = 0
         }
-        catch (error) {
-          if (abortController.signal.aborted) {
-            break
-          }
+      },
+    }))
+  }
 
-          notifyError(`Failed to fetch ${symbol}`, error)
-        }
-
-        if (!abortController.signal.aborted) {
-          runInAction(() => {
-            this.fetchedCount++
-          })
-        }
-
-        if (i < this.symbols.length - 1 && !abortController.signal.aborted) {
-          await new Promise(resolve => setTimeout(resolve, FETCH_INTERVAL))
-        }
-      }
-
-      if (!abortController.signal.aborted && pendingCacheWrites > 0) {
+  createFlushCacheTask(): FetchTask {
+    return {
+      label: "Save cache",
+      execute: async () => {
         await this.saveToCache()
-      }
-    })()
-
-    this.fetchQueuePromise = runPromise
-
-    try {
-      await runPromise
+        this.pendingCacheWrites = 0
+      },
     }
-    finally {
-      if (this.fetchQueuePromise === runPromise) {
-        this.fetchQueuePromise = null
-      }
-      if (this.queueAbortController === abortController) {
-        this.queueAbortController = null
-      }
-      runInAction(() => {
-        this.loading = false
-      })
-    }
-  }
-
-  stopFetchQueue(): void {
-    this.queueAbortController?.abort()
-    runInAction(() => {
-      this.loading = false
-    })
-  }
-
-  private async stopFetchQueueAndWait(): Promise<void> {
-    this.queueAbortController?.abort()
-    const runningQueue = this.fetchQueuePromise
-    if (runningQueue) {
-      await runningQueue
-    }
-    runInAction(() => {
-      this.loading = false
-    })
-  }
-
-  async refreshAll(): Promise<void> {
-    await this.stopFetchQueueAndWait()
-    await this.startFetchQueue()
   }
 
   async loadAmounts(): Promise<void> {

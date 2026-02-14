@@ -1,8 +1,7 @@
+import type { FetchTask } from "./FetchQueueStore"
 import type { RootStore } from "./RootStore"
 
 import { makeAutoObservable, runInAction } from "mobx"
-
-import { notifyError } from "../utils/notify"
 
 interface CurrencyRate {
   symbol: string
@@ -27,29 +26,20 @@ export class CurrencyStore {
   }
 
   data: CurrencyRatesData | null = null
-  loading = false
-  error: string | null = null
 
   get rootStore(): RootStore {
     return this.root
   }
 
-  async fetchRates(): Promise<void> {
-    this.loading = true
-    this.error = null
-    try {
-      const data = await window.api.fetchCurrencyRates()
-      runInAction(() => {
-        this.data = data as CurrencyRatesData
-        this.loading = false
-      })
-    }
-    catch (error) {
-      runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to fetch currency rates"
-        this.loading = false
-      })
-      notifyError("Failed to fetch currency rates", error)
+  createFetchRatesTask(): FetchTask {
+    return {
+      label: "Currency rates",
+      execute: async () => {
+        const data = await window.api.fetchCurrencyRates()
+        runInAction(() => {
+          this.data = data as CurrencyRatesData
+        })
+      },
     }
   }
 }

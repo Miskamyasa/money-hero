@@ -1,119 +1,74 @@
-import { ActionIcon, Alert, Button, Card, Center, Group, Loader, NumberInput, Paper, Stack, Text } from "@mantine/core"
+import { ActionIcon, Card, Group, NumberInput, Paper, Stack, Text } from "@mantine/core"
 
 import { useStores } from "@renderer/stores/useStores"
 import { formatChange, formatChangePercent, formatPrice, getChangeColor } from "@renderer/utils/quoteFormatters"
 import { observer } from "mobx-react-lite"
 
-import { useEffect } from "react"
-
 function GoldStats(): React.JSX.Element {
   const { gold } = useStores()
-
-  useEffect(() => {
-    gold.fetchQuote()
-    gold.fetchHistory()
-    gold.loadAmount()
-  }, [gold])
-
-  const handleRefresh = (): void => {
-    gold.fetchQuote()
-    gold.fetchHistory()
-  }
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Stack gap="md">
-        <Group justify="space-between">
-          <Text fw={700} size="lg">Gold (GC=F)</Text>
-          <Button
-            variant="light"
-            size="xs"
-            onClick={handleRefresh}
-            loading={gold.loading}
-          >
-            Refresh
-          </Button>
-        </Group>
+        <Text fw={700} size="lg">Gold (GC=F)</Text>
 
-        {gold.loading && gold.quote === null && (
-          <Center>
-            <Loader />
-          </Center>
-        )}
-
-        {gold.error && (
-          <Alert color="red" title="Error">
-            {gold.error}
-          </Alert>
-        )}
-
-        {gold.quote && (
-          <>
-            <Group justify="space-between">
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed">Price</Text>
-                <Text size="xl" fw={700}>{formatPrice(gold.quote.price)}</Text>
-              </Stack>
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed">Change</Text>
-                <Text size="xl" fw={700} c={getChangeColor(gold.quote.change)}>
-                  {formatChange(gold.quote.change)}
-                </Text>
-              </Stack>
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed">Change %</Text>
-                <Text size="xl" fw={700} c={getChangeColor(gold.quote.changePercent)}>
-                  {formatChangePercent(gold.quote.changePercent)}
-                </Text>
-              </Stack>
-            </Group>
-
-            <Group justify="space-between">
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed">Balance</Text>
-                <Text size="xl" fw={700}>{formatPrice(gold.balance)}</Text>
-              </Stack>
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed">Amount</Text>
-                <Group gap={4}>
-                  <NumberInput
-                    size="xs"
-                    value={gold.amount}
-                    onChange={value => gold.setAmount(Number(value) || 0)}
-                    min={0}
-                    step={1}
-                    hideControls
-                    disabled={!gold.editingAmount}
-                    styles={{ input: { width: 80 } }}
-                  />
-                  <ActionIcon
-                    variant={gold.editingAmount ? "filled" : "subtle"}
-                    size="sm"
-                    aria-label={gold.editingAmount ? "Stop editing" : "Edit amount"}
-                    onClick={() => gold.editingAmount ? gold.stopEditing() : gold.startEditing()}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-                      <path d="M13.5 6.5l4 4" />
-                    </svg>
-                  </ActionIcon>
+        {gold.quote
+          ? (
+              <>
+                <Group justify="space-between">
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">Price</Text>
+                    <Text size="xl" fw={700}>{formatPrice(gold.quote.price)}</Text>
+                  </Stack>
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">Change</Text>
+                    <Text size="xl" fw={700} c={getChangeColor(gold.quote.change)}>
+                      {formatChange(gold.quote.change)}
+                    </Text>
+                  </Stack>
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">Change %</Text>
+                    <Text size="xl" fw={700} c={getChangeColor(gold.quote.changePercent)}>
+                      {formatChangePercent(gold.quote.changePercent)}
+                    </Text>
+                  </Stack>
                 </Group>
-              </Stack>
-            </Group>
-          </>
-        )}
 
-        {gold.historyLoading && gold.history === null && (
-          <Center>
-            <Loader size="sm" />
-          </Center>
-        )}
-
-        {gold.historyError && (
-          <Alert color="red" title="History Error" variant="light">
-            {gold.historyError}
-          </Alert>
-        )}
+                <Group justify="space-between">
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">Balance</Text>
+                    <Text size="xl" fw={700}>{formatPrice(gold.balance)}</Text>
+                  </Stack>
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">Amount</Text>
+                    <Group gap={4}>
+                      <NumberInput
+                        size="xs"
+                        value={gold.amount}
+                        onChange={value => gold.setAmount(Number(value) || 0)}
+                        min={0}
+                        step={1}
+                        hideControls
+                        disabled={!gold.editingAmount}
+                        styles={{ input: { width: 80 } }}
+                      />
+                      <ActionIcon
+                        variant={gold.editingAmount ? "filled" : "subtle"}
+                        size="sm"
+                        aria-label={gold.editingAmount ? "Stop editing" : "Edit amount"}
+                        onClick={() => gold.editingAmount ? gold.stopEditing() : gold.startEditing()}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                          <path d="M13.5 6.5l4 4" />
+                        </svg>
+                      </ActionIcon>
+                    </Group>
+                  </Stack>
+                </Group>
+              </>
+            )
+          : <Text c="dimmed" ta="center">No data</Text>}
 
         {gold.history && (
           <Group grow>

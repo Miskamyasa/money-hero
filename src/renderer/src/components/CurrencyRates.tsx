@@ -1,14 +1,9 @@
-import { Alert, Center, Group, Loader, Paper, Stack, Text } from "@mantine/core"
+import { Group, Paper, Stack, Text } from "@mantine/core"
 import { useStores } from "@renderer/stores/useStores"
 import { observer } from "mobx-react-lite"
-import { useEffect } from "react"
 
 function CurrencyRates(): React.JSX.Element {
   const { currency } = useStores()
-
-  useEffect(() => {
-    currency.fetchRates()
-  }, [currency])
 
   const formatRate = (value: number): string => {
     return value.toFixed(4)
@@ -21,22 +16,6 @@ function CurrencyRates(): React.JSX.Element {
 
   const getChangeColor = (value: number): string => {
     return value >= 0 ? "teal" : "red"
-  }
-
-  if (currency.loading && currency.data === null) {
-    return (
-      <Center>
-        <Loader size="sm" />
-      </Center>
-    )
-  }
-
-  if (currency.error && currency.data === null) {
-    return (
-      <Alert color="red" title="Currency Error" variant="light">
-        {currency.error}
-      </Alert>
-    )
   }
 
   if (!currency.data) {

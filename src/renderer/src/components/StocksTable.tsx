@@ -1,7 +1,8 @@
 import type { StocksStore } from "@renderer/stores/StocksStore"
 
-import { ActionIcon, Button, Card, Center, Collapse, Group, NumberInput, Progress, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
+import { ActionIcon, Button, Card, Center, Collapse, Group, NumberInput, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
 import { useDebouncedCallback } from "@mantine/hooks"
+import { useStores } from "@renderer/stores/useStores"
 import { formatChange, formatChangePercent, formatPrice, getChangeColor } from "@renderer/utils/quoteFormatters"
 
 import { observer } from "mobx-react-lite"
@@ -49,6 +50,7 @@ function SortableHeader({ label, column, sortState, onSort }: {
 }
 
 function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Element {
+  const root = useStores()
   const data = stocks.data
   const ui = stocks.ui
   const allocationStore = stocks.allocation
@@ -102,22 +104,12 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
     setLocalAmount(ui.investmentAmount === 0 ? "" : ui.investmentAmount)
   }, [ui.buyingMode, ui.investmentAmount])
 
-  useEffect(() => {
-    void ui.loadDisabledSymbols()
-    void data.loadFromCache()
-    void data.loadAmounts()
-  }, [data, ui])
-
   const formatDividendYield = (symbol: string): string => {
     const yieldValue = data.getDividendYield(symbol, 24)
     if (yieldValue == null) {
       return "No dividends"
     }
     return `Div yield: ${yieldValue.toFixed(2)}% ann.`
-  }
-
-  const handleRefresh = (): void => {
-    void data.refreshAll()
   }
 
   const filterLower = debouncedFilter.toLowerCase().trim()
@@ -177,14 +169,6 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
           <Button
             variant="light"
             size="xs"
-            onClick={handleRefresh}
-            loading={data.loading}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="light"
-            size="xs"
             onClick={() => setTableVisible(prev => !prev)}
           >
             {tableVisible ? "Hide" : "Show"}
@@ -193,24 +177,11 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
       </Group>
 
       <Collapse in={tableVisible}>
-        {data.loading && (
-          <>
-            <Progress value={data.progress * 100} size="sm" mb="xs" />
-            <Text size="xs" c="dimmed" mb="md">
-              Loading stocks... (
-              {data.fetchedCount}
-              /
-              {data.totalCount}
-              )
-            </Text>
-          </>
-        )}
-
-        {data.quotes.size === 0 && !data.loading && (
+        {data.quotes.size === 0 && !root.fetchQueue.running && (
           <Center>
             <Button
               variant="light"
-              onClick={handleRefresh}
+              onClick={() => root.loadStocks(stocks)}
             >
               Load Stocks
             </Button>
