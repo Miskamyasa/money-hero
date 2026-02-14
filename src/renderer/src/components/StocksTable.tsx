@@ -135,8 +135,10 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
-        <Group gap="sm">
+        <Group gap="sm" w="25%">
           <Text fw={700} size="lg">{title}</Text>
+        </Group>
+        <Group gap="sm" w="25%">
           <TextInput
             size="xs"
             placeholder="Filter by name or symbol"
@@ -145,7 +147,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
             styles={{ input: { width: 180 } }}
           />
         </Group>
-        <Group gap="sm">
+        <Group gap="sm" w="35%" display="flex" justify="flex-end">
           <NumberInput
             size="xs"
             placeholder="Amount"
@@ -287,11 +289,21 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                         size="xs"
                         value={data.getAmount(quote.symbol)}
                         onChange={value => data.setAmount(quote.symbol, Number(value) || 0)}
+                        onKeyDown={e => e.key === "Enter" && ui.stopEditing()}
                         min={0}
                         step={1}
                         hideControls
                         disabled={!ui.isEditing(quote.symbol)}
-                        styles={{ input: { width: 80 } }}
+                        styles={{
+                          input: {
+                            width: 80,
+                            ...(data.getAmount(quote.symbol) !== 0 && !ui.isEditing(quote.symbol) && {
+                              color: "var(--mantine-color-blue-filled)",
+                              fontWeight: 700,
+                              opacity: 1,
+                            }),
+                          },
+                        }}
                       />
                       {ui.buyingMode && allocation > 0 && (
                         <Text

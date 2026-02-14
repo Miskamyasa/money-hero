@@ -46,6 +46,7 @@ function GoldStats(): React.JSX.Element {
                         size="xs"
                         value={gold.amount}
                         onChange={value => gold.setAmount(Number(value) || 0)}
+                        onKeyDown={e => e.key === "Enter" && gold.stopEditing()}
                         min={0}
                         step={1}
                         hideControls

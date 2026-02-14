@@ -56,6 +56,7 @@ function SymbolStats({ store }: SymbolStatsProps): React.JSX.Element {
                         size="xs"
                         value={store.amount}
                         onChange={value => store.setAmount(Number(value) || 0)}
+                        onKeyDown={e => e.key === "Enter" && store.stopEditing()}
                         min={0}
                         step={1}
                         hideControls
