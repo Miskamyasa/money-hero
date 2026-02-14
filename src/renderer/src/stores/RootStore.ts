@@ -11,6 +11,8 @@ import { StocksStore } from "./StocksStore"
 import { SymbolStore } from "./SymbolStore"
 import { ThemeStore } from "./ThemeStore"
 
+const AUTO_REFRESH_INTERVAL = 20 * 60 * 1000 // 20 minutes
+
 export class RootStore {
   constructor() {
     this.fetchQueue = new FetchQueueStore()
@@ -40,7 +42,29 @@ export class RootStore {
   readonly vt: SymbolStore
   readonly voo: SymbolStore
 
+  private autoRefreshTimer: ReturnType<typeof setInterval> | null = null
+  private lastRefreshAt = 0
+
+  startAutoRefresh(): void {
+    this.stopAutoRefresh()
+    this.autoRefreshTimer = setInterval(() => {
+      const elapsed = Date.now() - this.lastRefreshAt
+      if (elapsed < AUTO_REFRESH_INTERVAL) {
+        return
+      }
+      this.refreshAll()
+    }, AUTO_REFRESH_INTERVAL)
+  }
+
+  stopAutoRefresh(): void {
+    if (this.autoRefreshTimer != null) {
+      clearInterval(this.autoRefreshTimer)
+      this.autoRefreshTimer = null
+    }
+  }
+
   fetchStartupItems(): void {
+    this.lastRefreshAt = Date.now()
     this.fetchQueue.enqueue([
       this.currency.createFetchRatesTask(),
       this.gold.createFetchQuoteTask(),
@@ -51,6 +75,7 @@ export class RootStore {
   }
 
   refreshAll(): void {
+    this.lastRefreshAt = Date.now()
     this.fetchQueue.clear()
     this.fetchQueue.enqueue([
       this.currency.createFetchRatesTask(),
@@ -68,7 +93,6 @@ export class RootStore {
   }
 
   loadStocks(store: StocksStore): void {
-    this.fetchQueue.clear()
     this.fetchQueue.enqueue([
       ...store.data.createFetchTasks(),
       store.data.createFlushCacheTask(),

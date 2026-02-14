@@ -1,5 +1,8 @@
 import type { DividendEvent, StockQuote } from "../shared/stocks"
 
+import { z } from "zod"
+import { formatYahooSchemaError, YahooChartResponseSchema } from "./schemas/yahooChart"
+
 export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
 
 function normalizeYahooSymbol(symbol: string): string {
@@ -114,38 +117,40 @@ export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
 }
 
 function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote {
-  const chart = (data as Record<string, unknown>)?.chart as Record<string, unknown> | undefined
-  const error = chart?.error as Record<string, unknown> | undefined
+  const parsed = validateYahooResponse(data)
 
-  if (error) {
-    const description = typeof error.description === "string" ? error.description : "Unknown error"
+  if (parsed.chart.error) {
+    const description = parsed.chart.error.description ?? "Unknown error"
     throw new Error(`Yahoo Finance API error: ${description}`)
   }
 
-  const results = chart?.result as Array<Record<string, unknown>> | undefined
-
-  if (!results?.[0]?.meta) {
-    throw new Error("Yahoo Finance API response missing expected chart.result[0].meta structure")
+  if (!parsed.chart.result) {
+    throw new Error("Yahoo Finance API response missing chart results")
   }
 
-  const meta = results[0].meta as Record<string, unknown>
-  const symbolResponse = typeof meta.symbol === "string" ? meta.symbol : requestedSymbol
-  const currency = meta.currency
+  const result = parsed.chart.result[0]
+  const { meta } = result
 
-  if (typeof currency !== "string") {
-    throw new TypeError("Yahoo Finance API response missing required string field (currency)")
+  const symbolResponse = meta.symbol ?? requestedSymbol
+  let currency = meta.currency
+  const name = meta.longName ?? meta.shortName ?? symbolResponse
+
+  // Yahoo Finance reports London-listed stocks in GBp (pence sterling).
+  // Normalize to GBP (pounds) by dividing all monetary values by 100.
+  const isSubunit = currency === "GBp"
+  const subunitDivisor = isSubunit ? 100 : 1
+  if (isSubunit) {
+    currency = "GBP"
   }
 
-  const name = typeof meta.longName === "string" ? meta.longName : (typeof meta.shortName === "string" ? meta.shortName : symbolResponse)
-
-  const indicators = results[0]?.indicators as Record<string, unknown> | undefined
-  const quote = (indicators?.quote as Array<Record<string, unknown>> | undefined)?.[0]
-  const closePrices: (number | null)[] = (quote?.close as (number | null)[] | undefined) ?? []
-  const validCloses = closePrices.filter((p): p is number => p != null && Number.isFinite(p))
+  const closePrices = result.indicators.quote[0].close
+  const validCloses = closePrices
+    .filter((p): p is number => p != null && Number.isFinite(p))
+    .map(p => p / subunitDivisor)
   const totalPoints = validCloses.length
 
-  let price = typeof meta.regularMarketPrice === "number" ? meta.regularMarketPrice : null
-  let previousClose = typeof meta.chartPreviousClose === "number" ? meta.chartPreviousClose : null
+  let price = meta.regularMarketPrice != null ? meta.regularMarketPrice / subunitDivisor : null
+  let previousClose = meta.chartPreviousClose != null ? meta.chartPreviousClose / subunitDivisor : null
 
   // Fallback: use the last valid close price if regularMarketPrice is missing
   if (price == null && totalPoints >= 1) {
@@ -168,19 +173,18 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
   const price6m = totalPoints >= 7 ? validCloses[totalPoints - 7] : undefined
   const price2y = totalPoints >= 1 ? validCloses[0] : undefined
 
-  const events = results[0]?.events as Record<string, unknown> | undefined
-  const dividendsRaw = events?.dividends as Record<string, { amount: number, date: number }> | undefined
+  const dividendsRaw = result.events?.dividends
 
   const dividends: DividendEvent[] = dividendsRaw
     ? Object.values(dividendsRaw)
         .filter(d => Number.isFinite(d.amount) && Number.isFinite(d.date))
-        .map(d => ({ amount: d.amount, date: Math.trunc(d.date) }))
+        .map(d => ({ amount: d.amount / subunitDivisor, date: Math.trunc(d.date) }))
         .sort((a, b) => a.date - b.date)
     : []
 
   return {
     symbol: symbolResponse,
-    name: name as string,
+    name,
     price,
     previousClose,
     change,
@@ -190,5 +194,17 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
     change6m: computeChangePercent(price, price6m),
     change2y: computeChangePercent(price, price2y),
     dividends,
+  }
+}
+
+function validateYahooResponse(data: unknown): z.infer<typeof YahooChartResponseSchema> {
+  try {
+    return YahooChartResponseSchema.parse(data)
+  }
+  catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(formatYahooSchemaError(error))
+    }
+    throw error
   }
 }

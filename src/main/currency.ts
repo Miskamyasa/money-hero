@@ -1,3 +1,8 @@
+import type { YahooChartResponse } from "./schemas/yahooChart"
+
+import { z } from "zod"
+import { formatYahooSchemaError, YahooChartResponseSchema } from "./schemas/yahooChart"
+
 export interface CurrencyRate {
   symbol: string
   label: string
@@ -30,6 +35,18 @@ const FOREX_PAIRS = [
 const DXY_SYMBOL = "DX-Y.NYB"
 const CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart"
 
+function validateYahooResponse(data: unknown): YahooChartResponse {
+  try {
+    return YahooChartResponseSchema.parse(data)
+  }
+  catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(formatYahooSchemaError(error))
+    }
+    throw error
+  }
+}
+
 async function fetchForexRate(pair: typeof FOREX_PAIRS[number]): Promise<CurrencyRate> {
   const url = `${CHART_URL}/${pair.symbol}?range=2d&interval=1d`
   const response = await fetch(url)
@@ -38,17 +55,17 @@ async function fetchForexRate(pair: typeof FOREX_PAIRS[number]): Promise<Currenc
     throw new Error(`Yahoo Finance API returned status ${response.status} for ${pair.symbol}`)
   }
 
-  const data = await response.json()
+  const parsed = validateYahooResponse(await response.json())
 
-  if (!data.chart?.result?.[0]?.meta) {
-    throw new Error(`Yahoo Finance API response missing expected structure for ${pair.symbol}`)
+  if (!parsed.chart.result) {
+    throw new Error(`Yahoo Finance API response missing chart results for ${pair.symbol}`)
   }
 
-  const meta = data.chart.result[0].meta
+  const { meta } = parsed.chart.result[0]
   const price = meta.regularMarketPrice
   const previousClose = meta.chartPreviousClose
 
-  if (typeof price !== "number" || typeof previousClose !== "number") {
+  if (price == null || previousClose == null) {
     throw new TypeError(`Missing numeric fields for ${pair.symbol}`)
   }
 
@@ -77,17 +94,17 @@ async function fetchDollarIndex(): Promise<DollarIndex> {
     throw new Error(`Yahoo Finance API returned status ${response.status} for DXY`)
   }
 
-  const data = await response.json()
+  const parsed = validateYahooResponse(await response.json())
 
-  if (!data.chart?.result?.[0]?.meta) {
-    throw new Error("Yahoo Finance API response missing expected structure for DXY")
+  if (!parsed.chart.result) {
+    throw new Error("Yahoo Finance API response missing chart results for DXY")
   }
 
-  const meta = data.chart.result[0].meta
+  const { meta } = parsed.chart.result[0]
   const value = meta.regularMarketPrice
   const previousClose = meta.chartPreviousClose
 
-  if (typeof value !== "number" || typeof previousClose !== "number") {
+  if (value == null || previousClose == null) {
     throw new TypeError("Missing numeric fields for DXY")
   }
 

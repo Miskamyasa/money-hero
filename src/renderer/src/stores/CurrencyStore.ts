@@ -85,6 +85,20 @@ export class CurrencyStore {
     return (value / fromRate) * ilsRate
   }
 
+  convertToUsd(value: number, fromCurrency: string): number | null {
+    if (value === 0)
+      return 0
+
+    if (fromCurrency === "USD")
+      return value
+
+    const fromRate = this.getRate(fromCurrency)
+    if (fromRate == null)
+      return null
+
+    return value / fromRate
+  }
+
   createFetchRatesTask(): FetchTask {
     return {
       label: "Currency rates",

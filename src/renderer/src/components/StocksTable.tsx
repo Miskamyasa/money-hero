@@ -1,35 +1,21 @@
 import type { StocksStore } from "@renderer/stores/StocksStore"
 
+import type { SortableColumn, SortState } from "./stocksTableSelectors"
 import { ActionIcon, Button, Card, Center, Collapse, Group, NumberInput, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
 import { useDebouncedCallback } from "@mantine/hooks"
 import { useStores } from "@renderer/stores/useStores"
+
 import { formatChange, formatChangePercent, formatPrice, getChangeColor } from "@renderer/utils/quoteFormatters"
 
 import { observer } from "mobx-react-lite"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
-type SortableColumn = "change1m" | "change6m" | "change2y"
-type SortDirection = "asc" | "desc"
+import { selectSortedQuotes } from "./stocksTableSelectors"
 
 interface StocksTableProps {
   store: StocksStore
   title: string
-}
-
-interface SortState {
-  column: SortableColumn | null
-  direction: SortDirection
-}
-
-function compareSortableValues(a: number | null, b: number | null, direction: SortDirection): number {
-  if (a == null && b == null)
-    return 0
-  if (a == null)
-    return 1
-  if (b == null)
-    return -1
-  return direction === "asc" ? a - b : b - a
 }
 
 function SortableHeader({ label, column, sortState, onSort }: {
@@ -79,6 +65,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
     })
   }, [])
 
+  const investmentInputRef = useRef<HTMLInputElement>(null)
   const [localAmount, setLocalAmount] = useState<number | string>("")
 
   const debouncedSetInvestmentAmount = useDebouncedCallback((value: number | string): void => {
@@ -91,17 +78,19 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   }, [debouncedSetInvestmentAmount])
 
   const handleToggleBuy = useCallback((): void => {
+    const wasOff = !ui.buyingMode
     ui.toggleBuyingMode()
-  }, [ui])
 
-  useEffect(() => {
-    if (!ui.buyingMode) {
-      setLocalAmount("")
+    if (wasOff) {
+      setLocalAmount(ui.investmentAmount === 0 ? "" : ui.investmentAmount)
+      requestAnimationFrame(() => {
+        investmentInputRef.current?.focus()
+      })
       return
     }
 
-    setLocalAmount(ui.investmentAmount === 0 ? "" : ui.investmentAmount)
-  }, [ui.buyingMode, ui.investmentAmount])
+    setLocalAmount("")
+  }, [ui])
 
   const formatDividendYield = (symbol: string): string => {
     const yieldValue = data.getDividendYield(symbol, 24)
@@ -111,42 +100,15 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
     return `Div yield: ${yieldValue.toFixed(2)}% ann.`
   }
 
-  const totalActiveBalanceIls = stocks.activeQuotes.reduce((sum, quote) => {
-    const amount = data.getAmount(quote.symbol)
-    if (amount === 0)
-      return sum
-    const balance = data.getBalance(quote.symbol)
-    const balanceIls = root.currency.convertToIls(balance, quote.currency)
-    return balanceIls != null ? sum + balanceIls : sum
-  }, 0)
-
-  const filterLower = debouncedFilter.toLowerCase().trim()
-  const sortedQuotes = [...stocks.activeQuotes]
-    .filter((q) => {
-      if (!filterLower)
-        return true
-      return q.symbol.toLowerCase().includes(filterLower)
-        || q.name.toLowerCase().includes(filterLower)
-    })
-  if (sortState.column == null) {
-    sortedQuotes.sort((a, b) => a.symbol.localeCompare(b.symbol))
-  }
-  else {
-    const col = sortState.column
-    const dir = sortState.direction
-    sortedQuotes.sort((a, b) => {
-      const cmp = compareSortableValues(a[col], b[col], dir)
-      return cmp !== 0 ? cmp : a.symbol.localeCompare(b.symbol)
-    })
-  }
+  const sortedQuotes = selectSortedQuotes([...stocks.activeQuotes], debouncedFilter, sortState)
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
         <Group gap="sm">
           <Text fw={700} size="lg">{title}</Text>
-          {totalActiveBalanceIls > 0 && (
-            <Text size="sm" c="dimmed">{formatPrice(totalActiveBalanceIls, "ILS")}</Text>
+          {stocks.totalActiveBalanceIls > 0 && (
+            <Text size="sm" c="dimmed">{formatPrice(stocks.totalActiveBalanceIls, "ILS")}</Text>
           )}
         </Group>
         <Group gap="sm" flex="1" display="flex" justify="flex-end">
@@ -158,6 +120,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
             styles={{ input: { width: 180 } }}
           />
           <NumberInput
+            ref={investmentInputRef}
             size="xs"
             placeholder="Amount"
             prefix="$"
@@ -175,7 +138,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
             size="xs"
             onClick={handleToggleBuy}
           >
-            buy
+            Buy
           </Button>
           <Button
             variant="light"
@@ -192,7 +155,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
           <Center>
             <Button
               variant="light"
-              onClick={() => root.loadStocks(stocks)}
+              onClick={() => stocks.load()}
             >
               Load Stocks
             </Button>
@@ -285,7 +248,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                             right: 0,
                             transform: "translateY(-50%)",
                             textAlign: "center",
-                            backgroundColor: "var(--mantine-color-dark-7)",
+                            backgroundColor: "var(--mantine-color-body)",
                             padding: "0 4px",
                           }}
                         >
@@ -326,7 +289,7 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                             right: 0,
                             transform: "translateY(-50%)",
                             textAlign: "center",
-                            backgroundColor: "var(--mantine-color-dark-7)",
+                            backgroundColor: "var(--mantine-color-body)",
                             padding: "0 4px",
                           }}
                         >

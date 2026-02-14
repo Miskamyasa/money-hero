@@ -16,7 +16,7 @@ export class StocksStore {
     this.symbols = symbols
     this.data = new StocksDataStore(root, symbols)
     this.ui = new StocksUiStore(storageKey, symbols)
-    this.allocation = new StocksAllocationStore(this.data, this.ui)
+    this.allocation = new StocksAllocationStore(this.data, this.ui, root)
     makeAutoObservable(this)
   }
 
@@ -30,5 +30,21 @@ export class StocksStore {
 
   get activeQuotes() {
     return Array.from(this.data.quotes.values()).filter(q => !this.ui.disabledSymbols.has(q.symbol))
+  }
+
+  get totalActiveBalanceIls(): number {
+    return this.activeQuotes.reduce((sum, quote) => {
+      const amount = this.data.getAmount(quote.symbol)
+      if (amount === 0)
+        return sum
+
+      const balance = this.data.getBalance(quote.symbol)
+      const balanceIls = this.root.currency.convertToIls(balance, quote.currency)
+      return balanceIls != null ? sum + balanceIls : sum
+    }, 0)
+  }
+
+  load(): void {
+    this.root.loadStocks(this)
   }
 }
