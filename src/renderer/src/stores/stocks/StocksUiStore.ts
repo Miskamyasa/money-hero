@@ -6,6 +6,7 @@ export class StocksUiStore {
   buyingMode = false
   investmentAmount = 0
   disabledSymbols = new Set<string>()
+  tableVisible = true
 
   private persistVersion = 0
 
@@ -57,6 +58,34 @@ export class StocksUiStore {
 
   setInvestmentAmount(amount: number): void {
     this.investmentAmount = amount
+  }
+
+  toggleTableVisible(): void {
+    this.tableVisible = !this.tableVisible
+    void this.saveCollapseState()
+  }
+
+  async loadCollapseState(): Promise<void> {
+    try {
+      const value = await window.api.getKvCache(`collapse:${this.storageKey}`)
+      if (typeof value === "boolean") {
+        runInAction(() => {
+          this.tableVisible = value
+        })
+      }
+    }
+    catch (error) {
+      notifyError("Failed to load collapse state", error)
+    }
+  }
+
+  private async saveCollapseState(): Promise<void> {
+    try {
+      await window.api.setKvCache(`collapse:${this.storageKey}`, this.tableVisible)
+    }
+    catch (error) {
+      notifyError("Failed to save collapse state", error)
+    }
   }
 
   async loadDisabledSymbols(): Promise<void> {

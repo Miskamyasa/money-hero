@@ -28,12 +28,15 @@ function Dashboard(): React.JSX.Element {
     void stocks.data.loadFromCache()
     void stocks.data.loadAmounts()
     void stocks.ui.loadDisabledSymbols()
+    void stocks.ui.loadCollapseState()
     void highYield.data.loadFromCache()
     void highYield.data.loadAmounts()
     void highYield.ui.loadDisabledSymbols()
+    void highYield.ui.loadCollapseState()
     void water.data.loadFromCache()
     void water.data.loadAmounts()
     void water.ui.loadDisabledSymbols()
+    void water.ui.loadCollapseState()
 
     // Fetch startup items through the queue
     root.fetchStartupItems()
@@ -48,28 +51,29 @@ function Dashboard(): React.JSX.Element {
       <Stack align="stretch" gap="xl" w="100%" maw={1200}>
         <Group justify="space-between" gap="sm">
           <Title size="3rem" style={{ textTransform: "uppercase" }}>Money Hero</Title>
-          <Button
-            disabled={fetchQueue.running}
-            variant="light"
-            size="xs"
-            onClick={handleRefreshAll}
-            loading={fetchQueue.running}
-          >
-            Refresh
-          </Button>
+          <Group gap="xs">
+            <Button
+              disabled={fetchQueue.running}
+              variant="light"
+              size="sm"
+              onClick={handleRefreshAll}
+              loading={fetchQueue.running}
+            >
+              Refresh
+            </Button>
+            <ActionIcon
+              variant="default"
+              size="lg"
+              aria-label="Filter stocks"
+              onClick={() => setDrawerOpened(true)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
+              </svg>
+            </ActionIcon>
+            <ThemeToggle />
+          </Group>
         </Group>
-        <ActionIcon
-          variant="default"
-          size="lg"
-          aria-label="Filter stocks"
-          onClick={() => setDrawerOpened(true)}
-          style={{ position: "fixed", top: 16, left: 16 }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
-          </svg>
-        </ActionIcon>
-        <ThemeToggle />
         <CurrencyRates />
         <Group grow align="stretch" w="100%">
           <GoldStats />

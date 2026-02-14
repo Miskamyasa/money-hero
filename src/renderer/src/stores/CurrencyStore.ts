@@ -10,6 +10,7 @@ interface CurrencyRate {
   label: string
   rate: number
   changePercent: number
+  hidden: boolean
 }
 
 interface DollarIndex {
@@ -56,6 +57,32 @@ export class CurrencyStore {
     catch (error) {
       notifyError("Failed to save currency cache", error)
     }
+  }
+
+  getRate(label: string): number | null {
+    return this.data?.currencies.find(c => c.label === label)?.rate ?? null
+  }
+
+  convertToIls(value: number, fromCurrency: string): number | null {
+    if (value === 0)
+      return 0
+
+    const ilsRate = this.getRate("ILS")
+    if (ilsRate == null)
+      return null
+
+    if (fromCurrency === "ILS")
+      return value
+
+    if (fromCurrency === "USD")
+      return value * ilsRate
+
+    const fromRate = this.getRate(fromCurrency)
+    if (fromRate == null)
+      return null
+
+    // fromCurrency → USD → ILS
+    return (value / fromRate) * ilsRate
   }
 
   createFetchRatesTask(): FetchTask {

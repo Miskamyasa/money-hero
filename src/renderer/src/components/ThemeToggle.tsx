@@ -12,7 +12,6 @@ const ThemeToggle = observer((): React.JSX.Element => {
       size="lg"
       aria-label="Toggle color scheme"
       onClick={() => theme.toggleColorScheme()}
-      style={{ position: "fixed", top: 16, right: 16 }}
     >
       {colorScheme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19"}
     </ActionIcon>

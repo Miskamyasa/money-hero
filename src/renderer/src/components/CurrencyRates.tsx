@@ -40,7 +40,7 @@ function CurrencyRates(): React.JSX.Element {
         </Group>
       </Paper>
 
-      {currencies.map(rate => (
+      {currencies.filter(rate => !rate.hidden).map(rate => (
         <Paper key={rate.label} radius="sm" p="sm" withBorder>
           <Group justify="space-between" align="center" wrap="nowrap">
             <Text size="xl" fw={700}>{rate.label}</Text>

@@ -57,7 +57,6 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: "desc" })
   const [filterInput, setFilterInput] = useState("")
   const [debouncedFilter, setDebouncedFilter] = useState("")
-  const [tableVisible, setTableVisible] = useState(true)
 
   const debouncedSetFilter = useDebouncedCallback((value: string): void => {
     setDebouncedFilter(value)
@@ -112,6 +111,15 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
     return `Div yield: ${yieldValue.toFixed(2)}% ann.`
   }
 
+  const totalActiveBalanceIls = stocks.activeQuotes.reduce((sum, quote) => {
+    const amount = data.getAmount(quote.symbol)
+    if (amount === 0)
+      return sum
+    const balance = data.getBalance(quote.symbol)
+    const balanceIls = root.currency.convertToIls(balance, quote.currency)
+    return balanceIls != null ? sum + balanceIls : sum
+  }, 0)
+
   const filterLower = debouncedFilter.toLowerCase().trim()
   const sortedQuotes = [...stocks.activeQuotes]
     .filter((q) => {
@@ -135,10 +143,13 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
-        <Group gap="sm" w="25%">
+        <Group gap="sm">
           <Text fw={700} size="lg">{title}</Text>
+          {totalActiveBalanceIls > 0 && (
+            <Text size="sm" c="dimmed">{formatPrice(totalActiveBalanceIls, "ILS")}</Text>
+          )}
         </Group>
-        <Group gap="sm" w="25%">
+        <Group gap="sm" flex="1" display="flex" justify="flex-end">
           <TextInput
             size="xs"
             placeholder="Filter by name or symbol"
@@ -146,8 +157,6 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
             onChange={e => handleFilterChange(e.currentTarget.value)}
             styles={{ input: { width: 180 } }}
           />
-        </Group>
-        <Group gap="sm" w="35%" display="flex" justify="flex-end">
           <NumberInput
             size="xs"
             placeholder="Amount"
@@ -171,14 +180,14 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
           <Button
             variant="light"
             size="xs"
-            onClick={() => setTableVisible(prev => !prev)}
+            onClick={() => ui.toggleTableVisible()}
           >
-            {tableVisible ? "Hide" : "Show"}
+            {ui.tableVisible ? "Hide" : "Show"}
           </Button>
         </Group>
       </Group>
 
-      <Collapse in={tableVisible}>
+      <Collapse in={ui.tableVisible}>
         {data.quotes.size === 0 && !root.fetchQueue.running && (
           <Center>
             <Button

@@ -23,15 +23,16 @@ function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element
       styles={{ inner: { inset: 0 } }}
     >
       <Stack gap="xl">
+
         <div>
-          <Text fw={500} mb="xs">Dividend Aristocrats</Text>
+          <Text fw={500} mb="xs">Water</Text>
           <Group gap="xs">
-            {stocks.allSymbols.map(symbol => (
+            {water.allSymbols.map(symbol => (
               <Button
                 key={symbol}
                 size="compact-xs"
-                variant={stocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
-                onClick={() => stocksUi.toggleSymbol(symbol)}
+                variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                onClick={() => waterUi.toggleSymbol(symbol)}
               >
                 {symbol}
               </Button>
@@ -56,20 +57,21 @@ function FilterDrawer({ opened, onClose }: FilterDrawerProps): React.JSX.Element
         </div>
 
         <div>
-          <Text fw={500} mb="xs">Water</Text>
+          <Text fw={500} mb="xs">Dividend Aristocrats</Text>
           <Group gap="xs">
-            {water.allSymbols.map(symbol => (
+            {stocks.allSymbols.map(symbol => (
               <Button
                 key={symbol}
                 size="compact-xs"
-                variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}
-                onClick={() => waterUi.toggleSymbol(symbol)}
+                variant={stocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                onClick={() => stocksUi.toggleSymbol(symbol)}
               >
                 {symbol}
               </Button>
             ))}
           </Group>
         </div>
+
       </Stack>
     </Drawer>
   )

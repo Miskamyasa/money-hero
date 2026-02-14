@@ -21,6 +21,7 @@ export interface CurrencyRate {
   label: string
   rate: number
   changePercent: number
+  hidden: boolean
 }
 
 export interface DollarIndex {
