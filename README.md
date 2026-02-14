@@ -2,6 +2,19 @@
 
 A desktop investment dashboard that tracks gold, stocks, and currency exchange rates. Built with Electron, React, and TypeScript.
 
+<table>
+  <tr>
+    <td><img src="assets/14-February-13-57-20.jpg" alt="Filter Stocks drawer" /></td>
+    <td><img src="assets/14-February-13-56-58.jpg" alt="Dark theme" /></td>
+    <td><img src="assets/14-February-13-57-07.jpg" alt="Light theme" /></td>
+  </tr>
+  <tr>
+    <td><em>Filter Stocks drawer</em></td>
+    <td><em>Dark theme</em></td>
+    <td><em>Light theme</em></td>
+  </tr>
+</table>
+
 ## Features
 
 - **Gold Tracking** — Live gold futures price (GC=F) with daily change, historical performance (1M / 6M / 2Y), and portfolio balance based on your holdings
@@ -23,17 +36,17 @@ A desktop investment dashboard that tracks gold, stocks, and currency exchange r
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | [Electron](https://www.electronjs.org/) with [electron-vite](https://electron-vite.org/) |
-| UI | [React 19](https://react.dev/) + [Mantine 8](https://mantine.dev/) |
-| State | [MobX](https://mobx.js.org/) (class-based stores) |
-| Language | [TypeScript 5](https://www.typescriptlang.org/) |
-| Database | [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) via [Knex](https://knexjs.org/) |
-| Validation | [Zod 4](https://zod.dev/) (standard in main process, `zod/mini` in preload) |
-| Data Source | [Yahoo Finance](https://finance.yahoo.com/) Chart API |
-| Linting | [@antfu/eslint-config](https://github.com/antfu/eslint-config) (no Prettier) |
-| Build | [electron-builder](https://www.electron.build/) |
+| Layer       | Technology                                                                                   |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| Framework   | [Electron](https://www.electronjs.org/) with [electron-vite](https://electron-vite.org/)     |
+| UI          | [React 19](https://react.dev/) + [Mantine 8](https://mantine.dev/)                           |
+| State       | [MobX](https://mobx.js.org/) (class-based stores)                                            |
+| Language    | [TypeScript 5](https://www.typescriptlang.org/)                                              |
+| Database    | [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) via [Knex](https://knexjs.org/) |
+| Validation  | [Zod 4](https://zod.dev/) (standard in main process, `zod/mini` in preload)                  |
+| Data Source | [Yahoo Finance](https://finance.yahoo.com/) Chart API                                        |
+| Linting     | [@antfu/eslint-config](https://github.com/antfu/eslint-config) (no Prettier)                 |
+| Build       | [electron-builder](https://www.electron.build/)                                              |
 
 ## Prerequisites
 
@@ -54,17 +67,17 @@ pnpm dev
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `pnpm dev` | Start Electron in development mode with HMR |
-| `pnpm build` | Type-check and build for production |
-| `pnpm start` | Preview the production build |
-| `pnpm lint` | Run ESLint (with cache) |
-| `pnpm lint:fix` | Run ESLint and auto-fix issues |
-| `pnpm typecheck` | Run TypeScript type-checking for both processes |
-| `pnpm build:mac` | Build a distributable for macOS |
-| `pnpm build:win` | Build a distributable for Windows |
-| `pnpm build:linux` | Build a distributable for Linux |
+| Command            | Description                                     |
+| ------------------ | ----------------------------------------------- |
+| `pnpm dev`         | Start Electron in development mode with HMR     |
+| `pnpm build`       | Type-check and build for production             |
+| `pnpm start`       | Preview the production build                    |
+| `pnpm lint`        | Run ESLint (with cache)                         |
+| `pnpm lint:fix`    | Run ESLint and auto-fix issues                  |
+| `pnpm typecheck`   | Run TypeScript type-checking for both processes |
+| `pnpm build:mac`   | Build a distributable for macOS                 |
+| `pnpm build:win`   | Build a distributable for Windows               |
+| `pnpm build:linux` | Build a distributable for Linux                 |
 
 ## Architecture
 
