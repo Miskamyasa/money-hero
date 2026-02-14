@@ -132,15 +132,25 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
   const { meta } = result
 
   const symbolResponse = meta.symbol ?? requestedSymbol
-  const { currency } = meta
+  let currency = meta.currency
   const name = meta.longName ?? meta.shortName ?? symbolResponse
 
+  // Yahoo Finance reports London-listed stocks in GBp (pence sterling).
+  // Normalize to GBP (pounds) by dividing all monetary values by 100.
+  const isSubunit = currency === "GBp"
+  const subunitDivisor = isSubunit ? 100 : 1
+  if (isSubunit) {
+    currency = "GBP"
+  }
+
   const closePrices = result.indicators.quote[0].close
-  const validCloses = closePrices.filter((p): p is number => p != null && Number.isFinite(p))
+  const validCloses = closePrices
+    .filter((p): p is number => p != null && Number.isFinite(p))
+    .map(p => p / subunitDivisor)
   const totalPoints = validCloses.length
 
-  let price = meta.regularMarketPrice ?? null
-  let previousClose = meta.chartPreviousClose ?? null
+  let price = meta.regularMarketPrice != null ? meta.regularMarketPrice / subunitDivisor : null
+  let previousClose = meta.chartPreviousClose != null ? meta.chartPreviousClose / subunitDivisor : null
 
   // Fallback: use the last valid close price if regularMarketPrice is missing
   if (price == null && totalPoints >= 1) {
@@ -168,7 +178,7 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
   const dividends: DividendEvent[] = dividendsRaw
     ? Object.values(dividendsRaw)
         .filter(d => Number.isFinite(d.amount) && Number.isFinite(d.date))
-        .map(d => ({ amount: d.amount, date: Math.trunc(d.date) }))
+        .map(d => ({ amount: d.amount / subunitDivisor, date: Math.trunc(d.date) }))
         .sort((a, b) => a.date - b.date)
     : []
 
