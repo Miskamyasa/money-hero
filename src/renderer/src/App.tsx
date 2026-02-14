@@ -72,10 +72,10 @@ function Dashboard(): React.JSX.Element {
           <SymbolStats store={vt} />
           <SymbolStats store={voo} />
         </Group>
+        <FetchProgress />
         <StocksTable store={water} title="Water" />
         <StocksTable store={highYield} title="High Yield" />
         <StocksTable store={stocks} title="Dividend Aristocrats" />
-        <FetchProgress />
       </Stack>
       <FilterDrawer opened={drawerOpened} onClose={() => setDrawerOpened(false)} />
     </div>

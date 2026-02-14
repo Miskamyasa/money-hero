@@ -83,14 +83,16 @@ export class StocksDataStore {
   }
 
   async saveToCache(): Promise<void> {
+    const allowedSymbols = new Set(this.symbols)
+    const quotes = Array.from(this.quotes.values())
+      .filter(quote => allowedSymbols.has(quote.symbol))
+    const plain = JSON.parse(JSON.stringify(quotes)) as StockQuote[]
     try {
-      const allowedSymbols = new Set(this.symbols)
-      const quotes = Array.from(this.quotes.values())
-        .filter(quote => allowedSymbols.has(quote.symbol))
-      await window.api.saveStockCache(quotes)
+      await window.api.saveStockCache(plain)
     }
     catch (error) {
-      notifyError("Failed to save stocks cache", error)
+      const symbols = plain.map(q => q.symbol)
+      notifyError(`Failed to save stocks cache [${symbols.join(", ")}]`, error)
     }
   }
 

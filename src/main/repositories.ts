@@ -3,7 +3,7 @@ import type { DividendEvent, StockQuote } from "../shared/stocks"
 import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../shared/amountScopes"
 import { getDb } from "./database"
 
-const CACHE_TTL = 60 * 60 * 1000
+const CACHE_TTL = 12 * 60 * 60 * 1000 // 1 hour in milliseconds
 
 function toFiniteNumber(value: unknown, fallback: number = 0): number {
   const numeric = typeof value === "number" ? value : Number(value)
