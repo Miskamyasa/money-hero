@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Group, Stack, Title } from "@mantine/core"
+import { ActionIcon, Button, Group, Stack, Text, Title } from "@mantine/core"
 import CurrencyRates from "@renderer/components/CurrencyRates"
 import FetchProgress from "@renderer/components/FetchProgress"
 import FilterDrawer from "@renderer/components/FilterDrawer"
@@ -9,6 +9,8 @@ import ThemeToggle from "@renderer/components/ThemeToggle"
 import { StoreProvider } from "@renderer/stores/StoreProvider"
 import { useStores } from "@renderer/stores/useStores"
 import { ThemedApp } from "@renderer/ThemedApp"
+import { formatPrice } from "@renderer/utils/quoteFormatters"
+import { observer } from "mobx-react-lite"
 import { useEffect, useState } from "react"
 
 function Dashboard(): React.JSX.Element {
@@ -50,7 +52,12 @@ function Dashboard(): React.JSX.Element {
     <div style={{ display: "flex", justifyContent: "center", minHeight: "100vh", minWidth: "100%", padding: "2rem" }}>
       <Stack align="stretch" gap="xl" w="100%" maw={1200}>
         <Group justify="space-between" gap="sm">
-          <Title size="3rem" style={{ textTransform: "uppercase" }}>Money Hero</Title>
+          <Group gap="md" align="center">
+            <Title size="3rem" style={{ textTransform: "uppercase" }}>Money Hero</Title>
+            {root.balance.totalBalanceIls > 0 && (
+              <Text size="xl" c="dimmed">{formatPrice(root.balance.totalBalanceIls, "ILS")}</Text>
+            )}
+          </Group>
           <Group gap="xs">
             <Button
               disabled={fetchQueue.running}
@@ -90,11 +97,13 @@ function Dashboard(): React.JSX.Element {
   )
 }
 
+const DashboardObserver = observer(Dashboard)
+
 function App(): React.JSX.Element {
   return (
     <StoreProvider>
       <ThemedApp>
-        <Dashboard />
+        <DashboardObserver />
       </ThemedApp>
     </StoreProvider>
   )

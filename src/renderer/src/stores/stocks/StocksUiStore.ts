@@ -6,7 +6,7 @@ export class StocksUiStore {
   buyingMode = false
   investmentAmount = 0
   disabledSymbols = new Set<string>()
-  tableVisible = true
+  tableVisible = false
 
   private persistVersion = 0
 

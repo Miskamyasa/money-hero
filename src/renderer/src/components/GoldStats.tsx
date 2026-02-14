@@ -37,7 +37,7 @@ function GoldStats(): React.JSX.Element {
                 <Group justify="space-between">
                   <Stack gap={4}>
                     <Text size="xs" c="dimmed">Balance</Text>
-                    <Text size="xl" fw={700}>{formatPrice(gold.balance)}</Text>
+                    <Text size="xl">{formatPrice(gold.balance)}</Text>
                   </Stack>
                   <Stack gap={4}>
                     <Text size="xs" c="dimmed">Amount</Text>

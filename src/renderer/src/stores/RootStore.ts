@@ -2,6 +2,7 @@ import { DIVIDEND_ARISTOCRATS, HIGH_YIELD, WATER } from "@renderer/config/stockU
 import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../../../shared/amountScopes"
 
 import { AppStore } from "./AppStore"
+import { BalanceStore } from "./BalanceStore"
 import { CurrencyStore } from "./CurrencyStore"
 import { FetchQueueStore } from "./FetchQueueStore"
 import { GoldStore } from "./GoldStore"
@@ -23,10 +24,12 @@ export class RootStore {
     this.theme = new ThemeStore(this)
     this.vt = new SymbolStore(this, "VT")
     this.voo = new SymbolStore(this, "VOO")
+    this.balance = new BalanceStore(this)
   }
 
   readonly fetchQueue: FetchQueueStore
   readonly app: AppStore
+  readonly balance: BalanceStore
   readonly currency: CurrencyStore
   readonly gold: GoldStore
   readonly stockAmounts: StockAmountsStore

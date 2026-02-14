@@ -47,7 +47,7 @@ function SymbolStats({ store }: SymbolStatsProps): React.JSX.Element {
                 <Group justify="space-between">
                   <Stack gap={4}>
                     <Text size="xs" c="dimmed">Balance</Text>
-                    <Text size="xl" fw={700}>{formatPrice(store.balance)}</Text>
+                    <Text size="xl">{formatPrice(store.balance)}</Text>
                   </Stack>
                   <Stack gap={4}>
                     <Text size="xs" c="dimmed">Amount</Text>
