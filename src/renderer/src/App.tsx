@@ -42,6 +42,10 @@ function Dashboard(): React.JSX.Element {
 
     // Fetch startup items through the queue
     root.fetchStartupItems()
+
+    // Auto-refresh all data every 20 minutes
+    root.startAutoRefresh()
+    return () => root.stopAutoRefresh()
   }, [root, gold, vt, voo, stocks, highYield, water])
 
   const handleRefreshAll = (): void => {
