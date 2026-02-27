@@ -1,6 +1,6 @@
 [tools]
 "aqua:pnpm" = "10.30.1"
-"aqua:opencode" = "1.2.10"
+"aqua:opencode" = "1.2.15"
 node = "22.21.1"
 npm = "11.8.0"
 "npm:typescript" = "5.9.3"
