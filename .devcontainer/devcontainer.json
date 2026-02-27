@@ -18,7 +18,7 @@
     "source=${localWorkspaceFolder}/../main,target=${localWorkspaceFolder}/../main,type=bind,readonly"
   ],
   "runArgs": [
-    "--name=money-hero--${localWorkspaceFolderBasename}"
+    "--name=money-hero"
   ],
   "postCreateCommand": "mise install"
 }
