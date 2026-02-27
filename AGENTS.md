@@ -13,24 +13,24 @@ Three-process Electron architecture with three source directories and two TS pro
 
 ## Commands
 
-Package manager: **pnpm** (v10.28.2), Node 22. Versions pinned in `mise.toml`.
+Package manager: **npm** (v11.8.0), Node 22. Versions pinned in `mise.toml`.
 
 ```bash
-pnpm dev              # Start dev server (electron-vite dev)
-pnpm build            # Typecheck + build (electron-vite build)
-pnpm lint             # ESLint with cache
-pnpm lint:fix         # ESLint with auto-fix
-pnpm typecheck        # Run both node and web typechecks
-pnpm typecheck:node   # tsc --noEmit -p tsconfig.node.json --composite false
-pnpm typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
+npm run dev              # Start dev server (electron-vite dev)
+npm run build            # Typecheck + build (electron-vite build)
+npm run lint             # ESLint with cache
+npm run lint:fix         # ESLint with auto-fix
+npm run typecheck        # Run both node and web typechecks
+npm run typecheck:node   # tsc --noEmit -p tsconfig.node.json --composite false
+npm run typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
 ```
 
-There is **no test framework** configured (no vitest, jest, or test scripts). Validate changes with `pnpm typecheck && pnpm lint`.
+There is **no test framework** configured (no vitest, jest, or test scripts). Validate changes with `npm run typecheck && npm run lint`.
 
 ## Code Style
 
 Enforced by **@antfu/eslint-config** (`formatters: true`, `typescript: true`, `react: true`).
-If you see an ESLint error, fix it by running `pnpm lint:fix` before making manual changes. Change code manually only if auto-fix can't handle it.
+If you see an ESLint error, fix it by running `npm run lint:fix` before making manual changes. Change code manually only if auto-fix can't handle it.
 
 ### Formatting
 

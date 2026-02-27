@@ -51,7 +51,7 @@ A desktop investment dashboard that tracks gold, stocks, and currency exchange r
 ## Prerequisites
 
 - **Node.js** 22
-- **pnpm** 10
+- **npm** 11
 
 Exact versions are pinned in `mise.toml`. If you use [mise](https://mise.jdx.dev/), run `mise install` to set them up automatically.
 
@@ -59,25 +59,25 @@ Exact versions are pinned in `mise.toml`. If you use [mise](https://mise.jdx.dev
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Start the development server
-pnpm dev
+npm run dev
 ```
 
 ## Scripts
 
 | Command            | Description                                     |
 | ------------------ | ----------------------------------------------- |
-| `pnpm dev`         | Start Electron in development mode with HMR     |
-| `pnpm build`       | Type-check and build for production             |
-| `pnpm start`       | Preview the production build                    |
-| `pnpm lint`        | Run ESLint (with cache)                         |
-| `pnpm lint:fix`    | Run ESLint and auto-fix issues                  |
-| `pnpm typecheck`   | Run TypeScript type-checking for both processes |
-| `pnpm build:mac`   | Build a distributable for macOS                 |
-| `pnpm build:win`   | Build a distributable for Windows               |
-| `pnpm build:linux` | Build a distributable for Linux                 |
+| `npm run dev`         | Start Electron in development mode with HMR     |
+| `npm run build`       | Type-check and build for production             |
+| `npm run start`       | Preview the production build                    |
+| `npm run lint`        | Run ESLint (with cache)                         |
+| `npm run lint:fix`    | Run ESLint and auto-fix issues                  |
+| `npm run typecheck`   | Run TypeScript type-checking for both processes |
+| `npm run build:mac`   | Build a distributable for macOS                 |
+| `npm run build:win`   | Build a distributable for Windows               |
+| `npm run build:linux` | Build a distributable for Linux                 |
 
 ## Architecture
 
