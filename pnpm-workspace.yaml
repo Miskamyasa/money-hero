@@ -10,4 +10,6 @@ supportedArchitectures:
   cpu: [arm64]
   os: [darwin, linux]
 
-trustPolicy: no-downgrade
+trustPolicy: off
+
+storeDir: /Users/dzaitsev/.local/share/pnpm/store
