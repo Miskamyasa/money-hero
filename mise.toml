@@ -1,5 +1,5 @@
 [tools]
-node = "22.21.1"
+node = "24.14.0"
 npm = "11.8.0"
 "npm:opencode-ai" = "1.1.63"
 "aqua:pnpm" = "10.30.1"
