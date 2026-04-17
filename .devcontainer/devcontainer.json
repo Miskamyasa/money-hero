@@ -9,12 +9,12 @@
     "OPENCODE_YOLO": true
   },
   "mounts": [
-    "source=${localEnv:HOME}/.yarnrc.yml,target=/home/ubuntu/.yarnrc.yml,type=bind,readonly",
-    "source=${localEnv:HOME}/.cache/containers/cache,target=/home/ubuntu/.cache,type=bind",
-    "source=${localEnv:HOME}/.cache/containers/local-share,target=/home/ubuntu/.local/share,type=bind",
-    "source=${localEnv:HOME}/.local/share/opencode,target=/home/ubuntu/.local/share/opencode,type=bind",
-    "source=${localEnv:HOME}/.config/opencode,target=/home/ubuntu/.config/opencode,type=bind,readonly",
-    "source=${localEnv:HOME}/Downloads/Screenshots,target=${localWorkspaceFolder}/screenshots,type=bind,readonly"
+    "source=/Users/dzaitsev/.cache/containers/cache,target=/home/ubuntu/.cache,type=bind",
+    "source=/Users/dzaitsev/.cache/containers/local-share,target=/home/ubuntu/.local/share,type=bind",
+    "source=/Users/dzaitsev/.local/share/opencode,target=/home/ubuntu/.local/share/opencode,type=bind",
+    "source=/Users/dzaitsev/.config/opencode,target=/home/ubuntu/.config/opencode,type=bind,readonly",
+    "source=/Users/dzaitsev/Downloads/Screenshots,target=${localWorkspaceFolder}/screenshots,type=bind,readonly",
+    "source=/Users/dzaitsev/.local/share/pnpm,target=/Users/dzaitsev/.local/share/pnpm,type=bind,readonly"
   ],
   "runArgs": [
     "--name=money-hero"

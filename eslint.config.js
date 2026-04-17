@@ -5,7 +5,7 @@ import {createTypeScriptImportResolver} from "eslint-import-resolver-typescript"
 const config = createConfig(
   {
     tsconfigRootDir: import.meta.dirname,
-    ignores: ["out/**", "dist/**", ".yarn/**", "build/**"],
+    ignores: ["out/**", "dist/**", "build/**"],
   },
   {
     settings: {

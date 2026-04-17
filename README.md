@@ -51,33 +51,33 @@ A desktop investment dashboard that tracks gold, stocks, and currency exchange r
 ## Prerequisites
 
 - **Node.js** 24
-- **Yarn** 4 (via Corepack)
+- **pnpm** 10
 
-Exact versions are pinned in `mise.toml`. If you use [mise](https://mise.jdx.dev/), run `mise install` to set them up automatically — the `postinstall` hook enables Corepack and activates the correct Yarn release.
+Exact versions are pinned in `mise.toml`. If you use [mise](https://mise.jdx.dev/), run `mise install` to set them up automatically.
 
 ## Getting Started
 
 ```bash
 # Install dependencies
-yarn install
+pnpm install
 
 # Start the development server
-yarn dev
+pnpm dev
 ```
 
 ## Scripts
 
 | Command            | Description                                     |
 | ------------------ | ----------------------------------------------- |
-| `yarn dev`         | Start Electron in development mode with HMR     |
-| `yarn build`       | Type-check and build for production             |
-| `yarn start`       | Preview the production build                    |
-| `yarn lint`        | Run ESLint (with cache)                         |
-| `yarn lint:fix`    | Run ESLint and auto-fix issues                  |
-| `yarn typecheck`   | Run TypeScript type-checking for both processes |
-| `yarn build:mac`   | Build a distributable for macOS                 |
-| `yarn build:win`   | Build a distributable for Windows               |
-| `yarn build:linux` | Build a distributable for Linux                 |
+| `pnpm dev`         | Start Electron in development mode with HMR     |
+| `pnpm build`       | Type-check and build for production             |
+| `pnpm start`       | Preview the production build                    |
+| `pnpm lint`        | Run ESLint (with cache)                         |
+| `pnpm lint:fix`    | Run ESLint and auto-fix issues                  |
+| `pnpm typecheck`   | Run TypeScript type-checking for both processes |
+| `pnpm build:mac`   | Build a distributable for macOS                 |
+| `pnpm build:win`   | Build a distributable for Windows               |
+| `pnpm build:linux` | Build a distributable for Linux                 |
 
 ## Architecture
 

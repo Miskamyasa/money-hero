@@ -13,25 +13,25 @@ Three-process Electron architecture with three source directories and two TS pro
 
 ## Commands
 
-Package manager: **yarn** (v4.13.0, activated via Corepack), Node 24. Versions pinned in `mise.toml`.
+Package manager: **pnpm** (v10.30.1), Node 24. Versions pinned in `mise.toml`.
 
 ```bash
-yarn dev              # Start dev server (electron-vite dev)
-yarn build            # Typecheck + build (electron-vite build)
-yarn lint             # ESLint with cache
-yarn lint:fix         # ESLint with auto-fix
-yarn typecheck        # Run both node and web typechecks
-yarn typecheck:node   # tsc --noEmit -p tsconfig.node.json --composite false
-yarn typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
+pnpm dev              # Start dev server (electron-vite dev)
+pnpm build            # Typecheck + build (electron-vite build)
+pnpm lint             # ESLint with cache
+pnpm lint:fix         # ESLint with auto-fix
+pnpm typecheck        # Run both node and web typechecks
+pnpm typecheck:node   # tsc --noEmit -p tsconfig.node.json --composite false
+pnpm typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
 ```
 
-There is **no test framework** configured (no vitest, jest, or test scripts). Validate changes with `yarn typecheck && yarn lint`.
+There is **no test framework** configured (no vitest, jest, or test scripts). Validate changes with `pnpm typecheck && pnpm lint`.
 
 ## Code Style
 
 Enforced by **@miskamyasa/eslint-config** (flat config in `eslint.config.js`). The shared config bundles TypeScript strict type checking, React + React Hooks, import ordering/validation, and stylistic rules — there is no Prettier and no separate TypeScript-ESLint config.
 
-If you see an ESLint error, fix it by running `yarn lint:fix` before making manual changes. Change code manually only if auto-fix can't handle it.
+If you see an ESLint error, fix it by running `pnpm lint:fix` before making manual changes. Change code manually only if auto-fix can't handle it.
 
 ### Formatting
 
