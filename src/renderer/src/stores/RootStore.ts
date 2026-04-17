@@ -1,4 +1,4 @@
-import {PORTFOLIO} from "@renderer/config/stockUniverses"
+import {FUNDS_ETFS, INDIVIDUAL_STOCKS} from "@renderer/config/stockUniverses"
 
 import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
 
@@ -20,13 +20,17 @@ export class RootStore {
   currency = new CurrencyStore(this)
   gold = new GoldStore(this)
   stockAmounts = new StockAmountsStore(AMOUNT_SCOPE_STOCK_HOLDINGS)
-  portfolio = new StocksStore(this, PORTFOLIO, "portfolio")
+  fundsEtfs = new StocksStore(this, FUNDS_ETFS, "funds-etfs")
+  individualStocks = new StocksStore(this, INDIVIDUAL_STOCKS, "individual-stocks")
   // water = new StocksStore(this, WATER, "water")
   // highYield = new StocksStore(this, HIGH_YIELD, "high-yield")
   // aristocrats = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
   theme = new ThemeStore(this)
   vwra = new SymbolStore(this, "VWRA.L")
   tase = new SymbolStore(this, "MORE-S7.TA")
+  copx = new SymbolStore(this, "COPX")
+  psi = new SymbolStore(this, "PSI")
+  healL = new SymbolStore(this, "HEAL.L")
   balance = new BalanceStore(this)
 
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null
@@ -58,6 +62,9 @@ export class RootStore {
       this.gold.createFetchHistoryTask(),
       this.vwra.createFetchQuoteTask(),
       this.tase.createFetchQuoteTask(),
+      this.copx.createFetchQuoteTask(),
+      this.psi.createFetchQuoteTask(),
+      this.healL.createFetchQuoteTask(),
     ])
   }
 
@@ -70,6 +77,13 @@ export class RootStore {
       this.gold.createFetchHistoryTask(),
       this.vwra.createFetchQuoteTask(),
       this.tase.createFetchQuoteTask(),
+      this.copx.createFetchQuoteTask(),
+      this.psi.createFetchQuoteTask(),
+      this.healL.createFetchQuoteTask(),
+      ...this.fundsEtfs.data.createFetchTasks(),
+      this.fundsEtfs.data.createFlushCacheTask(),
+      ...this.individualStocks.data.createFetchTasks(),
+      this.individualStocks.data.createFlushCacheTask(),
       // ...this.aristocrats.data.createFetchTasks(),
       // this.aristocrats.data.createFlushCacheTask(),
       // ...this.highYield.data.createFetchTasks(),

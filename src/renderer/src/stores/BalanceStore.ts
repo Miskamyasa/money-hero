@@ -28,9 +28,31 @@ export class BalanceStore {
     return currency.convertToIls(tase.balance, tase.quote?.currency ?? "USD") ?? 0
   }
 
+  get copxBalanceIls(): number {
+    const {copx, currency} = this.root
+    if (copx.amount === 0)
+      return 0
+    return currency.convertToIls(copx.balance, copx.quote?.currency ?? "USD") ?? 0
+  }
+
+  get psiBalanceIls(): number {
+    const {psi, currency} = this.root
+    if (psi.amount === 0)
+      return 0
+    return currency.convertToIls(psi.balance, psi.quote?.currency ?? "USD") ?? 0
+  }
+
+  get healLBalanceIls(): number {
+    const {healL, currency} = this.root
+    if (healL.amount === 0)
+      return 0
+    return currency.convertToIls(healL.balance, healL.quote?.currency ?? "USD") ?? 0
+  }
+
   get allStocksBalanceIls(): number {
     const {
-      portfolio,
+      fundsEtfs,
+      individualStocks,
       // aristocrats,
       // highYield,
       // water,
@@ -39,7 +61,8 @@ export class BalanceStore {
     let total = 0
 
     for (const store of [
-      portfolio,
+      fundsEtfs,
+      individualStocks,
       // aristocrats,
       // highYield,
       // water,
@@ -65,6 +88,9 @@ export class BalanceStore {
     return this.goldBalanceIls
       + this.vtBalanceIls
       + this.taseBalanceIls
+      + this.copxBalanceIls
+      + this.psiBalanceIls
+      + this.healLBalanceIls
       + this.allStocksBalanceIls
   }
 }

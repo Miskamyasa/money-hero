@@ -30,7 +30,21 @@ function Dashboard(): React.JSX.Element {
     void stores.vwra.loadFromCache()
     void stores.tase.loadAmount()
     void stores.tase.loadFromCache()
+    void stores.copx.loadAmount()
+    void stores.copx.loadFromCache()
+    void stores.psi.loadAmount()
+    void stores.psi.loadFromCache()
+    void stores.healL.loadAmount()
+    void stores.healL.loadFromCache()
     void stores.currency.loadFromCache()
+    void stores.fundsEtfs.data.loadFromCache()
+    void stores.fundsEtfs.data.loadAmounts()
+    void stores.fundsEtfs.ui.loadDisabledSymbols()
+    void stores.fundsEtfs.ui.loadCollapseState()
+    void stores.individualStocks.data.loadFromCache()
+    void stores.individualStocks.data.loadAmounts()
+    void stores.individualStocks.ui.loadDisabledSymbols()
+    void stores.individualStocks.ui.loadCollapseState()
     // void stores.aristocrats.data.loadFromCache()
     // void stores.aristocrats.data.loadAmounts()
     // void stores.aristocrats.ui.loadDisabledSymbols()
@@ -121,10 +135,21 @@ function Dashboard(): React.JSX.Element {
           <SymbolStats store={stores.vwra} />
           <SymbolStats store={stores.tase} />
         </Group>
+        <Group
+          grow
+          align="stretch"
+          w="100%">
+          <SymbolStats store={stores.copx} />
+          <SymbolStats store={stores.psi} />
+          <SymbolStats store={stores.healL} />
+        </Group>
         <FetchProgress />
         <StocksTable
-          store={stores.portfolio}
-          title="Portfolio" />
+          store={stores.fundsEtfs}
+          title="Funds / ETFs" />
+        <StocksTable
+          store={stores.individualStocks}
+          title="Individual Stocks" />
         {/*<StocksTable*/}
         {/*  store={stores.water}*/}
         {/*  title="Water" />*/}

@@ -10,7 +10,8 @@ type FilterDrawerProps = {
 
 function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Element {
   const {
-    portfolio,
+    fundsEtfs,
+    individualStocks,
     // aristocrats,
     // highYield,
     // water,
@@ -18,7 +19,8 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
   // const aristocratsUi = aristocrats.ui
   // const highYieldUi = highYield.ui
   // const waterUi = water.ui
-  const portfolioUi = portfolio.ui
+  const fundsEtfsUi = fundsEtfs.ui
+  const individualStocksUi = individualStocks.ui
 
   return (
     <Drawer
@@ -33,15 +35,34 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
         <div>
           <Text
             fw={500}
-            mb="xs">Portfolio</Text>
+            mb="xs">Funds / ETFs</Text>
           <Group gap="xs">
-            {portfolio.allSymbols.map(symbol => (
+            {fundsEtfs.allSymbols.map(symbol => (
               <Button
                 key={symbol}
                 size="compact-xs"
-                variant={portfolioUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                variant={fundsEtfsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                 onClick={() => {
-                  portfolioUi.toggleSymbol(symbol)
+                  fundsEtfsUi.toggleSymbol(symbol)
+                }}>
+                {symbol}
+              </Button>
+            ))}
+          </Group>
+        </div>
+
+        <div>
+          <Text
+            fw={500}
+            mb="xs">Individual Stocks</Text>
+          <Group gap="xs">
+            {individualStocks.allSymbols.map(symbol => (
+              <Button
+                key={symbol}
+                size="compact-xs"
+                variant={individualStocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                onClick={() => {
+                  individualStocksUi.toggleSymbol(symbol)
                 }}>
                 {symbol}
               </Button>

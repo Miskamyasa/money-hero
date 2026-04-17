@@ -1,24 +1,25 @@
-export const PORTFOLIO = [
-  "AAOI",
-  "ALAB",
+export const FUNDS_ETFS = [
   "CNYA",
-  "COPX",
   "DFNS.L",
   "EZA",
   "FLXI.L",
-  "FN",
   "FUSA.L",
   "GLUG.L",
-  "HEAL.L",
   "IGLN.L",
+  "MORE-S7.TA",
+  "REMX",
+  "VWRA.L",
+]
+
+export const INDIVIDUAL_STOCKS = [
+  "AAOI",
+  "ALAB",
+  "FN",
   "IPGP",
   "MRVL",
   "MTSI",
   "NBIS",
   "NVT",
-  "PLTR",
-  "PSI",
-  "REMX",
   "VICR",
   "VRT",
 ]
