@@ -1,9 +1,10 @@
-import type { StockQuote } from "../../../../shared/stocks"
-import type { FetchTask } from "../FetchQueueStore"
-import type { RootStore } from "../RootStore"
+import {makeAutoObservable, runInAction} from "mobx"
 
-import { notifyError } from "@renderer/utils/notify"
-import { makeAutoObservable, runInAction } from "mobx"
+import {notifyError} from "@renderer/utils/notify"
+
+import type {StockQuote} from "../../../../shared/stocks"
+import type {FetchTask} from "../FetchQueueStore"
+import type {RootStore} from "../RootStore"
 
 const CACHE_SAVE_BATCH_SIZE = 5
 const SECONDS_PER_DAY = 24 * 60 * 60

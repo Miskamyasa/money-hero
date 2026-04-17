@@ -1,46 +1,61 @@
-import type { StocksStore } from "@renderer/stores/StocksStore"
+import {useCallback, useRef, useState} from "react"
 
-import type { SortableColumn, SortState } from "./stocksTableSelectors"
-import { ActionIcon, Button, Card, Center, Collapse, Group, NumberInput, Table, Text, TextInput, Tooltip, UnstyledButton } from "@mantine/core"
-import { useDebouncedCallback } from "@mantine/hooks"
-import { useStores } from "@renderer/stores/useStores"
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Center,
+  Collapse,
+  Group,
+  NumberInput,
+  Table,
+  Text,
+  TextInput,
+  Tooltip,
+  UnstyledButton,
+} from "@mantine/core"
+import {useDebouncedCallback} from "@mantine/hooks"
+import {observer} from "mobx-react-lite"
 
-import { formatChange, formatChangePercent, formatPrice, getChangeColor } from "@renderer/utils/quoteFormatters"
+import type {StocksStore} from "@renderer/stores/StocksStore"
+import {useStores} from "@renderer/stores/useStores"
+import {formatChange, formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
 
-import { observer } from "mobx-react-lite"
+import type {SortableColumn, SortState} from "./stocksTableSelectors"
+import {selectSortedQuotes} from "./stocksTableSelectors"
 
-import { useCallback, useRef, useState } from "react"
-
-import { selectSortedQuotes } from "./stocksTableSelectors"
-
-interface StocksTableProps {
-  store: StocksStore
-  title: string
+type StocksTableProps = {
+  store: StocksStore,
+  title: string,
 }
 
-function SortableHeader({ label, column, sortState, onSort }: {
-  label: string
-  column: SortableColumn
-  sortState: SortState
-  onSort: (column: SortableColumn) => void
+function SortableHeader({label, column, sortState, onSort}: {
+  label: string,
+  column: SortableColumn,
+  sortState: SortState,
+  onSort: (column: SortableColumn) => void,
 }): React.JSX.Element {
   const isActive = sortState.column === column
   const arrow = isActive ? (sortState.direction === "asc" ? " \u2191" : " \u2193") : ""
 
   return (
-    <UnstyledButton onClick={() => onSort(column)} style={{ fontWeight: 700 }}>
+    <UnstyledButton
+      style={{fontWeight: 700}}
+      onClick={() => {
+        onSort(column)
+      }}>
       {label}
       {arrow}
     </UnstyledButton>
   )
 }
 
-function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Element {
+function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.Element {
   const root = useStores()
   const data = stocks.data
   const ui = stocks.ui
   const allocationStore = stocks.allocation
-  const [sortState, setSortState] = useState<SortState>({ column: null, direction: "desc" })
+  const [sortState, setSortState] = useState<SortState>({column: null, direction: "desc"})
   const [filterInput, setFilterInput] = useState("")
   const [debouncedFilter, setDebouncedFilter] = useState("")
 
@@ -56,12 +71,12 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   const handleSort = useCallback((column: SortableColumn): void => {
     setSortState((prev) => {
       if (prev.column !== column) {
-        return { column, direction: "desc" }
+        return {column, direction: "desc"}
       }
       if (prev.direction === "desc") {
-        return { column, direction: "asc" }
+        return {column, direction: "asc"}
       }
-      return { column: null, direction: "desc" }
+      return {column: null, direction: "desc"}
     })
   }, [])
 
@@ -103,48 +118,62 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   const sortedQuotes = selectSortedQuotes([...stocks.activeQuotes], debouncedFilter, sortState)
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Group justify="space-between" mb="md">
+    <Card
+      withBorder
+      padding="lg"
+      radius="md"
+      shadow="sm">
+      <Group
+        justify="space-between"
+        mb="md">
         <Group gap="sm">
-          <Text fw={700} size="lg">{title}</Text>
+          <Text
+            fw={700}
+            size="lg">{title}</Text>
           {stocks.totalActiveBalanceIls > 0 && (
-            <Text size="sm" c="dimmed">{formatPrice(stocks.totalActiveBalanceIls, "ILS")}</Text>
+            <Text
+              c="dimmed"
+              size="sm">{formatPrice(stocks.totalActiveBalanceIls, "ILS")}</Text>
           )}
         </Group>
-        <Group gap="sm" flex="1" display="flex" justify="flex-end">
+        <Group
+          display="flex"
+          flex="1"
+          gap="sm"
+          justify="flex-end">
           <TextInput
-            size="xs"
             placeholder="Filter by name or symbol"
+            size="xs"
+            styles={{input: {width: 180}}}
             value={filterInput}
-            onChange={e => handleFilterChange(e.currentTarget.value)}
-            styles={{ input: { width: 180 } }}
-          />
+            onChange={e => {
+              handleFilterChange(e.currentTarget.value)
+            }}/>
           <NumberInput
             ref={investmentInputRef}
-            size="xs"
-            placeholder="Amount"
-            prefix="$"
-            min={0}
-            thousandSeparator=","
             hideControls
             disabled={!ui.buyingMode}
+            min={0}
+            placeholder="Amount"
+            prefix="$"
+            size="xs"
+            styles={{input: {width: 120}}}
+            thousandSeparator=","
             value={localAmount}
-            onChange={handleAmountChange}
-            styles={{ input: { width: 120 } }}
-          />
+            onChange={handleAmountChange}/>
           <Button
-            variant={ui.buyingMode ? "filled" : "light"}
             color={ui.buyingMode ? "teal" : undefined}
             size="xs"
-            onClick={handleToggleBuy}
-          >
+            variant={ui.buyingMode ? "filled" : "light"}
+            onClick={handleToggleBuy}>
             Buy
           </Button>
           <Button
-            variant="light"
             size="xs"
-            onClick={() => ui.toggleTableVisible()}
-          >
+            variant="light"
+            onClick={() => {
+              ui.toggleTableVisible()
+            }}>
             {ui.tableVisible ? "Hide" : "Show"}
           </Button>
         </Group>
@@ -155,15 +184,18 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
           <Center>
             <Button
               variant="light"
-              onClick={() => stocks.load()}
-            >
+              onClick={() => {
+                stocks.load()
+              }}>
               Load Stocks
             </Button>
           </Center>
         )}
 
         {data.quotes.size > 0 && (
-          <Table striped highlightOnHover>
+          <Table
+            highlightOnHover
+            striped>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Symbol</Table.Th>
@@ -171,9 +203,21 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                 <Table.Th>Price</Table.Th>
                 <Table.Th>Change</Table.Th>
                 <Table.Th>Change %</Table.Th>
-                <Table.Th><SortableHeader label="1M" column="change1m" sortState={sortState} onSort={handleSort} /></Table.Th>
-                <Table.Th><SortableHeader label="6M" column="change6m" sortState={sortState} onSort={handleSort} /></Table.Th>
-                <Table.Th><SortableHeader label="2Y" column="change2y" sortState={sortState} onSort={handleSort} /></Table.Th>
+                <Table.Th><SortableHeader
+                  column="change1m"
+                  label="1M"
+                  sortState={sortState}
+                  onSort={handleSort} /></Table.Th>
+                <Table.Th><SortableHeader
+                  column="change6m"
+                  label="6M"
+                  sortState={sortState}
+                  onSort={handleSort} /></Table.Th>
+                <Table.Th><SortableHeader
+                  column="change2y"
+                  label="2Y"
+                  sortState={sortState}
+                  onSort={handleSort} /></Table.Th>
                 <Table.Th>Balance</Table.Th>
                 <Table.Th>Amount</Table.Th>
                 <Table.Th />
@@ -187,13 +231,19 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                 return (
                   <Table.Tr key={quote.symbol}>
                     <Table.Td>
-                      <Tooltip label={quote.name} withArrow>
-                        <Text size="sm" style={{ cursor: "default" }}>{quote.symbol}</Text>
+                      <Tooltip
+                        withArrow
+                        label={quote.name}>
+                        <Text
+                          size="sm"
+                          style={{cursor: "default"}}>{quote.symbol}</Text>
                       </Tooltip>
                     </Table.Td>
                     <Table.Td><Text size="sm">{quote.currency}</Text></Table.Td>
                     <Table.Td>
-                      <Tooltip label={formatDividendYield(quote.symbol)} withArrow>
+                      <Tooltip
+                        withArrow
+                        label={formatDividendYield(quote.symbol)}>
                         <span>{formatPrice(quote.price, quote.currency)}</span>
                       </Tooltip>
                     </Table.Td>
@@ -210,37 +260,37 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                     <Table.Td>
                       {quote.change1m != null
                         ? (
-                            <Text c={getChangeColor(quote.change1m)}>
-                              {formatChangePercent(quote.change1m)}
-                            </Text>
-                          )
+                          <Text c={getChangeColor(quote.change1m)}>
+                            {formatChangePercent(quote.change1m)}
+                          </Text>
+                        )
                         : <Text c="dimmed">N/A</Text>}
                     </Table.Td>
                     <Table.Td>
                       {quote.change6m != null
                         ? (
-                            <Text c={getChangeColor(quote.change6m)}>
-                              {formatChangePercent(quote.change6m)}
-                            </Text>
-                          )
+                          <Text c={getChangeColor(quote.change6m)}>
+                            {formatChangePercent(quote.change6m)}
+                          </Text>
+                        )
                         : <Text c="dimmed">N/A</Text>}
                     </Table.Td>
                     <Table.Td>
                       {quote.change2y != null
                         ? (
-                            <Text c={getChangeColor(quote.change2y)}>
-                              {formatChangePercent(quote.change2y)}
-                            </Text>
-                          )
+                          <Text c={getChangeColor(quote.change2y)}>
+                            {formatChangePercent(quote.change2y)}
+                          </Text>
+                        )
                         : <Text c="dimmed">N/A</Text>}
                     </Table.Td>
-                    <Table.Td style={{ position: "relative" }}>
+                    <Table.Td style={{position: "relative"}}>
                       {formatPrice(data.getBalance(quote.symbol), quote.currency)}
                       {ui.buyingMode && allocationBalance > 0 && (
                         <Text
-                          size="sm"
-                          fw={700}
                           c="teal"
+                          fw={700}
+                          size="sm"
                           style={{
                             position: "absolute",
                             top: "50%",
@@ -250,22 +300,18 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                             textAlign: "center",
                             backgroundColor: "var(--mantine-color-body)",
                             padding: "0 4px",
-                          }}
-                        >
+                          }}>
                           {formatPrice(allocationBalance, quote.currency)}
                         </Text>
                       )}
                     </Table.Td>
-                    <Table.Td style={{ position: "relative" }}>
+                    <Table.Td style={{position: "relative"}}>
                       <NumberInput
-                        size="xs"
-                        value={data.getAmount(quote.symbol)}
-                        onChange={value => data.setAmount(quote.symbol, Number(value) || 0)}
-                        onKeyDown={e => e.key === "Enter" && ui.stopEditing()}
-                        min={0}
-                        step={1}
                         hideControls
                         disabled={!ui.isEditing(quote.symbol)}
+                        min={0}
+                        size="xs"
+                        step={1}
                         styles={{
                           input: {
                             width: 80,
@@ -276,12 +322,18 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                             }),
                           },
                         }}
-                      />
+                        value={data.getAmount(quote.symbol)}
+                        onChange={value => {
+                          data.setAmount(quote.symbol, Number(value) || 0)
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") ui.stopEditing()
+                        }}/>
                       {ui.buyingMode && allocation > 0 && (
                         <Text
-                          size="sm"
-                          fw={700}
                           c="teal"
+                          fw={700}
+                          size="sm"
                           style={{
                             position: "absolute",
                             top: "50%",
@@ -291,36 +343,60 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
                             textAlign: "center",
                             backgroundColor: "var(--mantine-color-body)",
                             padding: "0 4px",
-                          }}
-                        >
+                          }}>
                           +
                           {allocation}
                         </Text>
                       )}
                     </Table.Td>
                     <Table.Td>
-                      <Group gap={4} wrap="nowrap">
+                      <Group
+                        gap={4}
+                        wrap="nowrap">
                         <ActionIcon
-                          variant={ui.isEditing(quote.symbol) ? "filled" : "subtle"}
-                          size="sm"
                           aria-label={ui.isEditing(quote.symbol) ? "Stop editing" : "Edit amount"}
-                          onClick={() => ui.isEditing(quote.symbol) ? ui.stopEditing() : ui.startEditing(quote.symbol)}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          size="sm"
+                          variant={ui.isEditing(quote.symbol) ? "filled" : "subtle"}
+                          onClick={() => {
+                            if (ui.isEditing(quote.symbol)) {
+                              ui.stopEditing()
+                            }
+                            else {
+                              ui.startEditing(quote.symbol)
+                            }
+                          }}>
+                          <svg
+                            fill="none"
+                            height="14"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="1.5"
+                            viewBox="0 0 24 24"
+                            width="14"
+                            xmlns="http://www.w3.org/2000/svg">
                             <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
                             <path d="M13.5 6.5l4 4" />
                           </svg>
                         </ActionIcon>
                         <ActionIcon
-                          variant="subtle"
-                          size="sm"
                           aria-label="Open on Yahoo Finance"
                           component="a"
                           href={`https://finance.yahoo.com/quote/${quote.symbol}/`}
-                          target="_blank"
                           rel="noopener noreferrer"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          size="sm"
+                          target="_blank"
+                          variant="subtle">
+                          <svg
+                            fill="none"
+                            height="14"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="1.5"
+                            viewBox="0 0 24 24"
+                            width="14"
+                            xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
                             <path d="M11 13l9 -9" />
                             <path d="M15 4h5v5" />
@@ -339,5 +415,4 @@ function StocksTable({ store: stocks, title }: StocksTableProps): React.JSX.Elem
   )
 }
 
-const StocksTableObserver = observer(StocksTable)
-export default StocksTableObserver
+export const StocksTable = observer(StocksTableImpl)

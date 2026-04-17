@@ -1,22 +1,22 @@
-import type { FetchTask } from "./FetchQueueStore"
-import type { RootStore } from "./RootStore"
+import {makeAutoObservable, runInAction} from "mobx"
 
-import { makeAutoObservable, runInAction } from "mobx"
-import { AMOUNT_SCOPE_SYMBOL_WIDGET } from "../../../shared/amountScopes"
+import {AMOUNT_SCOPE_SYMBOL_WIDGET} from "../../../shared/amountScopes"
+import {notifyError} from "../utils/notify"
 
-import { notifyError } from "../utils/notify"
+import type {FetchTask} from "./FetchQueueStore"
+import type {RootStore} from "./RootStore"
 
-interface SymbolQuote {
-  symbol: string
-  name: string
-  price: number
-  previousClose: number
-  change: number
-  changePercent: number
-  currency: string
-  change1m: number | null
-  change6m: number | null
-  change2y: number | null
+type SymbolQuote = {
+  symbol: string,
+  name: string,
+  price: number,
+  previousClose: number,
+  change: number,
+  changePercent: number,
+  currency: string,
+  change1m: number | null,
+  change6m: number | null,
+  change2y: number | null,
 }
 
 export class SymbolStore {
@@ -38,7 +38,7 @@ export class SymbolStore {
 
   setAmount(value: number): void {
     this.amount = value
-    void window.api.setScopedStockAmount(AMOUNT_SCOPE_SYMBOL_WIDGET, this.symbol, value).catch((error) => {
+    void window.api.setScopedStockAmount(AMOUNT_SCOPE_SYMBOL_WIDGET, this.symbol, value).catch((error: unknown) => {
       notifyError(`Failed to save amount for ${this.symbol}`, error)
     })
   }

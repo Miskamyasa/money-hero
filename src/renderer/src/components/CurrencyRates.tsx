@@ -1,9 +1,10 @@
-import { Group, Paper, Stack, Text } from "@mantine/core"
-import { useStores } from "@renderer/stores/useStores"
-import { observer } from "mobx-react-lite"
+import {Group, Paper, Stack, Text} from "@mantine/core"
+import {observer} from "mobx-react-lite"
 
-function CurrencyRates(): React.JSX.Element {
-  const { currency } = useStores()
+import {useStores} from "@renderer/stores/useStores"
+
+function CurrencyRatesImpl(): React.JSX.Element {
+  const {currency} = useStores()
 
   const formatRate = (value: number): string => {
     return value.toFixed(4)
@@ -22,16 +23,30 @@ function CurrencyRates(): React.JSX.Element {
     return <></>
   }
 
-  const { dollar, currencies } = currency.data
+  const {dollar, currencies} = currency.data
 
   return (
     <Group grow>
-      <Paper radius="sm" p="sm" withBorder>
-        <Group justify="space-between" align="center" wrap="nowrap">
-          <Text size="xl" fw={700}>USD</Text>
-          <Stack gap={0} align="flex-end">
-            <Text size="lg" fw={700}>1.00</Text>
-            <Text size="xs" c="dimmed">
+      <Paper
+        withBorder
+        p="sm"
+        radius="sm">
+        <Group
+          align="center"
+          justify="space-between"
+          wrap="nowrap">
+          <Text
+            fw={700}
+            size="xl">USD</Text>
+          <Stack
+            align="flex-end"
+            gap={0}>
+            <Text
+              fw={700}
+              size="lg">1.00</Text>
+            <Text
+              c="dimmed"
+              size="xs">
               DXY
               {" "}
               {dollar.value.toFixed(2)}
@@ -41,12 +56,28 @@ function CurrencyRates(): React.JSX.Element {
       </Paper>
 
       {currencies.filter(rate => !rate.hidden).map(rate => (
-        <Paper key={rate.label} radius="sm" p="sm" withBorder>
-          <Group justify="space-between" align="center" wrap="nowrap">
-            <Text size="xl" fw={700}>{rate.label}</Text>
-            <Stack gap={0} align="flex-end">
-              <Text size="lg" fw={700}>{formatRate(rate.rate)}</Text>
-              <Text size="xs" fw={600} c={getChangeColor(rate.changePercent)}>
+        <Paper
+          key={rate.label}
+          withBorder
+          p="sm"
+          radius="sm">
+          <Group
+            align="center"
+            justify="space-between"
+            wrap="nowrap">
+            <Text
+              fw={700}
+              size="xl">{rate.label}</Text>
+            <Stack
+              align="flex-end"
+              gap={0}>
+              <Text
+                fw={700}
+                size="lg">{formatRate(rate.rate)}</Text>
+              <Text
+                c={getChangeColor(rate.changePercent)}
+                fw={600}
+                size="xs">
                 {formatChangePercent(rate.changePercent)}
               </Text>
             </Stack>
@@ -57,5 +88,4 @@ function CurrencyRates(): React.JSX.Element {
   )
 }
 
-const CurrencyRatesObserver = observer(CurrencyRates)
-export default CurrencyRatesObserver
+export const CurrencyRates = observer(CurrencyRatesImpl)

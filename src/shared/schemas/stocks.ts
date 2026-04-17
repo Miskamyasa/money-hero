@@ -8,7 +8,7 @@
  * Note: `z.number()` in Zod v4 rejects NaN and Infinity by default,
  * so no extra `.finite()` check is needed.
  */
-import { z } from "zod/mini"
+import {z} from "zod/mini"
 
 export const DividendEventSchema = z.object({
   amount: z.number(),

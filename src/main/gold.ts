@@ -1,21 +1,21 @@
-import type { YahooChartResponse } from "./schemas/yahooChart"
+import {z} from "zod"
 
-import { z } from "zod"
-import { formatYahooSchemaError, YahooChartResponseSchema } from "./schemas/yahooChart"
+import type {YahooChartResponse} from "./schemas/yahooChart"
+import {formatYahooSchemaError, YahooChartResponseSchema} from "./schemas/yahooChart"
 
-export interface GoldQuote {
-  price: number
-  previousClose: number
-  change: number
-  changePercent: number
-  currency: string
-  symbol: string
+export type GoldQuote = {
+  price: number,
+  previousClose: number,
+  change: number,
+  changePercent: number,
+  currency: string,
+  symbol: string,
 }
 
-export interface GoldHistory {
-  change1m: number | null
-  change6m: number | null
-  change2y: number | null
+export type GoldHistory = {
+  change1m: number | null,
+  change6m: number | null,
+  change2y: number | null,
 }
 
 export const GOLD_IPC_CHANNEL = "gold:fetch-quote"
@@ -30,7 +30,7 @@ function validateYahooResponse(data: unknown): YahooChartResponse {
   }
   catch (error) {
     if (error instanceof z.ZodError) {
-      throw new Error(formatYahooSchemaError(error))
+      throw new Error(formatYahooSchemaError(error), {cause: error})
     }
     throw error
   }
@@ -50,13 +50,15 @@ export async function fetchGoldQuote(): Promise<GoldQuote> {
       throw new Error("Yahoo Finance API response missing chart results")
     }
 
-    const { meta } = parsed.chart.result[0]
+    const {meta} = parsed.chart.result[0]
 
     const price = meta.regularMarketPrice
     const previousClose = meta.chartPreviousClose
 
     if (price == null || previousClose == null) {
-      throw new TypeError("Yahoo Finance API response missing required numeric fields (regularMarketPrice or chartPreviousClose)")
+      throw new TypeError(
+        "Yahoo Finance API response missing required numeric fields (regularMarketPrice or chartPreviousClose)",
+      )
     }
 
     const change = price - previousClose
@@ -73,9 +75,9 @@ export async function fetchGoldQuote(): Promise<GoldQuote> {
   }
   catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to fetch gold quote: ${error.message}`)
+      throw new Error(`Failed to fetch gold quote: ${error.message}`, {cause: error})
     }
-    throw new Error("Failed to fetch gold quote: Unknown error occurred")
+    throw new Error("Failed to fetch gold quote: Unknown error occurred", {cause: error})
   }
 }
 
@@ -100,7 +102,7 @@ export async function fetchGoldHistory(): Promise<GoldHistory> {
       throw new Error("Yahoo Finance API response missing chart results")
     }
 
-    const { meta } = parsed.chart.result[0]
+    const {meta} = parsed.chart.result[0]
     const closePrices = parsed.chart.result[0].indicators.quote[0].close
 
     const currentPrice = meta.regularMarketPrice
@@ -127,8 +129,8 @@ export async function fetchGoldHistory(): Promise<GoldHistory> {
   }
   catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to fetch gold history: ${error.message}`)
+      throw new Error(`Failed to fetch gold history: ${error.message}`, {cause: error})
     }
-    throw new Error("Failed to fetch gold history: Unknown error occurred")
+    throw new Error("Failed to fetch gold history: Unknown error occurred", {cause: error})
   }
 }

@@ -1,35 +1,35 @@
-import type { YahooChartResponse } from "./schemas/yahooChart"
+import {z} from "zod"
 
-import { z } from "zod"
-import { formatYahooSchemaError, YahooChartResponseSchema } from "./schemas/yahooChart"
+import type {YahooChartResponse} from "./schemas/yahooChart"
+import {formatYahooSchemaError, YahooChartResponseSchema} from "./schemas/yahooChart"
 
-export interface CurrencyRate {
-  symbol: string
-  label: string
-  rate: number
-  changePercent: number
-  hidden: boolean
+export type CurrencyRate = {
+  symbol: string,
+  label: string,
+  rate: number,
+  changePercent: number,
+  hidden: boolean,
 }
 
-export interface DollarIndex {
-  value: number
-  changePercent: number
+export type DollarIndex = {
+  value: number,
+  changePercent: number,
 }
 
-export interface CurrencyRates {
-  dollar: DollarIndex
-  currencies: CurrencyRate[]
+export type CurrencyRates = {
+  dollar: DollarIndex,
+  currencies: CurrencyRate[],
 }
 
 export const CURRENCY_IPC_CHANNEL = "currency:fetch-rates"
 
 // Yahoo Finance forex symbols: USDGBP=X means 1 USD in GBP
 const FOREX_PAIRS = [
-  { symbol: "GBPUSD=X", label: "GBP", invert: true, hidden: false },
-  { symbol: "EURUSD=X", label: "EUR", invert: true, hidden: false },
-  { symbol: "ILSUSD=X", label: "ILS", invert: true, hidden: false },
-  { symbol: "INRUSD=X", label: "INR", invert: true, hidden: true },
-  { symbol: "BRLUSD=X", label: "BRL", invert: true, hidden: true },
+  {symbol: "GBPUSD=X", label: "GBP", invert: true, hidden: false},
+  {symbol: "EURUSD=X", label: "EUR", invert: true, hidden: false},
+  {symbol: "ILSUSD=X", label: "ILS", invert: true, hidden: false},
+  {symbol: "INRUSD=X", label: "INR", invert: true, hidden: true},
+  {symbol: "BRLUSD=X", label: "BRL", invert: true, hidden: true},
 ]
 
 const DXY_SYMBOL = "DX-Y.NYB"
@@ -41,7 +41,7 @@ function validateYahooResponse(data: unknown): YahooChartResponse {
   }
   catch (error) {
     if (error instanceof z.ZodError) {
-      throw new Error(formatYahooSchemaError(error))
+      throw new Error(formatYahooSchemaError(error), {cause: error})
     }
     throw error
   }
@@ -61,7 +61,7 @@ async function fetchForexRate(pair: typeof FOREX_PAIRS[number]): Promise<Currenc
     throw new Error(`Yahoo Finance API response missing chart results for ${pair.symbol}`)
   }
 
-  const { meta } = parsed.chart.result[0]
+  const {meta} = parsed.chart.result[0]
   const price = meta.regularMarketPrice
   const previousClose = meta.chartPreviousClose
 
@@ -100,7 +100,7 @@ async function fetchDollarIndex(): Promise<DollarIndex> {
     throw new Error("Yahoo Finance API response missing chart results for DXY")
   }
 
-  const { meta } = parsed.chart.result[0]
+  const {meta} = parsed.chart.result[0]
   const value = meta.regularMarketPrice
   const previousClose = meta.chartPreviousClose
 
@@ -110,7 +110,7 @@ async function fetchDollarIndex(): Promise<DollarIndex> {
 
   const changePercent = ((value - previousClose) / previousClose) * 100
 
-  return { value, changePercent }
+  return {value, changePercent}
 }
 
 export async function fetchCurrencyRates(): Promise<CurrencyRates> {
@@ -120,12 +120,12 @@ export async function fetchCurrencyRates(): Promise<CurrencyRates> {
       ...FOREX_PAIRS.map(pair => fetchForexRate(pair)),
     ])
 
-    return { dollar, currencies }
+    return {dollar, currencies}
   }
   catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to fetch currency rates: ${error.message}`)
+      throw new Error(`Failed to fetch currency rates: ${error.message}`, {cause: error})
     }
-    throw new Error("Failed to fetch currency rates: Unknown error occurred")
+    throw new Error("Failed to fetch currency rates: Unknown error occurred", {cause: error})
   }
 }

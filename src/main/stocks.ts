@@ -1,7 +1,8 @@
-import type { DividendEvent, StockQuote } from "../shared/stocks"
+import {z} from "zod"
 
-import { z } from "zod"
-import { formatYahooSchemaError, YahooChartResponseSchema } from "./schemas/yahooChart"
+import type {DividendEvent, StockQuote} from "../shared/stocks"
+
+import {formatYahooSchemaError, YahooChartResponseSchema} from "./schemas/yahooChart"
 
 export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
 
@@ -18,10 +19,10 @@ function computeChangePercent(currentPrice: number, historicalPrice: number | un
 
 const SESSION_TTL_MS = 30 * 60 * 1000 // 30 minutes
 
-interface YahooSession {
-  cookie: string
-  crumb: string
-  expiresAt: number
+type YahooSession = {
+  cookie: string,
+  crumb: string,
+  expiresAt: number,
 }
 
 let cachedSession: YahooSession | null = null
@@ -44,7 +45,7 @@ export async function getYahooSession(): Promise<YahooSession> {
     return cachedSession
   }
 
-  const consentResponse = await fetch("https://fc.yahoo.com/", { redirect: "manual" })
+  const consentResponse = await fetch("https://fc.yahoo.com/", {redirect: "manual"})
   const cookie = extractSetCookies(consentResponse)
 
   if (!cookie) {
@@ -52,7 +53,7 @@ export async function getYahooSession(): Promise<YahooSession> {
   }
 
   const crumbResponse = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
-    headers: { "Cookie": cookie, "User-Agent": "Mozilla/5.0" },
+    headers: {"Cookie": cookie, "User-Agent": "Mozilla/5.0"},
   })
 
   if (!crumbResponse.ok) {
@@ -78,45 +79,24 @@ export function clearYahooSession(): void {
   cachedSession = null
 }
 
-export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
+function buildChartUrl(symbol: string, crumb: string): string {
+  const params = `range=2y&interval=1mo&events=div&crumb=${encodeURIComponent(crumb)}`
+  return `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?${params}`
+}
+
+function validateYahooResponse(data: unknown): z.infer<typeof YahooChartResponseSchema> {
   try {
-    const normalizedSymbol = normalizeYahooSymbol(symbol)
-    const session = await getYahooSession()
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&events=div&crumb=${encodeURIComponent(session.crumb)}`
-    const response = await fetch(url, {
-      headers: { "Cookie": session.cookie, "User-Agent": "Mozilla/5.0" },
-    })
-
-    if (response.status === 401 || response.status === 403) {
-      clearYahooSession()
-      const freshSession = await getYahooSession()
-      const retryUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}?range=2y&interval=1mo&events=div&crumb=${encodeURIComponent(freshSession.crumb)}`
-      const retryResponse = await fetch(retryUrl, {
-        headers: { "Cookie": freshSession.cookie, "User-Agent": "Mozilla/5.0" },
-      })
-
-      if (!retryResponse.ok) {
-        throw new Error(`Yahoo Finance API returned status ${retryResponse.status}: ${retryResponse.statusText}`)
-      }
-
-      return parseChartResponse(await retryResponse.json(), normalizedSymbol)
-    }
-
-    if (!response.ok) {
-      throw new Error(`Yahoo Finance API returned status ${response.status}: ${response.statusText}`)
-    }
-
-    return parseChartResponse(await response.json(), normalizedSymbol)
+    return YahooChartResponseSchema.parse(data)
   }
   catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to fetch stock quote: ${error.message}`)
+    if (error instanceof z.ZodError) {
+      throw new Error(formatYahooSchemaError(error), {cause: error})
     }
-    throw new Error("Failed to fetch stock quote: Unknown error occurred")
+    throw error
   }
 }
 
-function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote {
+function parseChartResponse(data: unknown): StockQuote {
   const parsed = validateYahooResponse(data)
 
   if (parsed.chart.error) {
@@ -129,9 +109,9 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
   }
 
   const result = parsed.chart.result[0]
-  const { meta } = result
+  const {meta} = result
 
-  const symbolResponse = meta.symbol ?? requestedSymbol
+  const symbolResponse = meta.symbol
   let currency = meta.currency
   const name = meta.longName ?? meta.shortName ?? symbolResponse
 
@@ -177,9 +157,9 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
 
   const dividends: DividendEvent[] = dividendsRaw
     ? Object.values(dividendsRaw)
-        .filter(d => Number.isFinite(d.amount) && Number.isFinite(d.date))
-        .map(d => ({ amount: d.amount / subunitDivisor, date: Math.trunc(d.date) }))
-        .sort((a, b) => a.date - b.date)
+      .filter(d => Number.isFinite(d.amount) && Number.isFinite(d.date))
+      .map(d => ({amount: d.amount / subunitDivisor, date: Math.trunc(d.date)}))
+      .sort((a, b) => a.date - b.date)
     : []
 
   return {
@@ -197,14 +177,40 @@ function parseChartResponse(data: unknown, requestedSymbol: string): StockQuote 
   }
 }
 
-function validateYahooResponse(data: unknown): z.infer<typeof YahooChartResponseSchema> {
+export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
   try {
-    return YahooChartResponseSchema.parse(data)
+    const normalizedSymbol = normalizeYahooSymbol(symbol)
+    const session = await getYahooSession()
+    const url = buildChartUrl(normalizedSymbol, session.crumb)
+    const response = await fetch(url, {
+      headers: {"Cookie": session.cookie, "User-Agent": "Mozilla/5.0"},
+    })
+
+    if (response.status === 401 || response.status === 403) {
+      clearYahooSession()
+      const freshSession = await getYahooSession()
+      const retryUrl = buildChartUrl(normalizedSymbol, freshSession.crumb)
+      const retryResponse = await fetch(retryUrl, {
+        headers: {"Cookie": freshSession.cookie, "User-Agent": "Mozilla/5.0"},
+      })
+
+      if (!retryResponse.ok) {
+        throw new Error(`Yahoo Finance API returned status ${retryResponse.status}: ${retryResponse.statusText}`)
+      }
+
+      return parseChartResponse(await retryResponse.json())
+    }
+
+    if (!response.ok) {
+      throw new Error(`Yahoo Finance API returned status ${response.status}: ${response.statusText}`)
+    }
+
+    return parseChartResponse(await response.json())
   }
   catch (error) {
-    if (error instanceof z.ZodError) {
-      throw new Error(formatYahooSchemaError(error))
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch stock quote: ${error.message}`, {cause: error})
     }
-    throw error
+    throw new Error("Failed to fetch stock quote: Unknown error occurred", {cause: error})
   }
 }

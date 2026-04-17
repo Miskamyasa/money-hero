@@ -3917,7 +3917,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:10":
+"eslint@npm:10.2.0":
   version: 10.2.0
   resolution: "eslint@npm:10.2.0"
   dependencies:
@@ -7601,7 +7601,7 @@ __metadata:
     electron: "npm:39.2.6"
     electron-builder: "npm:26.0.12"
     electron-vite: "npm:5.0.0"
-    eslint: "npm:10"
+    eslint: "npm:10.2.0"
     knex: "npm:3.1.0"
     mobx: "npm:6.15.0"
     mobx-react-lite: "npm:4.1.1"

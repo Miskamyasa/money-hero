@@ -1,26 +1,26 @@
-import type { FetchTask } from "./FetchQueueStore"
-import type { RootStore } from "./RootStore"
+import {makeAutoObservable, runInAction} from "mobx"
 
-import { makeAutoObservable, runInAction } from "mobx"
+import {notifyError} from "../utils/notify"
 
-import { notifyError } from "../utils/notify"
+import type {FetchTask} from "./FetchQueueStore"
+import type {RootStore} from "./RootStore"
 
-interface CurrencyRate {
-  symbol: string
-  label: string
-  rate: number
-  changePercent: number
-  hidden: boolean
+type CurrencyRate = {
+  symbol: string,
+  label: string,
+  rate: number,
+  changePercent: number,
+  hidden: boolean,
 }
 
-interface DollarIndex {
-  value: number
-  changePercent: number
+type DollarIndex = {
+  value: number,
+  changePercent: number,
 }
 
-interface CurrencyRatesData {
-  dollar: DollarIndex
-  currencies: CurrencyRate[]
+type CurrencyRatesData = {
+  dollar: DollarIndex,
+  currencies: CurrencyRate[],
 }
 
 export class CurrencyStore {

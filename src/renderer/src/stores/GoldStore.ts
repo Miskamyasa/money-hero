@@ -1,24 +1,24 @@
-import type { FetchTask } from "./FetchQueueStore"
-import type { RootStore } from "./RootStore"
+import {makeAutoObservable, runInAction} from "mobx"
 
-import { makeAutoObservable, runInAction } from "mobx"
-import { AMOUNT_SCOPE_GOLD } from "../../../shared/amountScopes"
+import {AMOUNT_SCOPE_GOLD} from "../../../shared/amountScopes"
+import {notifyError} from "../utils/notify"
 
-import { notifyError } from "../utils/notify"
+import type {FetchTask} from "./FetchQueueStore"
+import type {RootStore} from "./RootStore"
 
-interface GoldQuote {
-  price: number
-  previousClose: number
-  change: number
-  changePercent: number
-  currency: string
-  symbol: string
+type GoldQuote = {
+  price: number,
+  previousClose: number,
+  change: number,
+  changePercent: number,
+  currency: string,
+  symbol: string,
 }
 
-interface GoldHistory {
-  change1m: number | null
-  change6m: number | null
-  change2y: number | null
+type GoldHistory = {
+  change1m: number | null,
+  change6m: number | null,
+  change2y: number | null,
 }
 
 export class GoldStore {
@@ -42,7 +42,7 @@ export class GoldStore {
 
   setAmount(value: number): void {
     this.amount = value
-    void window.api.setScopedStockAmount(AMOUNT_SCOPE_GOLD, "GC=F", value).catch((error) => {
+    void window.api.setScopedStockAmount(AMOUNT_SCOPE_GOLD, "GC=F", value).catch((error: unknown) => {
       notifyError("Failed to save gold amount", error)
     })
   }

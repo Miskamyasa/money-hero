@@ -1,6 +1,6 @@
-import type { RootStore } from "./RootStore"
+import {makeAutoObservable} from "mobx"
 
-import { makeAutoObservable } from "mobx"
+import type {RootStore} from "./RootStore"
 
 export class AppStore {
   constructor(private root: RootStore) {

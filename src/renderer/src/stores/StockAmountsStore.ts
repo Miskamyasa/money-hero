@@ -1,6 +1,8 @@
-import { notifyError } from "@renderer/utils/notify"
-import { makeAutoObservable, runInAction } from "mobx"
-import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../../../shared/amountScopes"
+import {makeAutoObservable, runInAction} from "mobx"
+
+import {notifyError} from "@renderer/utils/notify"
+
+import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
 
 const PERSIST_DEBOUNCE_MS = 400
 

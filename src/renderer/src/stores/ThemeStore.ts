@@ -1,6 +1,6 @@
-import type { RootStore } from "./RootStore"
+import {makeAutoObservable} from "mobx"
 
-import { makeAutoObservable } from "mobx"
+import type {RootStore} from "./RootStore"
 
 type ColorScheme = "light" | "dark"
 

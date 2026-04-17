@@ -77,12 +77,12 @@ import { AMOUNT_SCOPE_GOLD } from "../../../shared/amountScopes"
 - Wrap MobX-observed components with `observer()` and export the wrapped version:
 
 ```typescript
-function GoldStats(): React.JSX.Element { /* ... */ }
-const GoldStatsObserver = observer(GoldStats)
-export default GoldStatsObserver
+function GoldStatsImpl(): React.JSX.Element { /* ... */ }
+export const GoldStats = observer(GoldStatsImpl)
 ```
 
 - Access stores via `useStores()` hook (throws if used outside `StoreProvider`)
+- Default exports are disallowed (`import-x/no-default-export`). The only exception is the electron-vite config file, which requires `export default` — use a file-local `// eslint-disable-next-line` there.
 
 ### State Management (MobX)
 
@@ -152,7 +152,7 @@ Stores are provided via React context with a singleton pattern in `useStores.ts`
 
 ## Project Layout
 
-```
+```text
 src/
 ├── main/              # Main process (index.ts, database.ts, stocks.ts, gold.ts, currency.ts, repositories.ts)
 │   └── schemas/       # Zod schemas for external API responses (uses zod)

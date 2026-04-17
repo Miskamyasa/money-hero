@@ -1,8 +1,8 @@
-import type { StockQuote } from "../shared/stocks"
+import {electronAPI} from "@electron-toolkit/preload"
+import {contextBridge, ipcRenderer} from "electron"
 
-import { electronAPI } from "@electron-toolkit/preload"
-import { contextBridge, ipcRenderer } from "electron"
-import { parseStockAmounts, parseStockQuote, parseStockQuotes } from "../shared/stocks"
+import type {StockQuote} from "../shared/stocks"
+import {parseStockAmounts, parseStockQuote, parseStockQuotes} from "../shared/stocks"
 
 function parseStockSymbols(value: unknown, label: string): string[] {
   if (!Array.isArray(value)) {
@@ -41,12 +41,12 @@ function parseAmountScope(value: unknown, label: string): string {
   return value
 }
 
-function parseStockAmountWrite(value: unknown): { symbol: string, amount: number } {
+function parseStockAmountWrite(value: unknown): {symbol: string, amount: number} {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new TypeError("stock amount write payload must be an object")
   }
 
-  const payload = value as { symbol?: unknown, amount?: unknown }
+  const payload = value as {symbol?: unknown, amount?: unknown}
   if (typeof payload.symbol !== "string") {
     throw new TypeError("stock amount write payload.symbol must be a string")
   }
@@ -66,23 +66,23 @@ const api = {
   fetchGoldQuote: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-quote"),
   fetchGoldHistory: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-history"),
   fetchStockQuote: async (symbol: string): Promise<StockQuote> => {
-    const payload = await ipcRenderer.invoke("stock:fetch-quote", symbol)
+    const payload: unknown = await ipcRenderer.invoke("stock:fetch-quote", symbol)
     try {
       return parseStockQuote(payload)
     }
     catch (error) {
       const message = error instanceof Error ? error.message : "Unknown payload error"
-      throw new Error(`Invalid IPC payload for stock:fetch-quote: ${message}`)
+      throw new Error(`Invalid IPC payload for stock:fetch-quote: ${message}`, {cause: error})
     }
   },
   getStockCache: async (symbols: string[]): Promise<StockQuote[]> => {
-    const payload = await ipcRenderer.invoke("db:get-stock-cache", symbols)
+    const payload: unknown = await ipcRenderer.invoke("db:get-stock-cache", symbols)
     try {
       return parseStockQuotes(payload)
     }
     catch (error) {
       const message = error instanceof Error ? error.message : "Unknown payload error"
-      throw new Error(`Invalid IPC payload for db:get-stock-cache: ${message}`)
+      throw new Error(`Invalid IPC payload for db:get-stock-cache: ${message}`, {cause: error})
     }
   },
   saveStockCache: async (quotes: StockQuote[]): Promise<void> => {
@@ -91,7 +91,7 @@ const api = {
     }
     catch (error) {
       const message = error instanceof Error ? error.message : "Unknown payload error"
-      throw new Error(`Invalid IPC payload for db:save-stock-cache request: ${message}`)
+      throw new Error(`Invalid IPC payload for db:save-stock-cache request: ${message}`, {cause: error})
     }
     await ipcRenderer.invoke("db:save-stock-cache", quotes)
   },
@@ -100,44 +100,44 @@ const api = {
     return ipcRenderer.invoke("db:clear-stock-cache", parsedSymbols)
   },
   getStockAmounts: async (): Promise<Record<string, number>> => {
-    const payload = await ipcRenderer.invoke("db:get-stock-amounts")
+    const payload: unknown = await ipcRenderer.invoke("db:get-stock-amounts")
     try {
       return parseStockAmounts(payload)
     }
     catch (error) {
       const message = error instanceof Error ? error.message : "Unknown payload error"
-      throw new Error(`Invalid IPC payload for db:get-stock-amounts: ${message}`)
+      throw new Error(`Invalid IPC payload for db:get-stock-amounts: ${message}`, {cause: error})
     }
   },
   setStockAmount: (symbol: string, amount: number): Promise<void> => {
-    const parsed = parseStockAmountWrite({ symbol, amount })
+    const parsed = parseStockAmountWrite({symbol, amount})
     return ipcRenderer.invoke("db:set-stock-amount", parsed.symbol, parsed.amount)
   },
   getScopedStockAmounts: async (scope: string): Promise<Record<string, number>> => {
     const parsedScope = parseAmountScope(scope, "getScopedStockAmounts scope")
-    const payload = await ipcRenderer.invoke("db:get-scoped-stock-amounts", parsedScope)
+    const payload: unknown = await ipcRenderer.invoke("db:get-scoped-stock-amounts", parsedScope)
     try {
       return parseStockAmounts(payload)
     }
     catch (error) {
       const message = error instanceof Error ? error.message : "Unknown payload error"
-      throw new Error(`Invalid IPC payload for db:get-scoped-stock-amounts: ${message}`)
+      throw new Error(`Invalid IPC payload for db:get-scoped-stock-amounts: ${message}`, {cause: error})
     }
   },
   setScopedStockAmount: (scope: string, symbol: string, amount: number): Promise<void> => {
     const parsedScope = parseAmountScope(scope, "setScopedStockAmount scope")
-    const parsed = parseStockAmountWrite({ symbol, amount })
+    const parsed = parseStockAmountWrite({symbol, amount})
     return ipcRenderer.invoke("db:set-scoped-stock-amount", parsedScope, parsed.symbol, parsed.amount)
   },
   getDisabledStockSymbols: async (storageKey: string): Promise<string[]> => {
     const parsedStorageKey = parseStorageKey(storageKey, "getDisabledStockSymbols storageKey")
-    const payload = await ipcRenderer.invoke("db:get-disabled-stock-symbols", parsedStorageKey)
+    const payload: unknown = await ipcRenderer.invoke("db:get-disabled-stock-symbols", parsedStorageKey)
     try {
       return parseStockSymbols(payload, "db:get-disabled-stock-symbols payload")
     }
     catch (error) {
       const message = error instanceof Error ? error.message : "Unknown payload error"
-      throw new Error(`Invalid IPC payload for db:get-disabled-stock-symbols: ${message}`)
+      throw new Error(`Invalid IPC payload for db:get-disabled-stock-symbols: ${message}`, {cause: error})
     }
   },
   setDisabledStockSymbols: (storageKey: string, symbols: string[]): Promise<void> => {
@@ -166,8 +166,8 @@ if (process.contextIsolated) {
   }
 }
 else {
-  // @ts-expect-error ts(2551)
+  // @ts-expect-error ts(2551) window typings without contextIsolation
   window.electron = electronAPI
-  // @ts-expect-error ts(2551)
+  // @ts-expect-error ts(2551) window typings without contextIsolation
   window.api = api
 }

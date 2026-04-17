@@ -1,6 +1,6 @@
-import type { z } from "zod/mini"
+import type {z} from "zod/mini"
 
-import { StockAmountsSchema, StockQuoteSchema, StockQuotesSchema } from "./schemas/stocks"
+import {StockAmountsSchema, StockQuoteSchema, StockQuotesSchema} from "./schemas/stocks"
 
 export type DividendEvent = z.infer<typeof StockQuoteSchema>["dividends"][number]
 

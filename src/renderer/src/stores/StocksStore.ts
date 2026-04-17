@@ -1,10 +1,9 @@
-import type { RootStore } from "./RootStore"
+import {makeAutoObservable} from "mobx"
 
-import { makeAutoObservable } from "mobx"
-
-import { StocksAllocationStore } from "./stocks/StocksAllocationStore"
-import { StocksDataStore } from "./stocks/StocksDataStore"
-import { StocksUiStore } from "./stocks/StocksUiStore"
+import type {RootStore} from "./RootStore"
+import {StocksAllocationStore} from "./stocks/StocksAllocationStore"
+import {StocksDataStore} from "./stocks/StocksDataStore"
+import {StocksUiStore} from "./stocks/StocksUiStore"
 
 export class StocksStore {
   private symbols: string[]
@@ -12,7 +11,7 @@ export class StocksStore {
   readonly ui: StocksUiStore
   readonly allocation: StocksAllocationStore
 
-  constructor(private root: RootStore, symbols: string[], storageKey: string = "default") {
+  constructor(private root: RootStore, symbols: string[], storageKey = "default") {
     this.symbols = symbols
     this.data = new StocksDataStore(root, symbols)
     this.ui = new StocksUiStore(storageKey, symbols)

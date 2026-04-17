@@ -1,9 +1,32 @@
-import type { DividendEvent, StockQuote } from "../shared/stocks"
+import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../shared/amountScopes"
+import type {DividendEvent, StockQuote} from "../shared/stocks"
 
-import { AMOUNT_SCOPE_STOCK_HOLDINGS } from "../shared/amountScopes"
-import { getDb } from "./database"
+import {getDb} from "./database"
 
-function toFiniteNumber(value: unknown, fallback: number = 0): number {
+type StockQuoteRow = {
+  symbol: string,
+  name: string,
+  price: number,
+  previous_close: number,
+  change: number,
+  change_percent: number,
+  currency: string,
+  change_1m: number | null,
+  change_6m: number | null,
+  change_2y: number | null,
+  dividends: string | null,
+  updated_at: number,
+}
+
+type StockAmountRow = {symbol: string, amount: number}
+
+type ScopedStockAmountRow = {scope: string, symbol: string, amount: number}
+
+type DisabledSymbolRow = {storage_key: string, symbol: string}
+
+type KvCacheRow = {key: string, value: string}
+
+function toFiniteNumber(value: unknown, fallback = 0): number {
   const numeric = typeof value === "number" ? value : Number(value)
   return Number.isFinite(numeric) ? numeric : fallback
 }
@@ -23,7 +46,7 @@ export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote
   }
 
   const db = getDb()
-  const rows = await db("stock_quotes")
+  const rows = await db<StockQuoteRow>("stock_quotes")
     .whereIn("symbol", symbols)
     .select("*")
 
@@ -35,12 +58,15 @@ export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote
     let dividends: DividendEvent[] = []
     if (typeof row.dividends === "string") {
       try {
-        const parsed = JSON.parse(row.dividends) as unknown
+        const parsed: unknown = JSON.parse(row.dividends)
         if (Array.isArray(parsed)) {
-          dividends = parsed.map((event): DividendEvent => ({
-            amount: toFiniteNumber((event as Partial<DividendEvent>).amount),
-            date: toFiniteNumber((event as Partial<DividendEvent>).date),
-          }))
+          dividends = parsed.map((event): DividendEvent => {
+            const e = event as {amount?: unknown, date?: unknown}
+            return {
+              amount: toFiniteNumber(e.amount),
+              date: toFiniteNumber(e.date),
+            }
+          })
         }
       }
       catch {
@@ -49,13 +75,13 @@ export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote
     }
 
     return {
-      symbol: row.symbol as string,
-      name: row.name as string,
+      symbol: row.symbol,
+      name: row.name,
       price: toFiniteNumber(row.price),
       previousClose: toFiniteNumber(row.previous_close),
       change: toFiniteNumber(row.change),
       changePercent: toFiniteNumber(row.change_percent),
-      currency: row.currency as string,
+      currency: row.currency,
       change1m: toNullableFiniteNumber(row.change_1m),
       change6m: toNullableFiniteNumber(row.change_6m),
       change2y: toNullableFiniteNumber(row.change_2y),
@@ -81,7 +107,7 @@ export async function saveStockQuotesCache(quotes: StockQuote[]): Promise<void> 
     change_1m: quote.change1m,
     change_6m: quote.change6m,
     change_2y: quote.change2y,
-    dividends: JSON.stringify(quote.dividends ?? []),
+    dividends: JSON.stringify(quote.dividends),
     updated_at: now,
   }))
 
@@ -104,11 +130,11 @@ export async function clearStockQuotesCache(symbols: string[]): Promise<void> {
 
 export async function getStockAmounts(): Promise<Record<string, number>> {
   const db = getDb()
-  const rows = await db("stock_amounts").select("symbol", "amount")
+  const rows = await db<StockAmountRow>("stock_amounts").select("symbol", "amount")
 
   const result: Record<string, number> = {}
   for (const row of rows) {
-    result[row.symbol as string] = row.amount as number
+    result[row.symbol] = row.amount
   }
 
   return result
@@ -122,7 +148,7 @@ export async function setStockAmount(symbol: string, amount: number): Promise<vo
   }
   else {
     await db("stock_amounts")
-      .insert({ symbol, amount })
+      .insert({symbol, amount})
       .onConflict("symbol")
       .merge()
   }
@@ -130,14 +156,14 @@ export async function setStockAmount(symbol: string, amount: number): Promise<vo
 
 export async function getScopedStockAmounts(scope: string): Promise<Record<string, number>> {
   const db = getDb()
-  const scopedRows = await db("stock_amounts_scoped")
+  const scopedRows = await db<ScopedStockAmountRow>("stock_amounts_scoped")
     .where("scope", scope)
     .select("symbol", "amount")
 
   if (scopedRows.length > 0) {
     const scopedResult: Record<string, number> = {}
     for (const row of scopedRows) {
-      scopedResult[row.symbol as string] = row.amount as number
+      scopedResult[row.symbol] = row.amount
     }
     return scopedResult
   }
@@ -146,7 +172,7 @@ export async function getScopedStockAmounts(scope: string): Promise<Record<strin
     return {}
   }
 
-  const legacyRows = await db("stock_amounts").select("symbol", "amount")
+  const legacyRows = await db<StockAmountRow>("stock_amounts").select("symbol", "amount")
   if (legacyRows.length === 0) {
     return {}
   }
@@ -154,15 +180,15 @@ export async function getScopedStockAmounts(scope: string): Promise<Record<strin
   await db("stock_amounts_scoped")
     .insert(legacyRows.map(row => ({
       scope,
-      symbol: row.symbol as string,
-      amount: row.amount as number,
+      symbol: row.symbol,
+      amount: row.amount,
     })))
     .onConflict(["scope", "symbol"])
     .merge()
 
   const migratedResult: Record<string, number> = {}
   for (const row of legacyRows) {
-    migratedResult[row.symbol as string] = row.amount as number
+    migratedResult[row.symbol] = row.amount
   }
 
   return migratedResult
@@ -173,12 +199,12 @@ export async function setScopedStockAmount(scope: string, symbol: string, amount
 
   if (amount === 0) {
     await db("stock_amounts_scoped")
-      .where({ scope, symbol })
+      .where({scope, symbol})
       .delete()
   }
   else {
     await db("stock_amounts_scoped")
-      .insert({ scope, symbol, amount })
+      .insert({scope, symbol, amount})
       .onConflict(["scope", "symbol"])
       .merge()
   }
@@ -186,13 +212,11 @@ export async function setScopedStockAmount(scope: string, symbol: string, amount
 
 export async function getDisabledStockSymbols(storageKey: string): Promise<string[]> {
   const db = getDb()
-  const rows = await db("stock_disabled_symbols")
+  const rows = await db<DisabledSymbolRow>("stock_disabled_symbols")
     .where("storage_key", storageKey)
     .select("symbol")
 
-  return rows
-    .map(row => row.symbol)
-    .filter((symbol): symbol is string => typeof symbol === "string")
+  return rows.map(row => row.symbol)
 }
 
 export async function setDisabledStockSymbols(storageKey: string, symbols: string[]): Promise<void> {
@@ -217,13 +241,13 @@ export async function setDisabledStockSymbols(storageKey: string, symbols: strin
 
 export async function getKvCache(key: string): Promise<unknown> {
   const db = getDb()
-  const row = await db("kv_cache").where("key", key).first()
+  const row = await db<KvCacheRow>("kv_cache").where("key", key).first()
   if (!row) {
     return null
   }
 
   try {
-    return JSON.parse(row.value as string) as unknown
+    return JSON.parse(row.value) as unknown
   }
   catch {
     return null
@@ -235,7 +259,7 @@ export async function setKvCache(key: string, value: unknown): Promise<void> {
   const serialized = JSON.stringify(value)
 
   await db("kv_cache")
-    .insert({ key, value: serialized })
+    .insert({key, value: serialized})
     .onConflict("key")
     .merge()
 }

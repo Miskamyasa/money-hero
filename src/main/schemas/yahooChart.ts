@@ -1,55 +1,55 @@
-import { z } from "zod"
+import {z} from "zod"
 
 /**
  * Zod schemas for Yahoo Finance `/v8/finance/chart/` API responses.
  *
- * Uses `.passthrough()` on objects so that new fields Yahoo may add
+ * Uses `z.looseObject()` on objects so that new fields Yahoo may add
  * don't cause validation failures — we only assert the fields we depend on.
  *
  * Note: `z.number()` in Zod v4 rejects NaN and Infinity by default,
  * so no extra `.finite()` check is needed.
  */
 
-const YahooChartMetaSchema = z.object({
+const YahooChartMetaSchema = z.looseObject({
   symbol: z.string(),
   currency: z.string(),
   regularMarketPrice: z.number().optional(),
   chartPreviousClose: z.number().optional(),
   longName: z.string().optional(),
   shortName: z.string().optional(),
-}).passthrough()
+})
 
-const YahooChartQuoteSchema = z.object({
+const YahooChartQuoteSchema = z.looseObject({
   close: z.array(z.number().nullable()),
-}).passthrough()
+})
 
-const YahooDividendEventSchema = z.object({
+const YahooDividendEventSchema = z.looseObject({
   amount: z.number(),
   date: z.number(),
-}).passthrough()
+})
 
-const YahooChartEventsSchema = z.object({
+const YahooChartEventsSchema = z.looseObject({
   dividends: z.record(z.string(), YahooDividendEventSchema).optional(),
-}).passthrough()
+})
 
-const YahooChartResultSchema = z.object({
+const YahooChartResultSchema = z.looseObject({
   meta: YahooChartMetaSchema,
-  indicators: z.object({
+  indicators: z.looseObject({
     quote: z.array(YahooChartQuoteSchema).min(1),
-  }).passthrough(),
+  }),
   events: YahooChartEventsSchema.optional(),
-}).passthrough()
+})
 
-const YahooChartErrorSchema = z.object({
+const YahooChartErrorSchema = z.looseObject({
   description: z.string().optional(),
-}).passthrough()
+})
 
-export const YahooChartResponseSchema = z.object({
-  chart: z.object({
+export const YahooChartResponseSchema = z.looseObject({
+  chart: z.looseObject({
     result: z.array(YahooChartResultSchema).min(1).nullable(),
     error: YahooChartErrorSchema.nullable().optional(),
-  }).passthrough(),
-}).passthrough()
+  }),
+})
 
 export type YahooChartResponse = z.infer<typeof YahooChartResponseSchema>
 export type YahooChartResult = z.infer<typeof YahooChartResultSchema>

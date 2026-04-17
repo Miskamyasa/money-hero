@@ -1,5 +1,6 @@
-import { notifyError } from "@renderer/utils/notify"
-import { makeAutoObservable, runInAction } from "mobx"
+import {makeAutoObservable, runInAction} from "mobx"
+
+import {notifyError} from "@renderer/utils/notify"
 
 export class StocksUiStore {
   editingSymbol: string | null = null

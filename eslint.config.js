@@ -1,17 +1,24 @@
-import antfu from "@antfu/eslint-config"
+import {createConfig} from "@miskamyasa/eslint-config"
+import {createTypeScriptImportResolver} from "eslint-import-resolver-typescript"
 
-export default antfu({
-  formatters: true,
-  typescript: true,
-  react: true,
-  stylistic: {
-    quotes: "double",
+// eslint-disable-next-line import-x/no-default-export
+export default createConfig(
+  {
+    tsconfigRootDir: import.meta.dirname,
+    ignores: ["out/**", "dist/**", ".yarn/**", "build/**"],
   },
-  ignores: [
-    "AGENTS.md",
-  ],
-  rules: {
-    "no-console": "off",
-    "node/prefer-global/process": "off",
+  {
+    settings: {
+      "import-x/resolver-next": [
+        createTypeScriptImportResolver({
+          project: ["./tsconfig.web.json", "./tsconfig.node.json"],
+        }),
+      ],
+    },
+    rules: {
+      "no-console": ["warn", {
+        allow: ["warn", "error"],
+      }],
+    },
   },
-})
+)

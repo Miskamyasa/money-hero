@@ -1,7 +1,7 @@
-import type { Knex } from "knex"
+import {join} from "node:path"
 
-import { join } from "node:path"
-import { app } from "electron"
+import {app} from "electron"
+import type {Knex} from "knex"
 import knex from "knex"
 
 let db: Knex | null = null

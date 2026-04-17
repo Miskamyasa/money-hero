@@ -1,12 +1,12 @@
-import { makeAutoObservable, runInAction } from "mobx"
+import {makeAutoObservable, runInAction} from "mobx"
 
-import { notifyError } from "../utils/notify"
+import {notifyError} from "../utils/notify"
 
 const FETCH_INTERVAL = 1000
 
-export interface FetchTask {
-  label: string
-  execute: () => Promise<void>
+export type FetchTask = {
+  label: string,
+  execute: () => Promise<void>,
 }
 
 export class FetchQueueStore {
@@ -31,7 +31,7 @@ export class FetchQueueStore {
     this.totalCount += tasks.length
 
     if (!this.running) {
-      this.processQueue()
+      void this.processQueue()
     }
   }
 
@@ -56,29 +56,24 @@ export class FetchQueueStore {
       if (abortController.signal.aborted)
         break
 
-      const task = this.pendingTasks.shift()!
+      const task = this.pendingTasks.shift()
+      if (!task) break
+
       runInAction(() => {
         this.currentLabel = task.label
       })
 
       try {
         await task.execute()
+        runInAction(() => {
+          this.completedCount++
+        })
       }
       catch (error) {
-        if (abortController.signal.aborted)
-          break
-
         notifyError(task.label, error)
       }
 
-      if (abortController.signal.aborted)
-        break
-
-      runInAction(() => {
-        this.completedCount++
-      })
-
-      if (this.pendingTasks.length > 0 && !abortController.signal.aborted) {
+      if (this.pendingTasks.length > 0) {
         await new Promise(resolve => setTimeout(resolve, FETCH_INTERVAL))
       }
     }

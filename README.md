@@ -83,7 +83,7 @@ yarn dev
 
 The app follows the standard three-process Electron architecture:
 
-```
+```text
 src/
 ├── main/              # Main process — Node.js, IPC handlers, database, API fetchers
 │   └── schemas/       # Zod schemas for Yahoo Finance API responses

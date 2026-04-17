@@ -1,4 +1,4 @@
-import { notifications } from "@mantine/notifications"
+import {notifications} from "@mantine/notifications"
 
 export function notifyError(title: string, error: unknown): void {
   const message = error instanceof Error ? error.message : String(error)

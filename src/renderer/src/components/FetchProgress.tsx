@@ -1,20 +1,27 @@
-import { Paper, Progress, Stack, Text } from "@mantine/core"
-import { useStores } from "@renderer/stores/useStores"
+import {Paper, Progress, Stack, Text} from "@mantine/core"
+import {observer} from "mobx-react-lite"
 
-import { observer } from "mobx-react-lite"
+import {useStores} from "@renderer/stores/useStores"
 
-function FetchProgress(): React.JSX.Element {
-  const { fetchQueue } = useStores()
+function FetchProgressImpl(): React.JSX.Element {
+  const {fetchQueue} = useStores()
 
   if (!fetchQueue.running) {
     return <></>
   }
 
   return (
-    <Paper radius="sm" p="sm" withBorder>
+    <Paper
+      withBorder
+      p="sm"
+      radius="sm">
       <Stack gap={4}>
-        <Progress value={fetchQueue.progress * 100} size="sm" />
-        <Text size="xs" c="dimmed">
+        <Progress
+          size="sm"
+          value={fetchQueue.progress * 100} />
+        <Text
+          c="dimmed"
+          size="xs">
           Fetching:
           {" "}
           {fetchQueue.currentLabel}
@@ -30,5 +37,4 @@ function FetchProgress(): React.JSX.Element {
   )
 }
 
-const FetchProgressObserver = observer(FetchProgress)
-export default FetchProgressObserver
+export const FetchProgress = observer(FetchProgressImpl)

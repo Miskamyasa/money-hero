@@ -1,6 +1,6 @@
-import type { RootStore } from "./RootStore"
+import {makeAutoObservable} from "mobx"
 
-import { makeAutoObservable } from "mobx"
+import type {RootStore} from "./RootStore"
 
 export class BalanceStore {
   constructor(private root: RootStore) {
@@ -8,32 +8,32 @@ export class BalanceStore {
   }
 
   get goldBalanceIls(): number {
-    const { gold, currency } = this.root
+    const {gold, currency} = this.root
     if (gold.amount === 0)
       return 0
     return currency.convertToIls(gold.balance, gold.quote?.currency ?? "USD") ?? 0
   }
 
   get vtBalanceIls(): number {
-    const { vt, currency } = this.root
-    if (vt.amount === 0)
+    const {vwra, currency} = this.root
+    if (vwra.amount === 0)
       return 0
-    return currency.convertToIls(vt.balance, vt.quote?.currency ?? "USD") ?? 0
+    return currency.convertToIls(vwra.balance, vwra.quote?.currency ?? "USD") ?? 0
   }
 
   get vooBalanceIls(): number {
-    const { voo, currency } = this.root
+    const {voo, currency} = this.root
     if (voo.amount === 0)
       return 0
     return currency.convertToIls(voo.balance, voo.quote?.currency ?? "USD") ?? 0
   }
 
   get allStocksBalanceIls(): number {
-    const { stocks, highYield, water } = this.root
+    const {aristocrats, highYield, water} = this.root
     const seen = new Set<string>()
     let total = 0
 
-    for (const store of [stocks, highYield, water]) {
+    for (const store of [aristocrats, highYield, water]) {
       for (const quote of store.activeQuotes) {
         if (seen.has(quote.symbol))
           continue

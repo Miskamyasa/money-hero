@@ -1,12 +1,14 @@
-import type { StockQuote } from "../shared/stocks"
+import {join} from "node:path"
 
-import { join } from "node:path"
-import { electronApp, is, optimizer } from "@electron-toolkit/utils"
-import { app, BrowserWindow, ipcMain, shell } from "electron"
+import {electronApp, is, optimizer} from "@electron-toolkit/utils"
+import {app, BrowserWindow, ipcMain, shell} from "electron"
+
 import icon from "../../resources/icon.png?asset"
-import { CURRENCY_IPC_CHANNEL, fetchCurrencyRates } from "./currency"
-import { initDatabase } from "./database"
-import { fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CHANNEL } from "./gold"
+import type {StockQuote} from "../shared/stocks"
+
+import {CURRENCY_IPC_CHANNEL, fetchCurrencyRates} from "./currency"
+import {initDatabase} from "./database"
+import {fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CHANNEL} from "./gold"
 import {
   clearStockQuotesCache,
   getDisabledStockSymbols,
@@ -20,7 +22,7 @@ import {
   setScopedStockAmount,
   setStockAmount,
 } from "./repositories"
-import { fetchStockQuote, STOCK_IPC_CHANNEL } from "./stocks"
+import {fetchStockQuote, STOCK_IPC_CHANNEL} from "./stocks"
 
 function createWindow(): void {
   // Create the browser window.
@@ -31,7 +33,7 @@ function createWindow(): void {
     minHeight: 720,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === "linux" ? { icon } : {}),
+    ...(process.platform === "linux" ? {icon} : {}),
     webPreferences: {
       preload: join(__dirname, "../preload/index.mjs"),
       sandbox: false,
@@ -43,24 +45,24 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: "deny" }
+    void shell.openExternal(details.url)
+    return {action: "deny"}
   })
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
+    void mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
   }
   else {
-    mainWindow.loadFile(join(__dirname, "../renderer/index.html"))
+    void mainWindow.loadFile(join(__dirname, "../renderer/index.html"))
   }
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(async () => {
+void app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId("com.electron")
 
@@ -72,7 +74,9 @@ app.whenReady().then(async () => {
   })
 
   // IPC test
-  ipcMain.on("ping", () => console.log("pong"))
+  ipcMain.on("ping", () => {
+    console.warn("pong")
+  })
   ipcMain.handle(GOLD_IPC_CHANNEL, fetchGoldQuote)
   ipcMain.handle(GOLD_HISTORY_IPC_CHANNEL, fetchGoldHistory)
   ipcMain.handle(STOCK_IPC_CHANNEL, (_event, symbol: string) => fetchStockQuote(symbol))
@@ -83,11 +87,17 @@ app.whenReady().then(async () => {
   ipcMain.handle("db:save-stock-cache", (_event, quotes: StockQuote[]) => saveStockQuotesCache(quotes))
   ipcMain.handle("db:clear-stock-cache", (_event, symbols: string[]) => clearStockQuotesCache(symbols))
   ipcMain.handle("db:get-stock-amounts", () => getStockAmounts())
-  ipcMain.handle("db:set-stock-amount", (_event, symbol, amount) => setStockAmount(symbol, amount))
+  ipcMain.handle("db:set-stock-amount", (_event, symbol: string, amount: number) => setStockAmount(symbol, amount))
   ipcMain.handle("db:get-scoped-stock-amounts", (_event, scope: string) => getScopedStockAmounts(scope))
-  ipcMain.handle("db:set-scoped-stock-amount", (_event, scope: string, symbol: string, amount: number) => setScopedStockAmount(scope, symbol, amount))
+  ipcMain.handle(
+    "db:set-scoped-stock-amount",
+    (_event, scope: string, symbol: string, amount: number) => setScopedStockAmount(scope, symbol, amount),
+  )
   ipcMain.handle("db:get-disabled-stock-symbols", (_event, storageKey: string) => getDisabledStockSymbols(storageKey))
-  ipcMain.handle("db:set-disabled-stock-symbols", (_event, storageKey: string, symbols: string[]) => setDisabledStockSymbols(storageKey, symbols))
+  ipcMain.handle(
+    "db:set-disabled-stock-symbols",
+    (_event, storageKey: string, symbols: string[]) => setDisabledStockSymbols(storageKey, symbols),
+  )
   ipcMain.handle("db:get-kv-cache", (_event, key: string) => getKvCache(key))
   ipcMain.handle("db:set-kv-cache", (_event, key: string, value: unknown) => setKvCache(key, value))
 

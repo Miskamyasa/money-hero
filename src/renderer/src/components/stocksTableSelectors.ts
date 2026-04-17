@@ -1,17 +1,17 @@
 export type SortableColumn = "change1m" | "change6m" | "change2y"
 export type SortDirection = "asc" | "desc"
 
-export interface SortState {
-  column: SortableColumn | null
-  direction: SortDirection
+export type SortState = {
+  column: SortableColumn | null,
+  direction: SortDirection,
 }
 
-interface SortableQuote {
-  symbol: string
-  name: string
-  change1m: number | null
-  change6m: number | null
-  change2y: number | null
+type SortableQuote = {
+  symbol: string,
+  name: string,
+  change1m: number | null,
+  change6m: number | null,
+  change2y: number | null,
 }
 
 function compareSortableValues(a: number | null, b: number | null, direction: SortDirection): number {
