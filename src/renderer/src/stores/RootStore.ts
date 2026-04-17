@@ -94,6 +94,16 @@ export class RootStore {
     ])
   }
 
+  resetAllBalances(): void {
+    this.stockAmounts.resetAll()
+    this.vwra.setAmount(0)
+    this.igln.setAmount(0)
+    this.tase.setAmount(0)
+    this.copx.setAmount(0)
+    this.psi.setAmount(0)
+    this.healL.setAmount(0)
+  }
+
   loadStocks(store: StocksStore): void {
     this.fetchQueue.enqueue([
       ...store.data.createFetchTasks(),

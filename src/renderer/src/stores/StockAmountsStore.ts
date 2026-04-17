@@ -62,6 +62,13 @@ export class StockAmountsStore {
     }
   }
 
+  resetAll(): void {
+    const symbols = new Set<string>([...this.amounts.keys(), ...this.persistedAmounts.keys()])
+    for (const symbol of symbols) {
+      this.setAmount(symbol, 0)
+    }
+  }
+
   async loadAmounts(): Promise<void> {
     if (this.loaded) {
       return

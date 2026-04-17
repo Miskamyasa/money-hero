@@ -1,4 +1,4 @@
-import {Button, Drawer, Group, Stack, Text} from "@mantine/core"
+import {Button, Divider, Drawer, Group, Modal, Stack, Text, useModalsStack} from "@mantine/core"
 import {observer} from "mobx-react-lite"
 
 import {useStores} from "@renderer/stores/useStores"
@@ -9,13 +9,21 @@ type FilterDrawerProps = {
 }
 
 function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Element {
+  const root = useStores()
   const {
     fundsEtfs,
     individualStocks,
     // aristocrats,
     // highYield,
     // water,
-  } = useStores()
+  } = root
+  const modalsStack = useModalsStack(["reset-confirm"])
+
+  const handleResetConfirm = (): void => {
+    root.resetAllBalances()
+    modalsStack.close("reset-confirm")
+    onClose()
+  }
   // const aristocratsUi = aristocrats.ui
   // const highYieldUi = highYield.ui
   // const waterUi = water.ui
@@ -23,112 +31,162 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
   const individualStocksUi = individualStocks.ui
 
   return (
-    <Drawer
-      opened={opened}
-      position="left"
-      size="md"
-      styles={{inner: {inset: 0}}}
-      title="Filter Stocks"
-      onClose={onClose}>
-      <Stack gap="xl">
+    <>
+      <Drawer
+        opened={opened}
+        position="left"
+        size="md"
+        styles={{
+          inner: {inset: 0},
+          body: {display: "flex", flexDirection: "column", height: "calc(100% - 60px)", paddingBottom: 0},
+        }}
+        title="Filter Stocks"
+        onClose={onClose}>
+        <Stack
+          gap="xl"
+          style={{flex: 1, overflowY: "auto", paddingBottom: "var(--mantine-spacing-md)"}}>
 
-        <div>
-          <Text
-            fw={500}
-            mb="xs">Funds / ETFs</Text>
-          <Group gap="xs">
-            {fundsEtfs.allSymbols.map(symbol => (
+          <div>
+            <Text
+              fw={500}
+              mb="xs">Funds / ETFs</Text>
+            <Group gap="xs">
+              {fundsEtfs.allSymbols.map(symbol => (
+                <Button
+                  key={symbol}
+                  size="compact-xs"
+                  variant={fundsEtfsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  onClick={() => {
+                    fundsEtfsUi.toggleSymbol(symbol)
+                  }}>
+                  {symbol}
+                </Button>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <Text
+              fw={500}
+              mb="xs">Individual Stocks</Text>
+            <Group gap="xs">
+              {individualStocks.allSymbols.map(symbol => (
+                <Button
+                  key={symbol}
+                  size="compact-xs"
+                  variant={individualStocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  onClick={() => {
+                    individualStocksUi.toggleSymbol(symbol)
+                  }}>
+                  {symbol}
+                </Button>
+              ))}
+            </Group>
+          </div>
+
+          {/*<div>*/}
+          {/*  <Text*/}
+          {/*    fw={500}*/}
+          {/*    mb="xs">Water</Text>*/}
+          {/*  <Group gap="xs">*/}
+          {/*    {water.allSymbols.map(symbol => (*/}
+          {/*      <Button*/}
+          {/*        key={symbol}*/}
+          {/*        size="compact-xs"*/}
+          {/*        variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
+          {/*        onClick={() => {*/}
+          {/*          waterUi.toggleSymbol(symbol)*/}
+          {/*        }}>*/}
+          {/*        {symbol}*/}
+          {/*      </Button>*/}
+          {/*    ))}*/}
+          {/*  </Group>*/}
+          {/*</div>*/}
+
+          {/*<div>*/}
+          {/*  <Text*/}
+          {/*    fw={500}*/}
+          {/*    mb="xs">High Yield</Text>*/}
+          {/*  <Group gap="xs">*/}
+          {/*    {highYield.allSymbols.map(symbol => (*/}
+          {/*      <Button*/}
+          {/*        key={symbol}*/}
+          {/*        size="compact-xs"*/}
+          {/*        variant={highYieldUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
+          {/*        onClick={() => {*/}
+          {/*          highYieldUi.toggleSymbol(symbol)*/}
+          {/*        }}>*/}
+          {/*        {symbol}*/}
+          {/*      </Button>*/}
+          {/*    ))}*/}
+          {/*  </Group>*/}
+          {/*</div>*/}
+
+          {/*<div>*/}
+          {/*  <Text*/}
+          {/*    fw={500}*/}
+          {/*    mb="xs">Dividend Aristocrats</Text>*/}
+          {/*  <Group gap="xs">*/}
+          {/*    {aristocrats.allSymbols.map(symbol => (*/}
+          {/*      <Button*/}
+          {/*        key={symbol}*/}
+          {/*        size="compact-xs"*/}
+          {/*        variant={aristocratsUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
+          {/*        onClick={() => {*/}
+          {/*          aristocratsUi.toggleSymbol(symbol)*/}
+          {/*        }}>*/}
+          {/*        {symbol}*/}
+          {/*      </Button>*/}
+          {/*    ))}*/}
+          {/*  </Group>*/}
+          {/*</div>*/}
+
+        </Stack>
+
+        <Divider />
+        <Stack
+          gap="xs"
+          py="md">
+          <Button
+            color="red"
+            variant="light"
+            onClick={() => {
+              modalsStack.open("reset-confirm")
+            }}>
+            Reset all balances
+          </Button>
+        </Stack>
+      </Drawer>
+
+      <Modal.Stack>
+        <Modal
+          {...modalsStack.register("reset-confirm")}
+          centered
+          styles={{inner: {inset: 0}}}
+          title="Reset all balances"
+          zIndex={500}>
+          <Stack gap="md">
+            <Text size="sm">
+              This will set every stock amount to 0. This action cannot be undone.
+            </Text>
+            <Group justify="flex-end">
               <Button
-                key={symbol}
-                size="compact-xs"
-                variant={fundsEtfsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                variant="default"
                 onClick={() => {
-                  fundsEtfsUi.toggleSymbol(symbol)
+                  modalsStack.close("reset-confirm")
                 }}>
-                {symbol}
+                Cancel
               </Button>
-            ))}
-          </Group>
-        </div>
-
-        <div>
-          <Text
-            fw={500}
-            mb="xs">Individual Stocks</Text>
-          <Group gap="xs">
-            {individualStocks.allSymbols.map(symbol => (
               <Button
-                key={symbol}
-                size="compact-xs"
-                variant={individualStocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
-                onClick={() => {
-                  individualStocksUi.toggleSymbol(symbol)
-                }}>
-                {symbol}
+                color="red"
+                onClick={handleResetConfirm}>
+                Reset
               </Button>
-            ))}
-          </Group>
-        </div>
-
-        {/*<div>*/}
-        {/*  <Text*/}
-        {/*    fw={500}*/}
-        {/*    mb="xs">Water</Text>*/}
-        {/*  <Group gap="xs">*/}
-        {/*    {water.allSymbols.map(symbol => (*/}
-        {/*      <Button*/}
-        {/*        key={symbol}*/}
-        {/*        size="compact-xs"*/}
-        {/*        variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
-        {/*        onClick={() => {*/}
-        {/*          waterUi.toggleSymbol(symbol)*/}
-        {/*        }}>*/}
-        {/*        {symbol}*/}
-        {/*      </Button>*/}
-        {/*    ))}*/}
-        {/*  </Group>*/}
-        {/*</div>*/}
-
-        {/*<div>*/}
-        {/*  <Text*/}
-        {/*    fw={500}*/}
-        {/*    mb="xs">High Yield</Text>*/}
-        {/*  <Group gap="xs">*/}
-        {/*    {highYield.allSymbols.map(symbol => (*/}
-        {/*      <Button*/}
-        {/*        key={symbol}*/}
-        {/*        size="compact-xs"*/}
-        {/*        variant={highYieldUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
-        {/*        onClick={() => {*/}
-        {/*          highYieldUi.toggleSymbol(symbol)*/}
-        {/*        }}>*/}
-        {/*        {symbol}*/}
-        {/*      </Button>*/}
-        {/*    ))}*/}
-        {/*  </Group>*/}
-        {/*</div>*/}
-
-        {/*<div>*/}
-        {/*  <Text*/}
-        {/*    fw={500}*/}
-        {/*    mb="xs">Dividend Aristocrats</Text>*/}
-        {/*  <Group gap="xs">*/}
-        {/*    {aristocrats.allSymbols.map(symbol => (*/}
-        {/*      <Button*/}
-        {/*        key={symbol}*/}
-        {/*        size="compact-xs"*/}
-        {/*        variant={aristocratsUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
-        {/*        onClick={() => {*/}
-        {/*          aristocratsUi.toggleSymbol(symbol)*/}
-        {/*        }}>*/}
-        {/*        {symbol}*/}
-        {/*      </Button>*/}
-        {/*    ))}*/}
-        {/*  </Group>*/}
-        {/*</div>*/}
-
-      </Stack>
-    </Drawer>
+            </Group>
+          </Stack>
+        </Modal>
+      </Modal.Stack>
+    </>
   )
 }
 

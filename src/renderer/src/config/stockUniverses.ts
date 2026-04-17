@@ -5,10 +5,7 @@ export const FUNDS_ETFS = [
   "FLXI.L",
   "FUSA.L",
   "GLUG.L",
-  "IGLN.L",
-  "MORE-S7.TA",
   "REMX",
-  "VWRA.L",
 ]
 
 export const INDIVIDUAL_STOCKS = [
