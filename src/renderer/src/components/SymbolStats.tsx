@@ -2,7 +2,7 @@ import {ActionIcon, Card, Group, NumberInput, Paper, Stack, Text} from "@mantine
 import {observer} from "mobx-react-lite"
 
 import type {SymbolStore} from "@renderer/stores/SymbolStore"
-import {formatChange, formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
+import {formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
 
 type SymbolStatsProps = {
   store: SymbolStore,
@@ -70,45 +70,21 @@ function SymbolStatsImpl({store}: SymbolStatsProps): React.JSX.Element {
         {store.quote
           ? (
             <>
-              <Group justify="space-between">
-                <Stack gap={4}>
-                  <Text
-                    c="dimmed"
-                    size="xs">Price</Text>
-                  <Text
-                    fw={700}
-                    size="xl">{formatPrice(store.quote.price)}</Text>
-                </Stack>
-                <Stack gap={4}>
-                  <Text
-                    c="dimmed"
-                    size="xs">Change</Text>
-                  <Text
-                    c={getChangeColor(store.quote.change)}
-                    fw={700}
-                    size="xl">
-                    {formatChange(store.quote.change)}
-                  </Text>
-                </Stack>
-                <Stack gap={4}>
-                  <Text
-                    c="dimmed"
-                    size="xs">Change %</Text>
-                  <Text
-                    c={getChangeColor(store.quote.changePercent)}
-                    fw={700}
-                    size="xl">
-                    {formatChangePercent(store.quote.changePercent)}
-                  </Text>
-                </Stack>
-              </Group>
+              <Stack gap={4}>
+                <Text
+                  c="dimmed"
+                  size="xs">Price</Text>
+                <Text
+                  fw={700}
+                  size="xl">{formatPrice(store.quote.price, store.quote.currency)}</Text>
+              </Stack>
 
               <Group justify="space-between">
                 <Stack gap={4}>
                   <Text
                     c="dimmed"
                     size="xs">Balance</Text>
-                  <Text size="xl">{formatPrice(store.balance)}</Text>
+                  <Text size="xl">{formatPrice(store.balance, store.quote.currency)}</Text>
                 </Stack>
                 <Stack gap={4}>
                   <Text

@@ -2,7 +2,7 @@ import {ActionIcon, Card, Group, NumberInput, Paper, Stack, Text} from "@mantine
 import {observer} from "mobx-react-lite"
 
 import {useStores} from "@renderer/stores/useStores"
-import {formatChange, formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
+import {formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
 
 type PriceChangeCardProps = {
   label: string,
@@ -60,45 +60,21 @@ function GoldStatsImpl(): React.JSX.Element {
         {gold.quote
           ? (
             <>
-              <Group justify="space-between">
-                <Stack gap={4}>
-                  <Text
-                    c="dimmed"
-                    size="xs">Price</Text>
-                  <Text
-                    fw={700}
-                    size="xl">{formatPrice(gold.quote.price)}</Text>
-                </Stack>
-                <Stack gap={4}>
-                  <Text
-                    c="dimmed"
-                    size="xs">Change</Text>
-                  <Text
-                    c={getChangeColor(gold.quote.change)}
-                    fw={700}
-                    size="xl">
-                    {formatChange(gold.quote.change)}
-                  </Text>
-                </Stack>
-                <Stack gap={4}>
-                  <Text
-                    c="dimmed"
-                    size="xs">Change %</Text>
-                  <Text
-                    c={getChangeColor(gold.quote.changePercent)}
-                    fw={700}
-                    size="xl">
-                    {formatChangePercent(gold.quote.changePercent)}
-                  </Text>
-                </Stack>
-              </Group>
+              <Stack gap={4}>
+                <Text
+                  c="dimmed"
+                  size="xs">Price</Text>
+                <Text
+                  fw={700}
+                  size="xl">{formatPrice(gold.quote.price, gold.quote.currency)}</Text>
+              </Stack>
 
               <Group justify="space-between">
                 <Stack gap={4}>
                   <Text
                     c="dimmed"
                     size="xs">Balance</Text>
-                  <Text size="xl">{formatPrice(gold.balance)}</Text>
+                  <Text size="xl">{formatPrice(gold.balance, gold.quote.currency)}</Text>
                 </Stack>
                 <Stack gap={4}>
                   <Text

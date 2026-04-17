@@ -115,12 +115,16 @@ function parseChartResponse(data: unknown): StockQuote {
   let currency = meta.currency
   const name = meta.longName ?? meta.shortName ?? symbolResponse
 
-  // Yahoo Finance reports London-listed stocks in GBp (pence sterling).
-  // Normalize to GBP (pounds) by dividing all monetary values by 100.
-  const isSubunit = currency === "GBp"
+  // Yahoo Finance reports some tickers in subunit currencies:
+  //   - London-listed stocks in GBp (pence sterling, 1/100 GBP)
+  //   - Tel Aviv-listed stocks in ILA (agurot, 1/100 ILS)
+  // Normalize to the parent currency by dividing all monetary values by 100.
+  const subunitCurrencies: Record<string, string> = {GBp: "GBP", ILA: "ILS"}
+  const parentCurrency = subunitCurrencies[currency]
+  const isSubunit = parentCurrency != null
   const subunitDivisor = isSubunit ? 100 : 1
-  if (isSubunit) {
-    currency = "GBP"
+  if (parentCurrency) {
+    currency = parentCurrency
   }
 
   const closePrices = result.indicators.quote[0].close

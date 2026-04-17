@@ -19,7 +19,7 @@ import {observer} from "mobx-react-lite"
 
 import type {StocksStore} from "@renderer/stores/StocksStore"
 import {useStores} from "@renderer/stores/useStores"
-import {formatChange, formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
+import {formatChangePercent, formatPrice, getChangeColor, normalizeCurrency} from "@renderer/utils/quoteFormatters"
 
 import type {SortableColumn, SortState} from "./stocksTableSelectors"
 import {selectSortedQuotes} from "./stocksTableSelectors"
@@ -201,8 +201,6 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                 <Table.Th>Symbol</Table.Th>
                 <Table.Th>Currency</Table.Th>
                 <Table.Th>Price</Table.Th>
-                <Table.Th>Change</Table.Th>
-                <Table.Th>Change %</Table.Th>
                 <Table.Th><SortableHeader
                   column="change1m"
                   label="1M"
@@ -239,23 +237,13 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                           style={{cursor: "default"}}>{quote.symbol}</Text>
                       </Tooltip>
                     </Table.Td>
-                    <Table.Td><Text size="sm">{quote.currency}</Text></Table.Td>
+                    <Table.Td><Text size="sm">{normalizeCurrency(quote.currency)}</Text></Table.Td>
                     <Table.Td>
                       <Tooltip
                         withArrow
                         label={formatDividendYield(quote.symbol)}>
                         <span>{formatPrice(quote.price, quote.currency)}</span>
                       </Tooltip>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text c={getChangeColor(quote.change)}>
-                        {formatChange(quote.change, quote.currency)}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text c={getChangeColor(quote.changePercent)}>
-                        {formatChangePercent(quote.changePercent)}
-                      </Text>
                     </Table.Td>
                     <Table.Td>
                       {quote.change1m != null
