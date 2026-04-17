@@ -18,11 +18,8 @@ A desktop investment dashboard that tracks gold, stocks, and currency exchange r
 ## Features
 
 - **Gold Tracking** — Live gold futures price (GC=F) with daily change, historical performance (1M / 6M / 2Y), and portfolio balance based on your holdings
-- **Stock Watchlists** — Three curated stock universes out of the box:
-  - **Dividend Aristocrats** — S&P 500 companies with 25+ years of consecutive dividend increases
-  - **High Yield** — Stocks selected for above-average dividend yields across US and international markets
-  - **Water** — Companies in the water infrastructure, utilities, and treatment sector
-- **Index Fund Widgets** — Dedicated cards for VWRA.L (Total World) and VOO (S&P 500) ETFs with price, change, and balance tracking
+- **Stock Watchlist** — A curated **Portfolio** of ~22 tickers (US large-caps + LSE/international listings) is active by default. Additional preset universes — **Dividend Aristocrats**, **High Yield**, and **Water** — are bundled in `src/renderer/src/config/stockUniverses.ts` and can be enabled by uncommenting the relevant wiring in `RootStore`, `App`, `FilterDrawer`, and `BalanceStore`.
+- **Index Fund Widgets** — Dedicated cards for VWRA.L and MORE-S7.TA ETFs with price, change, and balance tracking
 - **Currency Rates** — USD exchange rates for GBP, EUR, and ILS with daily change percentages and the US Dollar Index (DXY)
 - **Portfolio Balance** — Aggregated total balance across all assets, converted to ILS
 - **Buy Mode** — Enter an investment amount and see how it would be allocated across stocks in a watchlist

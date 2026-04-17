@@ -27,6 +27,8 @@ pnpm typecheck:web    # tsc --noEmit -p tsconfig.web.json --composite false
 
 There is **no test framework** configured (no vitest, jest, or test scripts). Validate changes with `pnpm typecheck && pnpm lint`.
 
+Workspace/build settings live in `pnpm-workspace.yaml`: `onlyBuiltDependencies` whitelists native modules (`electron`, `electron-winstaller`, `esbuild`, `better-sqlite3`) and `trustPolicy: off` disables lifecycle scripts by default. Don't run `pnpm approve-builds` or edit these unless adding a new native dependency.
+
 ## Code Style
 
 Enforced by **@miskamyasa/eslint-config** (flat config in `eslint.config.js`). The shared config bundles TypeScript strict type checking, React + React Hooks, import ordering/validation, and stylistic rules — there is no Prettier and no separate TypeScript-ESLint config.
@@ -119,6 +121,8 @@ export class ExampleStore {
 ```
 
 Stores are provided via React context with a singleton pattern in `useStores.ts`. Stores expose `createFetch*Task()` methods returning `FetchTask` objects that are enqueued into `FetchQueueStore` for sequential execution with rate limiting.
+
+`RootStore` currently wires up `portfolio` (primary stocks watchlist) plus two single-symbol stores `vwra` (VWRA.L) and `tase` (MORE-S7.TA). The `water`, `highYield`, and `aristocrats` `StocksStore` instances are intentionally left commented out in `RootStore.ts`, `App.tsx`, `FilterDrawer.tsx`, and `BalanceStore.ts` — preserve them as-is unless the user asks to restore those watchlists.
 
 ### IPC & Validation
 
