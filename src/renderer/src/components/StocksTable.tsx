@@ -195,7 +195,11 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
         {data.quotes.size > 0 && (
           <Table
             highlightOnHover
-            striped>
+            striped
+            styles={{
+              td: {fontSize: "14px"},
+              th: {fontSize: "14px"},
+            }}>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Symbol</Table.Th>
@@ -234,7 +238,7 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                         withArrow
                         label={quote.name}>
                         <Text
-                          size="sm"
+                          inherit
                           style={{cursor: "default"}}>{quote.symbol}</Text>
                       </Tooltip>
                     </Table.Td>
@@ -248,37 +252,61 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                     <Table.Td>
                       {quote.change1m != null
                         ? (
-                          <Text c={getChangeColor(quote.change1m)}>
+                          <Text
+                            inherit
+                            c={getChangeColor(quote.change1m)}>
                             {formatChangePercent(quote.change1m)}
                           </Text>
                         )
-                        : <Text c="dimmed">N/A</Text>}
+                        : (
+                          <Text
+                            inherit
+                            c="dimmed">
+                            N/A
+                          </Text>
+                        )}
                     </Table.Td>
                     <Table.Td>
                       {quote.change6m != null
                         ? (
-                          <Text c={getChangeColor(quote.change6m)}>
+                          <Text
+                            inherit
+                            c={getChangeColor(quote.change6m)}>
                             {formatChangePercent(quote.change6m)}
                           </Text>
                         )
-                        : <Text c="dimmed">N/A</Text>}
+                        : (
+                          <Text
+                            inherit
+                            c="dimmed">
+                            N/A
+                          </Text>
+                        )}
                     </Table.Td>
                     <Table.Td>
                       {quote.change2y != null
                         ? (
-                          <Text c={getChangeColor(quote.change2y)}>
+                          <Text
+                            inherit
+                            c={getChangeColor(quote.change2y)}>
                             {formatChangePercent(quote.change2y)}
                           </Text>
                         )
-                        : <Text c="dimmed">N/A</Text>}
+                        : (
+                          <Text
+                            inherit
+                            c="dimmed">
+                            N/A
+                          </Text>
+                        )}
                     </Table.Td>
                     <Table.Td style={{position: "relative"}}>
                       {formatPrice(data.getBalance(quote.symbol), quote.currency)}
                       {ui.buyingMode && allocationBalance > 0 && (
                         <Text
+                          inherit
                           c="teal"
                           fw={700}
-                          size="sm"
                           style={{
                             position: "absolute",
                             top: "50%",
@@ -301,11 +329,11 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                         if (positionBalanceIls == null || tableTotal <= 0 || positionBalanceIls <= 0) {
                           return (
                             <Text
-                              c="dimmed"
-                              fz="14px">—</Text>
+                              inherit
+                              c="dimmed">—</Text>
                           )
                         }
-                        return <Text fz="14px">{formatSharePercent(positionBalanceIls / tableTotal)}</Text>
+                        return <Text inherit>{formatSharePercent(positionBalanceIls / tableTotal)}</Text>
                       })()}
                     </Table.Td>
                     <Table.Td>
@@ -315,6 +343,10 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                         return (
                           <NumberInput
                             hideControls
+                            allowDecimal={false}
+                            allowLeadingZeros={false}
+                            allowNegative={false}
+                            clampBehavior="strict"
                             disabled={!ui.isEditing(quote.symbol)}
                             max={100}
                             min={1}
@@ -348,6 +380,10 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                     <Table.Td style={{position: "relative"}}>
                       <NumberInput
                         hideControls
+                        allowDecimal={false}
+                        allowLeadingZeros={false}
+                        allowNegative={false}
+                        clampBehavior="strict"
                         disabled={!ui.isEditing(quote.symbol)}
                         min={0}
                         size="xs"
@@ -355,6 +391,7 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                         styles={{
                           input: {
                             width: 80,
+                            fontSize: "14px",
                             ...(data.getAmount(quote.symbol) !== 0 && !ui.isEditing(quote.symbol) && {
                               color: "var(--mantine-color-blue-filled)",
                               fontWeight: 700,
@@ -371,9 +408,9 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                         }}/>
                       {ui.buyingMode && allocation > 0 && (
                         <Text
+                          inherit
                           c="teal"
                           fw={700}
-                          size="sm"
                           style={{
                             position: "absolute",
                             top: "50%",

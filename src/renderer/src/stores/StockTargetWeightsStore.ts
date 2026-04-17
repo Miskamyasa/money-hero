@@ -23,6 +23,10 @@ export class StockTargetWeightsStore {
     return this.weights.get(symbol) ?? 0
   }
 
+  getEffectiveWeight(symbol: string): number {
+    return this.weights.get(symbol) ?? 1
+  }
+
   hasWeight(symbol: string): boolean {
     return this.weights.has(symbol)
   }

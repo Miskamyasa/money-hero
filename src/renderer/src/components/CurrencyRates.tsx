@@ -46,6 +46,7 @@ function CurrencyRatesImpl(): React.JSX.Element {
               size="lg">1.00</Text>
             <Text
               c="dimmed"
+              fz={14}
               size="xs">
               DXY
               {" "}
@@ -77,6 +78,7 @@ function CurrencyRatesImpl(): React.JSX.Element {
               <Text
                 c={getChangeColor(rate.changePercent)}
                 fw={600}
+                fz={14}
                 size="xs">
                 {formatChangePercent(rate.changePercent)}
               </Text>
@@ -105,6 +107,7 @@ function CurrencyRatesImpl(): React.JSX.Element {
             <Text
               c={gold.quote ? getChangeColor(gold.quote.changePercent) : undefined}
               fw={600}
+              fz={14}
               size="xs">
               {gold.quote ? formatChangePercent(gold.quote.changePercent) : "—"}
             </Text>

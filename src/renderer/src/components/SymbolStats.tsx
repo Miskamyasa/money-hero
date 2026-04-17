@@ -115,7 +115,17 @@ function SymbolStatsImpl({store}: SymbolStatsProps): React.JSX.Element {
                       min={0}
                       size="xs"
                       step={1}
-                      styles={{input: {width: 80}}}
+                      styles={{
+                        input: {
+                          width: 80,
+                          fontSize: 14,
+                          ...(store.amount !== 0 && !store.editingAmount && {
+                            color: "var(--mantine-color-blue-filled)",
+                            fontWeight: 700,
+                            opacity: 1,
+                          }),
+                        },
+                      }}
                       value={store.amount}
                       onChange={value => {
                         store.setAmount(Number(value) || 0)

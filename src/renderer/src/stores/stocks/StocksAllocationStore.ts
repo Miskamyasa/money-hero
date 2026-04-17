@@ -78,11 +78,16 @@ export class StocksAllocationStore {
           priceNative: q.price,
           currency: q.currency,
           currentBalanceUsd,
+          effectiveWeight: this.root.stockTargetWeights.getEffectiveWeight(q.symbol),
           priority: (growthRank.get(q.symbol) ?? 0) + (scarcityRank.get(q.symbol) ?? 0),
         }
       })
       .filter((item): item is NonNullable<typeof item> => item != null)
       .sort((a, b) => a.priority - b.priority || a.symbol.localeCompare(b.symbol))
+
+    const totalCurrentBalanceUsd = ranked.reduce((sum, stock) => sum + stock.currentBalanceUsd, 0)
+    const totalWeight = ranked.reduce((sum, stock) => sum + stock.effectiveWeight, 0)
+    const totalPostBuyBalanceUsd = totalCurrentBalanceUsd + this.ui.investmentAmount
 
     const allocations = new Map<string, number>()
     const balances = new Map<string, number>()
@@ -92,7 +97,7 @@ export class StocksAllocationStore {
     // Greedy allocation loop: buy one share at a time while budget remains.
     while (remaining > 0) {
       let candidate: typeof ranked[number] | null = null
-      let candidateProjectedBalance = Number.POSITIVE_INFINITY
+      let candidateFulfillmentRatio = Number.POSITIVE_INFINITY
 
       for (const stock of ranked) {
         if (stock.priceUsd <= 0 || stock.priceUsd > remaining) {
@@ -100,28 +105,30 @@ export class StocksAllocationStore {
         }
 
         const allocatedBalanceUsd = balancesUsd.get(stock.symbol) ?? 0
-        const projectedBalance = stock.currentBalanceUsd + allocatedBalanceUsd
+        const projectedBalanceUsd = stock.currentBalanceUsd + allocatedBalanceUsd + stock.priceUsd
+        const targetBalanceUsd = totalPostBuyBalanceUsd * (stock.effectiveWeight / totalWeight)
+        const fulfillmentRatio = projectedBalanceUsd / targetBalanceUsd
 
         if (candidate == null) {
           candidate = stock
-          candidateProjectedBalance = projectedBalance
+          candidateFulfillmentRatio = fulfillmentRatio
           continue
         }
 
-        if (projectedBalance < candidateProjectedBalance) {
+        if (fulfillmentRatio < candidateFulfillmentRatio) {
           candidate = stock
-          candidateProjectedBalance = projectedBalance
+          candidateFulfillmentRatio = fulfillmentRatio
           continue
         }
 
-        if (projectedBalance === candidateProjectedBalance) {
+        if (fulfillmentRatio === candidateFulfillmentRatio) {
           const isHigherPriority = stock.priority < candidate.priority
           const isSamePriorityFirstSymbol = stock.priority === candidate.priority
             && stock.symbol.localeCompare(candidate.symbol) < 0
 
           if (isHigherPriority || isSamePriorityFirstSymbol) {
             candidate = stock
-            candidateProjectedBalance = projectedBalance
+            candidateFulfillmentRatio = fulfillmentRatio
           }
         }
       }
