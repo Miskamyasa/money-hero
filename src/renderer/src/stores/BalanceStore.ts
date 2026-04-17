@@ -7,13 +7,6 @@ export class BalanceStore {
     makeAutoObservable(this)
   }
 
-  get goldBalanceIls(): number {
-    const {gold, currency} = this.root
-    if (gold.amount === 0)
-      return 0
-    return currency.convertToIls(gold.balance, gold.quote?.currency ?? "USD") ?? 0
-  }
-
   get vtBalanceIls(): number {
     const {vwra, currency} = this.root
     if (vwra.amount === 0)
@@ -47,6 +40,13 @@ export class BalanceStore {
     if (healL.amount === 0)
       return 0
     return currency.convertToIls(healL.balance, healL.quote?.currency ?? "USD") ?? 0
+  }
+
+  get iglnBalanceIls(): number {
+    const {igln, currency} = this.root
+    if (igln.amount === 0)
+      return 0
+    return currency.convertToIls(igln.balance, igln.quote?.currency ?? "USD") ?? 0
   }
 
   get allStocksBalanceIls(): number {
@@ -85,12 +85,12 @@ export class BalanceStore {
   }
 
   get totalBalanceIls(): number {
-    return this.goldBalanceIls
-      + this.vtBalanceIls
+    return this.vtBalanceIls
       + this.taseBalanceIls
       + this.copxBalanceIls
       + this.psiBalanceIls
       + this.healLBalanceIls
+      + this.iglnBalanceIls
       + this.allStocksBalanceIls
   }
 }

@@ -11,12 +11,6 @@ export type GoldQuote = {
   symbol: string,
 }
 
-export type GoldHistory = {
-  change1m: number | null,
-  change6m: number | null,
-  change2y: number | null,
-}
-
 export type CurrencyRate = {
   symbol: string,
   label: string,
@@ -38,7 +32,6 @@ export type CurrencyRates = {
 export type Api = {
   fetchCurrencyRates: () => Promise<CurrencyRates>,
   fetchGoldQuote: () => Promise<GoldQuote>,
-  fetchGoldHistory: () => Promise<GoldHistory>,
   fetchStockQuote: (symbol: string) => Promise<StockQuote>,
   getStockCache: (symbols: string[]) => Promise<StockQuote[]>,
   saveStockCache: (quotes: StockQuote[]) => Promise<void>,

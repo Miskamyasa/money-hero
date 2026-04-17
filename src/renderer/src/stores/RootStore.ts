@@ -27,6 +27,7 @@ export class RootStore {
   // aristocrats = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
   theme = new ThemeStore(this)
   vwra = new SymbolStore(this, "VWRA.L")
+  igln = new SymbolStore(this, "IGLN.L")
   tase = new SymbolStore(this, "MORE-S7.TA")
   copx = new SymbolStore(this, "COPX")
   psi = new SymbolStore(this, "PSI")
@@ -59,8 +60,8 @@ export class RootStore {
     this.fetchQueue.enqueue([
       this.currency.createFetchRatesTask(),
       this.gold.createFetchQuoteTask(),
-      this.gold.createFetchHistoryTask(),
       this.vwra.createFetchQuoteTask(),
+      this.igln.createFetchQuoteTask(),
       this.tase.createFetchQuoteTask(),
       this.copx.createFetchQuoteTask(),
       this.psi.createFetchQuoteTask(),
@@ -74,8 +75,8 @@ export class RootStore {
     this.fetchQueue.enqueue([
       this.currency.createFetchRatesTask(),
       this.gold.createFetchQuoteTask(),
-      this.gold.createFetchHistoryTask(),
       this.vwra.createFetchQuoteTask(),
+      this.igln.createFetchQuoteTask(),
       this.tase.createFetchQuoteTask(),
       this.copx.createFetchQuoteTask(),
       this.psi.createFetchQuoteTask(),

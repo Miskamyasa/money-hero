@@ -25,8 +25,8 @@ export const CURRENCY_IPC_CHANNEL = "currency:fetch-rates"
 
 // Yahoo Finance forex symbols: USDGBP=X means 1 USD in GBP
 const FOREX_PAIRS = [
-  {symbol: "GBPUSD=X", label: "GBP", invert: true, hidden: false},
-  {symbol: "EURUSD=X", label: "EUR", invert: true, hidden: false},
+  {symbol: "GBPUSD=X", label: "GBP", invert: true, hidden: true},
+  {symbol: "EURUSD=X", label: "EUR", invert: true, hidden: true},
   {symbol: "ILSUSD=X", label: "ILS", invert: true, hidden: false},
   {symbol: "INRUSD=X", label: "INR", invert: true, hidden: true},
   {symbol: "BRLUSD=X", label: "BRL", invert: true, hidden: true},

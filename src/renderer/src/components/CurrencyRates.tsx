@@ -4,7 +4,7 @@ import {observer} from "mobx-react-lite"
 import {useStores} from "@renderer/stores/useStores"
 
 function CurrencyRatesImpl(): React.JSX.Element {
-  const {currency} = useStores()
+  const {currency, gold} = useStores()
 
   const formatRate = (value: number): string => {
     return value.toFixed(4)
@@ -84,6 +84,33 @@ function CurrencyRatesImpl(): React.JSX.Element {
           </Group>
         </Paper>
       ))}
+
+      <Paper
+        withBorder
+        p="sm"
+        radius="sm">
+        <Group
+          align="center"
+          justify="space-between"
+          wrap="nowrap">
+          <Text
+            fw={700}
+            size="xl">Gold</Text>
+          <Stack
+            align="flex-end"
+            gap={0}>
+            <Text
+              fw={700}
+              size="lg">{gold.quote ? formatRate(gold.quote.price) : "—"}</Text>
+            <Text
+              c={gold.quote ? getChangeColor(gold.quote.changePercent) : undefined}
+              fw={600}
+              size="xs">
+              {gold.quote ? formatChangePercent(gold.quote.changePercent) : "—"}
+            </Text>
+          </Stack>
+        </Group>
+      </Paper>
     </Group>
   )
 }

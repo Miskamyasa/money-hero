@@ -6,7 +6,6 @@ import {observer} from "mobx-react-lite"
 import {CurrencyRates} from "@renderer/components/CurrencyRates"
 import {FetchProgress} from "@renderer/components/FetchProgress"
 import {FilterDrawer} from "@renderer/components/FilterDrawer"
-import {GoldStats} from "@renderer/components/GoldStats"
 import {StocksTable} from "@renderer/components/StocksTable"
 import {SymbolStats} from "@renderer/components/SymbolStats"
 import {ThemeToggle} from "@renderer/components/ThemeToggle"
@@ -24,10 +23,11 @@ function Dashboard(): React.JSX.Element {
 
   useEffect(() => {
     // Load persisted data (non-fetch)
-    void stores.gold.loadAmount()
     void stores.gold.loadFromCache()
     void stores.vwra.loadAmount()
     void stores.vwra.loadFromCache()
+    void stores.igln.loadAmount()
+    void stores.igln.loadFromCache()
     void stores.tase.loadAmount()
     void stores.tase.loadFromCache()
     void stores.copx.loadAmount()
@@ -131,7 +131,7 @@ function Dashboard(): React.JSX.Element {
           grow
           align="stretch"
           w="100%">
-          <GoldStats />
+          <SymbolStats store={stores.igln} />
           <SymbolStats store={stores.vwra} />
           <SymbolStats store={stores.tase} />
         </Group>
