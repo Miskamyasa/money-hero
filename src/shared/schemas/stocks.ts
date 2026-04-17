@@ -32,3 +32,8 @@ export const StockQuoteSchema = z.object({
 export const StockQuotesSchema = z.array(StockQuoteSchema)
 
 export const StockAmountsSchema = z.record(z.string(), z.number())
+
+export const StockTargetWeightsSchema = z.record(
+  z.string(),
+  z.number().check(z.int(), z.gte(1), z.lte(100)),
+)

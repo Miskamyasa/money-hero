@@ -9,6 +9,7 @@ import {FetchQueueStore} from "./FetchQueueStore"
 import {GoldStore} from "./GoldStore"
 import {StockAmountsStore} from "./StockAmountsStore"
 import {StocksStore} from "./StocksStore"
+import {StockTargetWeightsStore} from "./StockTargetWeightsStore"
 import {SymbolStore} from "./SymbolStore"
 import {ThemeStore} from "./ThemeStore"
 
@@ -20,6 +21,7 @@ export class RootStore {
   currency = new CurrencyStore(this)
   gold = new GoldStore(this)
   stockAmounts = new StockAmountsStore(AMOUNT_SCOPE_STOCK_HOLDINGS)
+  stockTargetWeights = new StockTargetWeightsStore()
   fundsEtfs = new StocksStore(this, FUNDS_ETFS, "funds-etfs")
   individualStocks = new StocksStore(this, INDIVIDUAL_STOCKS, "individual-stocks")
   // water = new StocksStore(this, WATER, "water")

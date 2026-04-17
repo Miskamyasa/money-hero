@@ -2,7 +2,7 @@ import {electronAPI} from "@electron-toolkit/preload"
 import {contextBridge, ipcRenderer} from "electron"
 
 import type {StockQuote} from "../shared/stocks"
-import {parseStockAmounts, parseStockQuote, parseStockQuotes} from "../shared/stocks"
+import {parseStockAmounts, parseStockQuote, parseStockQuotes, parseStockTargetWeights} from "../shared/stocks"
 
 function parseStockSymbols(value: unknown, label: string): string[] {
   if (!Array.isArray(value)) {
@@ -57,6 +57,30 @@ function parseStockAmountWrite(value: unknown): {symbol: string, amount: number}
   return {
     symbol: payload.symbol,
     amount: payload.amount,
+  }
+}
+
+function parseStockTargetWeightWrite(value: unknown): {symbol: string, weight: number} {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError("stock target weight write payload must be an object")
+  }
+
+  const payload = value as {symbol?: unknown, weight?: unknown}
+  if (typeof payload.symbol !== "string" || payload.symbol.length === 0) {
+    throw new TypeError("stock target weight write payload.symbol must be a non-empty string")
+  }
+  if (
+    typeof payload.weight !== "number"
+    || !Number.isInteger(payload.weight)
+    || payload.weight < 1
+    || payload.weight > 100
+  ) {
+    throw new TypeError("stock target weight write payload.weight must be an integer between 1 and 100")
+  }
+
+  return {
+    symbol: payload.symbol,
+    weight: payload.weight,
   }
 }
 
@@ -127,6 +151,22 @@ const api = {
     const parsedScope = parseAmountScope(scope, "setScopedStockAmount scope")
     const parsed = parseStockAmountWrite({symbol, amount})
     return ipcRenderer.invoke("db:set-scoped-stock-amount", parsedScope, parsed.symbol, parsed.amount)
+  },
+  getScopedStockTargetWeights: async (scope: string): Promise<Record<string, number>> => {
+    const parsedScope = parseAmountScope(scope, "getScopedStockTargetWeights scope")
+    const payload: unknown = await ipcRenderer.invoke("db:get-scoped-stock-target-weights", parsedScope)
+    try {
+      return parseStockTargetWeights(payload)
+    }
+    catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown payload error"
+      throw new Error(`Invalid IPC payload for db:get-scoped-stock-target-weights: ${message}`, {cause: error})
+    }
+  },
+  setScopedStockTargetWeight: (scope: string, symbol: string, weight: number): Promise<void> => {
+    const parsedScope = parseAmountScope(scope, "setScopedStockTargetWeight scope")
+    const parsed = parseStockTargetWeightWrite({symbol, weight})
+    return ipcRenderer.invoke("db:set-scoped-stock-target-weight", parsedScope, parsed.symbol, parsed.weight)
   },
   getDisabledStockSymbols: async (storageKey: string): Promise<string[]> => {
     const parsedStorageKey = parseStorageKey(storageKey, "getDisabledStockSymbols storageKey")

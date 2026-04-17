@@ -22,6 +22,8 @@ type StockAmountRow = {symbol: string, amount: number}
 
 type ScopedStockAmountRow = {scope: string, symbol: string, amount: number}
 
+type ScopedStockTargetWeightRow = {scope: string, symbol: string, weight: number}
+
 type DisabledSymbolRow = {storage_key: string, symbol: string}
 
 type KvCacheRow = {key: string, value: string}
@@ -208,6 +210,31 @@ export async function setScopedStockAmount(scope: string, symbol: string, amount
       .onConflict(["scope", "symbol"])
       .merge()
   }
+}
+
+export async function getScopedStockTargetWeights(scope: string): Promise<Record<string, number>> {
+  const db = getDb()
+  const rows = await db<ScopedStockTargetWeightRow>("stock_target_weights_scoped")
+    .where("scope", scope)
+    .select("symbol", "weight")
+
+  const result: Record<string, number> = {}
+  for (const row of rows) {
+    result[row.symbol] = row.weight
+  }
+  return result
+}
+
+export async function setScopedStockTargetWeight(scope: string, symbol: string, weight: number): Promise<void> {
+  if (!Number.isInteger(weight) || weight < 1 || weight > 100) {
+    throw new Error(`weight must be an integer between 1 and 100, got ${String(weight)}`)
+  }
+
+  const db = getDb()
+  await db("stock_target_weights_scoped")
+    .insert({scope, symbol, weight})
+    .onConflict(["scope", "symbol"])
+    .merge()
 }
 
 export async function getDisabledStockSymbols(storageKey: string): Promise<string[]> {

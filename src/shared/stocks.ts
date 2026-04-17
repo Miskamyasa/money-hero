@@ -1,6 +1,6 @@
 import type {z} from "zod/mini"
 
-import {StockAmountsSchema, StockQuoteSchema, StockQuotesSchema} from "./schemas/stocks"
+import {StockAmountsSchema, StockQuoteSchema, StockQuotesSchema, StockTargetWeightsSchema} from "./schemas/stocks"
 
 export type DividendEvent = z.infer<typeof StockQuoteSchema>["dividends"][number]
 
@@ -16,4 +16,8 @@ export function parseStockQuotes(value: unknown): StockQuote[] {
 
 export function parseStockAmounts(value: unknown): Record<string, number> {
   return StockAmountsSchema.parse(value)
+}
+
+export function parseStockTargetWeights(value: unknown): Record<string, number> {
+  return StockTargetWeightsSchema.parse(value)
 }

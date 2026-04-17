@@ -93,4 +93,35 @@ export class BalanceStore {
       + this.iglnBalanceIls
       + this.allStocksBalanceIls
   }
+
+  shareOfTotal(balanceIls: number): number {
+    const total = this.totalBalanceIls
+    if (total <= 0 || balanceIls <= 0 || !Number.isFinite(balanceIls))
+      return 0
+    return balanceIls / total
+  }
+
+  get vtShareOfTotal(): number {
+    return this.shareOfTotal(this.vtBalanceIls)
+  }
+
+  get iglnShareOfTotal(): number {
+    return this.shareOfTotal(this.iglnBalanceIls)
+  }
+
+  get taseShareOfTotal(): number {
+    return this.shareOfTotal(this.taseBalanceIls)
+  }
+
+  get copxShareOfTotal(): number {
+    return this.shareOfTotal(this.copxBalanceIls)
+  }
+
+  get psiShareOfTotal(): number {
+    return this.shareOfTotal(this.psiBalanceIls)
+  }
+
+  get healLShareOfTotal(): number {
+    return this.shareOfTotal(this.healLBalanceIls)
+  }
 }

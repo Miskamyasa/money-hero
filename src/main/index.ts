@@ -14,12 +14,14 @@ import {
   getDisabledStockSymbols,
   getKvCache,
   getScopedStockAmounts,
+  getScopedStockTargetWeights,
   getStockAmounts,
   getStockQuotesCache,
   saveStockQuotesCache,
   setDisabledStockSymbols,
   setKvCache,
   setScopedStockAmount,
+  setScopedStockTargetWeight,
   setStockAmount,
 } from "./repositories"
 import {fetchStockQuote, STOCK_IPC_CHANNEL} from "./stocks"
@@ -91,6 +93,25 @@ void app.whenReady().then(async () => {
   ipcMain.handle(
     "db:set-scoped-stock-amount",
     (_event, scope: string, symbol: string, amount: number) => setScopedStockAmount(scope, symbol, amount),
+  )
+  ipcMain.handle(
+    "db:get-scoped-stock-target-weights",
+    (_event, scope: string) => getScopedStockTargetWeights(scope),
+  )
+  ipcMain.handle(
+    "db:set-scoped-stock-target-weight",
+    (_event, scope: string, symbol: string, weight: number) => {
+      if (typeof scope !== "string" || scope.length === 0) {
+        throw new TypeError("scope must be a non-empty string")
+      }
+      if (typeof symbol !== "string" || symbol.length === 0) {
+        throw new TypeError("symbol must be a non-empty string")
+      }
+      if (!Number.isInteger(weight) || weight < 1 || weight > 100) {
+        throw new TypeError("weight must be an integer between 1 and 100")
+      }
+      return setScopedStockTargetWeight(scope, symbol, weight)
+    },
   )
   ipcMain.handle("db:get-disabled-stock-symbols", (_event, storageKey: string) => getDisabledStockSymbols(storageKey))
   ipcMain.handle(

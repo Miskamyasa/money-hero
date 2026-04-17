@@ -30,6 +30,18 @@ export function formatChangePercent(value: number): string {
   return value >= 0 ? `+${formatted}%` : `${formatted}%`
 }
 
+export function formatSharePercent(ratio: number): string {
+  if (!Number.isFinite(ratio)) {
+    return ""
+  }
+  return `${(ratio * 100).toFixed(2)}%`
+}
+
+export function formatShareBracket(ratio: number): string {
+  const formatted = formatSharePercent(ratio)
+  return formatted ? `(${formatted})` : ""
+}
+
 export function getChangeColor(value: number): string {
   return value >= 0 ? "teal" : "red"
 }

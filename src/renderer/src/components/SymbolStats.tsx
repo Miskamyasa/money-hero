@@ -2,7 +2,8 @@ import {ActionIcon, Card, Group, NumberInput, Paper, Stack, Text} from "@mantine
 import {observer} from "mobx-react-lite"
 
 import type {SymbolStore} from "@renderer/stores/SymbolStore"
-import {formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
+import {useStores} from "@renderer/stores/useStores"
+import {formatChangePercent, formatPrice, formatShareBracket, getChangeColor} from "@renderer/utils/quoteFormatters"
 
 type SymbolStatsProps = {
   store: SymbolStore,
@@ -48,9 +49,17 @@ function PriceChangeCard({label, value, formatChangePercent, getChangeColor}: Pr
 }
 
 function SymbolStatsImpl({store}: SymbolStatsProps): React.JSX.Element {
+  const {currency, balance} = useStores()
   const truncateName = (name: string, maxWords: number): string => {
     return name.split(/\s+/).slice(0, maxWords).join(" ")
   }
+
+  const balanceIls = store.quote
+    ? currency.convertToIls(store.balance, store.quote.currency)
+    : null
+  const shareText = store.amount > 0 && balanceIls != null
+    ? formatShareBracket(balance.shareOfTotal(balanceIls))
+    : ""
 
   const title = store.quote?.name
     ? `${truncateName(store.quote.name, 3)} (${store.symbol})`
@@ -84,7 +93,16 @@ function SymbolStatsImpl({store}: SymbolStatsProps): React.JSX.Element {
                   <Text
                     c="dimmed"
                     size="xs">Balance</Text>
-                  <Text size="xl">{formatPrice(store.balance, store.quote.currency)}</Text>
+                  <Group
+                    gap={6}
+                    wrap="nowrap">
+                    <Text size="xl">{formatPrice(store.balance, store.quote.currency)}</Text>
+                    {shareText && (
+                      <Text
+                        c="dimmed"
+                        size="xl">{shareText}</Text>
+                    )}
+                  </Group>
                 </Stack>
                 <Stack gap={4}>
                   <Text

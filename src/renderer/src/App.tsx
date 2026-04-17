@@ -37,6 +37,7 @@ function Dashboard(): React.JSX.Element {
     void stores.healL.loadAmount()
     void stores.healL.loadFromCache()
     void stores.currency.loadFromCache()
+    void stores.stockTargetWeights.loadWeights()
     void stores.fundsEtfs.data.loadFromCache()
     void stores.fundsEtfs.data.loadAmounts()
     void stores.fundsEtfs.ui.loadDisabledSymbols()

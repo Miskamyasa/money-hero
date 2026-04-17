@@ -19,7 +19,7 @@ import {observer} from "mobx-react-lite"
 
 import type {StocksStore} from "@renderer/stores/StocksStore"
 import {useStores} from "@renderer/stores/useStores"
-import {formatChangePercent, formatPrice, getChangeColor, normalizeCurrency} from "@renderer/utils/quoteFormatters"
+import {formatChangePercent, formatPrice, formatSharePercent, getChangeColor} from "@renderer/utils/quoteFormatters"
 
 import type {SortableColumn, SortState} from "./stocksTableSelectors"
 import {selectSortedQuotes} from "./stocksTableSelectors"
@@ -199,7 +199,6 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Symbol</Table.Th>
-                <Table.Th>Currency</Table.Th>
                 <Table.Th>Price</Table.Th>
                 <Table.Th><SortableHeader
                   column="change1m"
@@ -217,6 +216,8 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                   sortState={sortState}
                   onSort={handleSort} /></Table.Th>
                 <Table.Th>Balance</Table.Th>
+                <Table.Th>Share</Table.Th>
+                <Table.Th>Weight</Table.Th>
                 <Table.Th>Amount</Table.Th>
                 <Table.Th />
               </Table.Tr>
@@ -237,7 +238,6 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                           style={{cursor: "default"}}>{quote.symbol}</Text>
                       </Tooltip>
                     </Table.Td>
-                    <Table.Td><Text size="sm">{normalizeCurrency(quote.currency)}</Text></Table.Td>
                     <Table.Td>
                       <Tooltip
                         withArrow
@@ -292,6 +292,58 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                           {formatPrice(allocationBalance, quote.currency)}
                         </Text>
                       )}
+                    </Table.Td>
+                    <Table.Td>
+                      {(() => {
+                        const positionBalance = data.getBalance(quote.symbol)
+                        const tableTotal = stocks.totalActiveBalanceIls
+                        const positionBalanceIls = root.currency.convertToIls(positionBalance, quote.currency)
+                        if (positionBalanceIls == null || tableTotal <= 0 || positionBalanceIls <= 0) {
+                          return (
+                            <Text
+                              c="dimmed"
+                              fz="14px">—</Text>
+                          )
+                        }
+                        return <Text fz="14px">{formatSharePercent(positionBalanceIls / tableTotal)}</Text>
+                      })()}
+                    </Table.Td>
+                    <Table.Td>
+                      {(() => {
+                        const hasWeight = root.stockTargetWeights.hasWeight(quote.symbol)
+                        const weightValue = hasWeight ? root.stockTargetWeights.getWeight(quote.symbol) : ""
+                        return (
+                          <NumberInput
+                            hideControls
+                            disabled={!ui.isEditing(quote.symbol)}
+                            max={100}
+                            min={1}
+                            placeholder="—"
+                            size="xs"
+                            step={1}
+                            styles={{
+                              input: {
+                                width: 64,
+                                fontSize: "14px",
+                                ...(hasWeight && !ui.isEditing(quote.symbol) && {
+                                  color: "var(--mantine-color-blue-filled)",
+                                  fontWeight: 700,
+                                  opacity: 1,
+                                }),
+                              },
+                            }}
+                            value={weightValue}
+                            onChange={value => {
+                              const numeric = Number(value)
+                              if (!Number.isFinite(numeric) || numeric < 1) return
+                              const clamped = Math.min(100, Math.max(1, Math.round(numeric)))
+                              root.stockTargetWeights.setWeight(quote.symbol, clamped)
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") ui.stopEditing()
+                            }}/>
+                        )
+                      })()}
                     </Table.Td>
                     <Table.Td style={{position: "relative"}}>
                       <NumberInput

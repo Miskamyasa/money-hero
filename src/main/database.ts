@@ -64,6 +64,17 @@ export async function initDatabase(): Promise<void> {
     })
   }
 
+  // Create stock_target_weights_scoped table
+  const hasStockTargetWeightsScoped = await db.schema.hasTable("stock_target_weights_scoped")
+  if (!hasStockTargetWeightsScoped) {
+    await db.schema.createTable("stock_target_weights_scoped", (table) => {
+      table.string("scope").notNullable()
+      table.string("symbol").notNullable()
+      table.integer("weight").notNullable()
+      table.primary(["scope", "symbol"])
+    })
+  }
+
   // Create stock_disabled_symbols table
   const hasStockDisabledSymbols = await db.schema.hasTable("stock_disabled_symbols")
   if (!hasStockDisabledSymbols) {
