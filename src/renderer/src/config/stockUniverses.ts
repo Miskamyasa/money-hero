@@ -1,3 +1,28 @@
+export const PORTFOLIO = [
+  "AAOI",
+  "ALAB",
+  "CNYA",
+  "COPX",
+  "DFNS.L",
+  "EZA",
+  "FLXI.L",
+  "FN",
+  "FUSA.L",
+  "GLUG.L",
+  "HEAL.L",
+  "IGLN.L",
+  "IPGP",
+  "MRVL",
+  "MTSI",
+  "NBIS",
+  "NVT",
+  "PLTR",
+  "PSI",
+  "REMX",
+  "VICR",
+  "VRT",
+]
+
 export const WATER = [
   "AWK", // American Water Works Company
   "CWCO", // Consolidated Water Co. Ltd.

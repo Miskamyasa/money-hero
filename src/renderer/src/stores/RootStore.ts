@@ -1,4 +1,4 @@
-import {DIVIDEND_ARISTOCRATS, HIGH_YIELD, WATER} from "@renderer/config/stockUniverses"
+import {PORTFOLIO} from "@renderer/config/stockUniverses"
 
 import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
 
@@ -15,33 +15,19 @@ import {ThemeStore} from "./ThemeStore"
 const AUTO_REFRESH_INTERVAL = 20 * 60 * 1000 // 20 minutes
 
 export class RootStore {
-  constructor() {
-    this.fetchQueue = new FetchQueueStore()
-    this.app = new AppStore(this)
-    this.currency = new CurrencyStore(this)
-    this.gold = new GoldStore(this)
-    this.stockAmounts = new StockAmountsStore(AMOUNT_SCOPE_STOCK_HOLDINGS)
-    this.water = new StocksStore(this, WATER, "water")
-    this.highYield = new StocksStore(this, HIGH_YIELD, "high-yield")
-    this.aristocrats = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
-    this.theme = new ThemeStore(this)
-    this.vwra = new SymbolStore(this, "VWRA.L")
-    this.voo = new SymbolStore(this, "VOO")
-    this.balance = new BalanceStore(this)
-  }
-
-  readonly fetchQueue: FetchQueueStore
-  readonly app: AppStore
-  readonly balance: BalanceStore
-  readonly currency: CurrencyStore
-  readonly gold: GoldStore
-  readonly stockAmounts: StockAmountsStore
-  readonly aristocrats: StocksStore
-  readonly highYield: StocksStore
-  readonly water: StocksStore
-  readonly theme: ThemeStore
-  readonly vwra: SymbolStore
-  readonly voo: SymbolStore
+  fetchQueue = new FetchQueueStore()
+  app = new AppStore(this)
+  currency = new CurrencyStore(this)
+  gold = new GoldStore(this)
+  stockAmounts = new StockAmountsStore(AMOUNT_SCOPE_STOCK_HOLDINGS)
+  portfolio = new StocksStore(this, PORTFOLIO, "portfolio")
+  // water = new StocksStore(this, WATER, "water")
+  // highYield = new StocksStore(this, HIGH_YIELD, "high-yield")
+  // aristocrats = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
+  theme = new ThemeStore(this)
+  vwra = new SymbolStore(this, "VWRA.L")
+  tase = new SymbolStore(this, "MORE-S7.TA")
+  balance = new BalanceStore(this)
 
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null
   private lastRefreshAt = 0
@@ -71,7 +57,7 @@ export class RootStore {
       this.gold.createFetchQuoteTask(),
       this.gold.createFetchHistoryTask(),
       this.vwra.createFetchQuoteTask(),
-      this.voo.createFetchQuoteTask(),
+      this.tase.createFetchQuoteTask(),
     ])
   }
 
@@ -83,13 +69,13 @@ export class RootStore {
       this.gold.createFetchQuoteTask(),
       this.gold.createFetchHistoryTask(),
       this.vwra.createFetchQuoteTask(),
-      this.voo.createFetchQuoteTask(),
-      ...this.aristocrats.data.createFetchTasks(),
-      this.aristocrats.data.createFlushCacheTask(),
-      ...this.highYield.data.createFetchTasks(),
-      this.highYield.data.createFlushCacheTask(),
-      ...this.water.data.createFetchTasks(),
-      this.water.data.createFlushCacheTask(),
+      this.tase.createFetchQuoteTask(),
+      // ...this.aristocrats.data.createFetchTasks(),
+      // this.aristocrats.data.createFlushCacheTask(),
+      // ...this.highYield.data.createFetchTasks(),
+      // this.highYield.data.createFlushCacheTask(),
+      // ...this.water.data.createFetchTasks(),
+      // this.water.data.createFlushCacheTask(),
     ])
   }
 

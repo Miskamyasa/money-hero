@@ -1,8 +1,8 @@
 import {createConfig} from "@miskamyasa/eslint-config"
 import {createTypeScriptImportResolver} from "eslint-import-resolver-typescript"
 
-// eslint-disable-next-line import-x/no-default-export
-export default createConfig(
+/** @type {ReturnType<typeof createConfig>} */
+const config = createConfig(
   {
     tsconfigRootDir: import.meta.dirname,
     ignores: ["out/**", "dist/**", ".yarn/**", "build/**"],
@@ -22,3 +22,6 @@ export default createConfig(
     },
   },
 )
+
+// eslint-disable-next-line import-x/no-default-export
+export default config

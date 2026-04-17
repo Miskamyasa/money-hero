@@ -9,6 +9,7 @@
     "OPENCODE_YOLO": true
   },
   "mounts": [
+    "source=${localEnv:HOME}/.yarnrc.yml,target=/home/ubuntu/.yarnrc.yml,type=bind,readonly",
     "source=${localEnv:HOME}/.cache/containers/cache,target=/home/ubuntu/.cache,type=bind",
     "source=${localEnv:HOME}/.cache/containers/local-share,target=/home/ubuntu/.local/share,type=bind",
     "source=${localEnv:HOME}/.local/share/opencode,target=/home/ubuntu/.local/share/opencode,type=bind",

@@ -9,10 +9,16 @@ type FilterDrawerProps = {
 }
 
 function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Element {
-  const {aristocrats, highYield, water} = useStores()
-  const aristocratsUi = aristocrats.ui
-  const highYieldUi = highYield.ui
-  const waterUi = water.ui
+  const {
+    portfolio,
+    // aristocrats,
+    // highYield,
+    // water,
+  } = useStores()
+  // const aristocratsUi = aristocrats.ui
+  // const highYieldUi = highYield.ui
+  // const waterUi = water.ui
+  const portfolioUi = portfolio.ui
 
   return (
     <Drawer
@@ -27,15 +33,15 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
         <div>
           <Text
             fw={500}
-            mb="xs">Water</Text>
+            mb="xs">Portfolio</Text>
           <Group gap="xs">
-            {water.allSymbols.map(symbol => (
+            {portfolio.allSymbols.map(symbol => (
               <Button
                 key={symbol}
                 size="compact-xs"
-                variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                variant={portfolioUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                 onClick={() => {
-                  waterUi.toggleSymbol(symbol)
+                  portfolioUi.toggleSymbol(symbol)
                 }}>
                 {symbol}
               </Button>
@@ -43,43 +49,62 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
           </Group>
         </div>
 
-        <div>
-          <Text
-            fw={500}
-            mb="xs">High Yield</Text>
-          <Group gap="xs">
-            {highYield.allSymbols.map(symbol => (
-              <Button
-                key={symbol}
-                size="compact-xs"
-                variant={highYieldUi.isSymbolEnabled(symbol) ? "filled" : "default"}
-                onClick={() => {
-                  highYieldUi.toggleSymbol(symbol)
-                }}>
-                {symbol}
-              </Button>
-            ))}
-          </Group>
-        </div>
+        {/*<div>*/}
+        {/*  <Text*/}
+        {/*    fw={500}*/}
+        {/*    mb="xs">Water</Text>*/}
+        {/*  <Group gap="xs">*/}
+        {/*    {water.allSymbols.map(symbol => (*/}
+        {/*      <Button*/}
+        {/*        key={symbol}*/}
+        {/*        size="compact-xs"*/}
+        {/*        variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
+        {/*        onClick={() => {*/}
+        {/*          waterUi.toggleSymbol(symbol)*/}
+        {/*        }}>*/}
+        {/*        {symbol}*/}
+        {/*      </Button>*/}
+        {/*    ))}*/}
+        {/*  </Group>*/}
+        {/*</div>*/}
 
-        <div>
-          <Text
-            fw={500}
-            mb="xs">Dividend Aristocrats</Text>
-          <Group gap="xs">
-            {aristocrats.allSymbols.map(symbol => (
-              <Button
-                key={symbol}
-                size="compact-xs"
-                variant={aristocratsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
-                onClick={() => {
-                  aristocratsUi.toggleSymbol(symbol)
-                }}>
-                {symbol}
-              </Button>
-            ))}
-          </Group>
-        </div>
+        {/*<div>*/}
+        {/*  <Text*/}
+        {/*    fw={500}*/}
+        {/*    mb="xs">High Yield</Text>*/}
+        {/*  <Group gap="xs">*/}
+        {/*    {highYield.allSymbols.map(symbol => (*/}
+        {/*      <Button*/}
+        {/*        key={symbol}*/}
+        {/*        size="compact-xs"*/}
+        {/*        variant={highYieldUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
+        {/*        onClick={() => {*/}
+        {/*          highYieldUi.toggleSymbol(symbol)*/}
+        {/*        }}>*/}
+        {/*        {symbol}*/}
+        {/*      </Button>*/}
+        {/*    ))}*/}
+        {/*  </Group>*/}
+        {/*</div>*/}
+
+        {/*<div>*/}
+        {/*  <Text*/}
+        {/*    fw={500}*/}
+        {/*    mb="xs">Dividend Aristocrats</Text>*/}
+        {/*  <Group gap="xs">*/}
+        {/*    {aristocrats.allSymbols.map(symbol => (*/}
+        {/*      <Button*/}
+        {/*        key={symbol}*/}
+        {/*        size="compact-xs"*/}
+        {/*        variant={aristocratsUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
+        {/*        onClick={() => {*/}
+        {/*          aristocratsUi.toggleSymbol(symbol)*/}
+        {/*        }}>*/}
+        {/*        {symbol}*/}
+        {/*      </Button>*/}
+        {/*    ))}*/}
+        {/*  </Group>*/}
+        {/*</div>*/}
 
       </Stack>
     </Drawer>

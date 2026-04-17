@@ -28,21 +28,21 @@ function Dashboard(): React.JSX.Element {
     void stores.gold.loadFromCache()
     void stores.vwra.loadAmount()
     void stores.vwra.loadFromCache()
-    void stores.voo.loadAmount()
-    void stores.voo.loadFromCache()
+    void stores.tase.loadAmount()
+    void stores.tase.loadFromCache()
     void stores.currency.loadFromCache()
-    void stores.aristocrats.data.loadFromCache()
-    void stores.aristocrats.data.loadAmounts()
-    void stores.aristocrats.ui.loadDisabledSymbols()
-    void stores.aristocrats.ui.loadCollapseState()
-    void stores.highYield.data.loadFromCache()
-    void stores.highYield.data.loadAmounts()
-    void stores.highYield.ui.loadDisabledSymbols()
-    void stores.highYield.ui.loadCollapseState()
-    void stores.water.data.loadFromCache()
-    void stores.water.data.loadAmounts()
-    void stores.water.ui.loadDisabledSymbols()
-    void stores.water.ui.loadCollapseState()
+    // void stores.aristocrats.data.loadFromCache()
+    // void stores.aristocrats.data.loadAmounts()
+    // void stores.aristocrats.ui.loadDisabledSymbols()
+    // void stores.aristocrats.ui.loadCollapseState()
+    // void stores.highYield.data.loadFromCache()
+    // void stores.highYield.data.loadAmounts()
+    // void stores.highYield.ui.loadDisabledSymbols()
+    // void stores.highYield.ui.loadCollapseState()
+    // void stores.water.data.loadFromCache()
+    // void stores.water.data.loadAmounts()
+    // void stores.water.ui.loadDisabledSymbols()
+    // void stores.water.ui.loadCollapseState()
 
     // Fetch startup items through the queue
     stores.fetchStartupItems()
@@ -119,18 +119,21 @@ function Dashboard(): React.JSX.Element {
           w="100%">
           <GoldStats />
           <SymbolStats store={stores.vwra} />
-          <SymbolStats store={stores.voo} />
+          <SymbolStats store={stores.tase} />
         </Group>
         <FetchProgress />
         <StocksTable
-          store={stores.water}
-          title="Water" />
-        <StocksTable
-          store={stores.highYield}
-          title="High Yield" />
-        <StocksTable
-          store={stores.aristocrats}
-          title="Dividend Aristocrats" />
+          store={stores.portfolio}
+          title="Portfolio" />
+        {/*<StocksTable*/}
+        {/*  store={stores.water}*/}
+        {/*  title="Water" />*/}
+        {/*<StocksTable*/}
+        {/*  store={stores.highYield}*/}
+        {/*  title="High Yield" />*/}
+        {/*<StocksTable*/}
+        {/*  store={stores.aristocrats}*/}
+        {/*  title="Dividend Aristocrats" />*/}
       </Stack>
       <FilterDrawer
         opened={drawerOpened}

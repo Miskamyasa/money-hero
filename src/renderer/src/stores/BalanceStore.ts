@@ -21,19 +21,29 @@ export class BalanceStore {
     return currency.convertToIls(vwra.balance, vwra.quote?.currency ?? "USD") ?? 0
   }
 
-  get vooBalanceIls(): number {
-    const {voo, currency} = this.root
-    if (voo.amount === 0)
+  get taseBalanceIls(): number {
+    const {tase, currency} = this.root
+    if (tase.amount === 0)
       return 0
-    return currency.convertToIls(voo.balance, voo.quote?.currency ?? "USD") ?? 0
+    return currency.convertToIls(tase.balance, tase.quote?.currency ?? "USD") ?? 0
   }
 
   get allStocksBalanceIls(): number {
-    const {aristocrats, highYield, water} = this.root
+    const {
+      portfolio,
+      // aristocrats,
+      // highYield,
+      // water,
+    } = this.root
     const seen = new Set<string>()
     let total = 0
 
-    for (const store of [aristocrats, highYield, water]) {
+    for (const store of [
+      portfolio,
+      // aristocrats,
+      // highYield,
+      // water,
+    ]) {
       for (const quote of store.activeQuotes) {
         if (seen.has(quote.symbol))
           continue
@@ -54,7 +64,7 @@ export class BalanceStore {
   get totalBalanceIls(): number {
     return this.goldBalanceIls
       + this.vtBalanceIls
-      + this.vooBalanceIls
+      + this.taseBalanceIls
       + this.allStocksBalanceIls
   }
 }
