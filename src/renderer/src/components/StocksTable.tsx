@@ -179,7 +179,7 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
         </Group>
       </Group>
 
-      <Collapse in={ui.tableVisible}>
+      <Collapse expanded={ui.tableVisible}>
         {data.quotes.size === 0 && !root.fetchQueue.running && (
           <Center>
             <Button
