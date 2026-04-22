@@ -1,8 +1,9 @@
 [tools]
 node = "24.14.0"
 # Npm tools
-npm = "11.11.0"
+npm = "11.12.1"
 "npm:@devcontainers/cli" = "0.85.0"
+"npm:@mariozechner/pi-coding-agent" = "0.68.1"
 # Aqua tools
 "aqua:opencode" = "1.1.63"
 "aqua:cli/cli" = "2.88.1"

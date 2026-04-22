@@ -1,11 +1,12 @@
 {
   "name": "money-hero",
-  "image": "miskamyasa/mise-ub-24-04:3",
+  "image": "miskamyasa/mise-ub-24-04:4",
   "remoteUser": "ubuntu",
   "workspaceFolder": "${localWorkspaceFolder}",
   "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
   "containerEnv": {
     "MISE_TRUSTED_CONFIG_PATHS": "${localWorkspaceFolder}",
+    "PI_CODING_AGENT_DIR": "/home/ubuntu/.config/pi",
     "OPENCODE_YOLO": true
   },
   "mounts": [
@@ -13,6 +14,7 @@
     "source=/Users/dzaitsev/.cache/containers/local-share,target=/home/ubuntu/.local/share,type=bind",
     "source=/Users/dzaitsev/.local/share/opencode,target=/home/ubuntu/.local/share/opencode,type=bind",
     "source=/Users/dzaitsev/.config/opencode,target=/home/ubuntu/.config/opencode,type=bind,readonly",
+    "source=/Users/dzaitsev/.config/pi,target=/home/ubuntu/.config/pi,type=bind",
     "source=/Users/dzaitsev/Downloads/Screenshots,target=${localWorkspaceFolder}/screenshots,type=bind,readonly",
     "source=/Users/dzaitsev/.local/share/pnpm,target=/Users/dzaitsev/.local/share/pnpm,type=bind,readonly"
   ],
