@@ -1,6 +1,6 @@
 # Money Hero
 
-A desktop investment dashboard that tracks gold, stocks, and currency exchange rates. Built with Electron, React, and TypeScript.
+A desktop portfolio dashboard that tracks gold, stock watchlists, currency exchange rates, and projected balance growth. Built with Electron, React, and TypeScript.
 
 <table>
   <tr>
@@ -18,32 +18,35 @@ A desktop investment dashboard that tracks gold, stocks, and currency exchange r
 ## Features
 
 - **Gold Widget** — Live gold futures price (`GC=F`) with historical performance (1M / 6M / 2Y)
-- **Benchmark Widgets** — Dedicated cards for the S&P 500 (`^GSPC`) and TA-35 (`TA35.TA`)
+- **Benchmark Widgets** — Dedicated cards for the S&P 500 (`^GSPC`) and TA-125 (`^TA125.TA`)
 - **Three Active Stock Watchlists** — Separate tables for **IBI: Individual Stocks**, **IBI: Funds / ETFs**, and **Psagot: Funds / ETFs**
-- **Currency Rates** — USD and DXY plus selected FX rates from Yahoo Finance
+- **Currency Rates** — USD, DXY, and selected FX rates from Yahoo Finance
 - **Portfolio Balance** — Aggregated tracked holdings balance, converted to ILS
+- **Expected Balance Projections** — 1-year and 5-year projected ILS totals based on held positions and available trailing performance history
 - **Buy Mode** — Enter an investment amount and see how it would be allocated across stocks in a watchlist
 - **Sortable & Filterable Tables** — Sort stocks by 1M / 6M / 2Y performance, filter by name or symbol
 - **Editable Holdings** — Set the number of shares you own per symbol; balances update automatically
 - **Dividend Yield** — Annualized dividend yield calculated from historical dividend events
-- **Local Database** — All quotes and holdings are cached in a local SQLite database for instant startup
+- **Local Database** — Quotes, holdings, target weights, disabled symbols, and KV cache are persisted in local SQLite storage
 - **Auto-Refresh** — Data refreshes automatically every 20 minutes with a sequential fetch queue and rate limiting
 - **Dark / Light Theme** — Toggle between color schemes with a single click
-- **Cross-Platform** — Builds for macOS, Windows, and Linux
+- **Packaging Scripts** — electron-builder targets for macOS, Windows, and Linux are included
 
 ## Current Scope
 
 - The app is currently a single dashboard screen, not a multi-page or routed UI.
 - The live watchlists are `INDIVIDUAL_STOCKS`, `FUNDS_ETFS`, and `PSAGOT_ETFS` from `src/renderer/src/config/stockUniverses.ts`.
+- The dashboard currently renders gold, S&P 500, TA-125, currency, fetch progress, and two expected-balance widgets (`in 1 Year`, `in 5 Years`).
+- Expected-balance projections are computed from held positions in the three active watchlists only: the 1-year card uses trailing 1Y change, and the 5-year card annualizes trailing 2Y change when available.
 - Additional preset universes — **Dividend Aristocrats**, **High Yield**, and **Water** — are still present in config, but their store/UI wiring is commented out.
-- Extra symbol widgets for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist in the store layer, but their dashboard cards are currently commented out.
+- Extra symbol widgets for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist in the store layer and are fetched at startup, but their dashboard cards plus amount/cache hydration are currently commented out, and recurring `refreshAll()` skips them.
 
 ## Tech Stack
 
 | Layer       | Technology                                                                                   |
 | ----------- |----------------------------------------------------------------------------------------------|
 | Framework   | [Electron](https://www.electronjs.org/) with [electron-vite](https://electron-vite.org/)     |
-| UI          | [React 19](https://react.dev/) + [Mantine 8](https://mantine.dev/)                           |
+| UI          | [React 19](https://react.dev/) + [Mantine 9](https://mantine.dev/)                           |
 | State       | [MobX](https://mobx.js.org/) (class-based stores)                                            |
 | Language    | [TypeScript 5](https://www.typescriptlang.org/)                                              |
 | Database    | [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) via [Knex](https://knexjs.org/) |
@@ -114,10 +117,10 @@ src/
 
 ### Runtime Domains
 
-- **Market data** — Yahoo Finance fetchers in `src/main/` plus renderer stores for gold, currency, and benchmark/index symbols
+- **Market data** — Yahoo Finance fetchers in `src/main/` plus renderer stores for gold, currency, the S&P 500 / TA-125 benchmark symbols, and stock watchlists
 - **Persistence** — SQLite via Knex/better-sqlite3 with quote cache, scoped holdings, target weights, disabled symbols, and KV cache
 - **IPC/contracts** — `window.api` in preload, shared stock schemas in `src/shared/`, Yahoo response schemas in `src/main/schemas/`
-- **Portfolio engine** — `RootStore`, `StocksStore`, and the stock-table sub-stores coordinate hydration, fetch queueing, allocations, and totals
+- **Portfolio engine** — `RootStore`, `StocksStore`, `BalanceStore`, and `ExpectedBalanceStore` coordinate hydration, fetch queueing, allocations, totals, and projections
 - **Presentation** — a single dashboard shell in `src/renderer/src/App.tsx` backed by Mantine components
 
 - **Main process** fetches data from Yahoo Finance, manages the SQLite database, and exposes IPC handlers.
@@ -126,4 +129,4 @@ src/
 
 ## License
 
-This project is licensed under the **GNU General Public License v3.0** — see the [LICENSE](LICENSE) file for details.
+This repository currently includes the **GNU General Public License v3.0** text in [LICENSE](LICENSE).

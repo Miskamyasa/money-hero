@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Electron desktop app — React, TypeScript, Vite, MobX, Mantine UI.
+Money Hero Electron desktop app — React, TypeScript, Vite, MobX, Mantine UI.
 
 ## Architecture
 
@@ -8,7 +8,7 @@ Three-process Electron architecture with four source roots and two TS project re
 
 - `src/main/` — Main process (Node.js). App bootstrap, Yahoo fetchers, SQLite repositories. Tsconfig: `tsconfig.node.json`
 - `src/preload/` — Preload scripts (IPC bridge). Exposes `window.api` and validates IPC payloads. Tsconfig: `tsconfig.node.json`
-- `src/renderer/` — Renderer (React UI). Dashboard shell, components, MobX stores. Tsconfig: `tsconfig.web.json`
+- `src/renderer/` — Renderer shell (`index.html`) and React UI under `src/renderer/src/`. Dashboard shell, components, MobX stores. Tsconfig: `tsconfig.web.json`
 - `src/shared/` — Types, scopes, and IPC schemas shared across processes. Included in both tsconfigs.
 
 ### Domain Split
@@ -17,7 +17,7 @@ Three-process Electron architecture with four source roots and two TS project re
 - **Persistence** — `src/main/{database,repositories}.ts` plus renderer persistence-facing stores (`StockAmountsStore`, `StockTargetWeightsStore`, `StocksUiStore`)
 - **IPC/contracts** — `src/preload/index.ts`, `src/preload/index.d.ts`, `src/shared/*`, `src/main/schemas/*`
 - **Portfolio state engine** — `src/renderer/src/stores/*`, centered on `RootStore`
-- **Dashboard presentation** — `src/renderer/src/App.tsx`, `components/*`, `config/*`, `utils/*`
+- **Dashboard presentation** — `src/renderer/src/App.tsx`, `components/*` (including benchmark cards, `ExpectedBalanceWidget`, tables, and drawers), `config/*`, `utils/*`
 - **Dormant slices** — commented-out stock universes (`water`, `highYield`, `aristocrats`) and symbol-widget UI blocks that are preserved in code but not rendered
 
 ## Commands
@@ -133,15 +133,15 @@ Stores are provided via React context with a singleton pattern in `useStores.ts`
 
 `RootStore` is the renderer domain hub. The currently active live slices are:
 
-- `currency`, `gold`, `sp500`, `ta35`
+- `app`, `currency`, `gold`, `sp500`, `ta125`
 - `individualStocks`, `fundsEtfs`, `psagotEtfs`
-- `stockAmounts`, `stockTargetWeights`, `theme`, `fetchQueue`, `balance`
+- `stockAmounts`, `stockTargetWeights`, `theme`, `fetchQueue`, `balance`, `expectedBalance`
 
-Additional `SymbolStore`s for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist for fetch/balance plumbing, but their widget UI and amount hydration are currently commented out in `App.tsx`.
+Additional `SymbolStore`s for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist for optional balance plumbing and startup quote fetches, but their widget UI plus amount/cache hydration remain commented out in `App.tsx`, and `refreshAll()` skips them.
 
 The `water`, `highYield`, and `aristocrats` `StocksStore` instances are intentionally left commented out in `RootStore.ts`, `App.tsx`, `FilterDrawer.tsx`, and `BalanceStore.ts` — preserve them as-is unless the user asks to restore those watchlists.
 
-Startup hydration is orchestrated from `App.tsx`: cached renderer state is loaded first, then `RootStore.fetchStartupItems()` seeds the fetch queue, and `RootStore.startAutoRefresh()` keeps the dashboard fresh on a 20-minute interval.
+Startup hydration is orchestrated from `App.tsx`: cached renderer state is loaded first for the live watchlists and dashboard widgets, then `RootStore.fetchStartupItems()` seeds the fetch queue (including hidden symbol quotes), and `RootStore.startAutoRefresh()` refreshes the main dashboard every 20 minutes.
 
 ### IPC & Validation
 

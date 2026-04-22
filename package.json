@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "description": "Money Hero is a desktop portfolio dashboard, not a bank or trading app",
   "author": "MiskaMyasa",
-  "license": "MIT",
+  "license": "AGPL3",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/Miskamyasa/money-hero.git"
