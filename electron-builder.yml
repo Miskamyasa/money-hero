@@ -1,5 +1,6 @@
 appId: com.electron.app
 productName: tmp
+icon: resources/money-hero-app-icon.png
 directories:
   buildResources: build
 files:
@@ -20,6 +21,7 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
+  icon: resources/money-hero.icon
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.

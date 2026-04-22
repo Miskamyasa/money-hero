@@ -3,7 +3,7 @@ import {join} from "node:path"
 import {electronApp, is, optimizer} from "@electron-toolkit/utils"
 import {app, BrowserWindow, ipcMain, shell} from "electron"
 
-import icon from "../../resources/icon.png?asset"
+import icon from "../../resources/money-hero-app-icon.png?asset"
 import type {StockQuote} from "../shared/stocks"
 
 import {CURRENCY_IPC_CHANNEL, fetchCurrencyRates} from "./currency"
@@ -65,6 +65,10 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 void app.whenReady().then(async () => {
+  if (process.platform === "darwin") {
+    app.dock?.setIcon(icon)
+  }
+
   // Set app user model id for windows
   electronApp.setAppUserModelId("com.electron")
 
