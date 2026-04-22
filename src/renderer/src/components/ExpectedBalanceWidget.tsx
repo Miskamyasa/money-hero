@@ -16,9 +16,17 @@ export function ExpectedBalanceWidget({changePercent, title, value}: ExpectedBal
       radius="md"
       shadow="sm">
       <Stack gap="md">
-        <Text
-          fw={700}
-          size="lg">{title}</Text>
+        <Group
+          align="center"
+          justify="space-between"
+          wrap="nowrap">
+          <Text
+            fw={700}
+            size="lg">Expected Balance</Text>
+          <Text
+            fw={700}
+            size="lg">{title}</Text>
+        </Group>
         <Stack gap={4}>
           <Text
             c="dimmed"
