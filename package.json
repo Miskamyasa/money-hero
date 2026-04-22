@@ -1,10 +1,19 @@
 {
   "name": "tmp",
+  "productName": "Money Hero",
   "type": "module",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "description": "Money Hero is a desktop portfolio dashboard, not a bank or trading app",
+  "author": "MiskaMyasa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Miskamyasa/money-hero.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Miskamyasa/money-hero/issues"
+  },
+  "homepage": "https://github.com/Miskamyasa/money-hero",
   "main": "./out/main/index.js",
   "scripts": {
     "lint": "eslint --cache",

@@ -35,6 +35,7 @@ function createWindow(): void {
     minHeight: 720,
     show: false,
     autoHideMenuBar: true,
+    title: "Money Hero",
     ...(process.platform === "linux" ? {icon} : {}),
     webPreferences: {
       preload: join(__dirname, "../preload/index.mjs"),
@@ -61,14 +62,15 @@ function createWindow(): void {
   }
 }
 
+if (process.platform === "darwin") {
+  app.dock?.setIcon(icon)
+  app.setName("Money Hero")
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 void app.whenReady().then(async () => {
-  if (process.platform === "darwin") {
-    app.dock?.setIcon(icon)
-  }
-
   // Set app user model id for windows
   electronApp.setAppUserModelId("red.paragraph.money-hero")
 
