@@ -17,11 +17,11 @@ A desktop investment dashboard that tracks gold, stocks, and currency exchange r
 
 ## Features
 
-- **Gold Tracking** — Live gold futures price (GC=F) with daily change, historical performance (1M / 6M / 2Y), and portfolio balance based on your holdings
-- **Stock Watchlist** — A curated **Portfolio** of ~22 tickers (US large-caps + LSE/international listings) is active by default. Additional preset universes — **Dividend Aristocrats**, **High Yield**, and **Water** — are bundled in `src/renderer/src/config/stockUniverses.ts` and can be enabled by uncommenting the relevant wiring in `RootStore`, `App`, `FilterDrawer`, and `BalanceStore`.
-- **Index Fund Widgets** — Dedicated cards for VWRA.L and MORE-S7.TA ETFs with price, change, and balance tracking
-- **Currency Rates** — USD exchange rates for GBP, EUR, and ILS with daily change percentages and the US Dollar Index (DXY)
-- **Portfolio Balance** — Aggregated total balance across all assets, converted to ILS
+- **Gold Widget** — Live gold futures price (`GC=F`) with historical performance (1M / 6M / 2Y)
+- **Benchmark Widgets** — Dedicated cards for the S&P 500 (`^GSPC`) and TA-35 (`TA35.TA`)
+- **Three Active Stock Watchlists** — Separate tables for **IBI: Individual Stocks**, **IBI: Funds / ETFs**, and **Psagot: Funds / ETFs**
+- **Currency Rates** — USD and DXY plus selected FX rates from Yahoo Finance
+- **Portfolio Balance** — Aggregated tracked holdings balance, converted to ILS
 - **Buy Mode** — Enter an investment amount and see how it would be allocated across stocks in a watchlist
 - **Sortable & Filterable Tables** — Sort stocks by 1M / 6M / 2Y performance, filter by name or symbol
 - **Editable Holdings** — Set the number of shares you own per symbol; balances update automatically
@@ -30,6 +30,13 @@ A desktop investment dashboard that tracks gold, stocks, and currency exchange r
 - **Auto-Refresh** — Data refreshes automatically every 20 minutes with a sequential fetch queue and rate limiting
 - **Dark / Light Theme** — Toggle between color schemes with a single click
 - **Cross-Platform** — Builds for macOS, Windows, and Linux
+
+## Current Scope
+
+- The app is currently a single dashboard screen, not a multi-page or routed UI.
+- The live watchlists are `INDIVIDUAL_STOCKS`, `FUNDS_ETFS`, and `PSAGOT_ETFS` from `src/renderer/src/config/stockUniverses.ts`.
+- Additional preset universes — **Dividend Aristocrats**, **High Yield**, and **Water** — are still present in config, but their store/UI wiring is commented out.
+- Extra symbol widgets for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist in the store layer, but their dashboard cards are currently commented out.
 
 ## Tech Stack
 
@@ -62,6 +69,13 @@ pnpm install
 pnpm dev
 ```
 
+There is no test runner configured. The expected verification pass is:
+
+```bash
+pnpm typecheck
+pnpm lint
+```
+
 ## Scripts
 
 | Command            | Description                                     |
@@ -72,9 +86,12 @@ pnpm dev
 | `pnpm lint`        | Run ESLint (with cache)                         |
 | `pnpm lint:fix`    | Run ESLint and auto-fix issues                  |
 | `pnpm typecheck`   | Run TypeScript type-checking for both processes |
+| `pnpm typecheck:node` | Run the Node/main/preload type-check         |
+| `pnpm typecheck:web`  | Run the renderer type-check                  |
 | `pnpm build:mac`   | Build a distributable for macOS                 |
 | `pnpm build:win`   | Build a distributable for Windows               |
 | `pnpm build:linux` | Build a distributable for Linux                 |
+| `pnpm build:unpack` | Build an unpacked app bundle                   |
 
 ## Architecture
 
@@ -82,20 +99,29 @@ The app follows the standard three-process Electron architecture:
 
 ```text
 src/
-├── main/              # Main process — Node.js, IPC handlers, database, API fetchers
+├── main/              # Main process — Yahoo fetchers, database, repositories, IPC handlers
 │   └── schemas/       # Zod schemas for Yahoo Finance API responses
-├── preload/           # Preload scripts — IPC bridge with payload validation
-├── shared/            # Types, schemas, and constants shared across all processes
+├── preload/           # Preload scripts — typed IPC bridge exposed as window.api
+├── shared/            # Cross-process types, scopes, and IPC schemas
 │   └── schemas/       # Zod Mini schemas for IPC domain types
-└── renderer/src/      # Renderer process — React UI
-    ├── components/    # React components (GoldStats, StocksTable, CurrencyRates, etc.)
-    ├── config/        # Static configuration (stock symbol lists)
-    ├── stores/        # MobX stores (RootStore, GoldStore, CurrencyStore, etc.)
-    └── utils/         # Helpers (formatting, notifications)
+└── renderer/src/      # Renderer process — React UI + MobX state engine
+    ├── components/    # Dashboard widgets, tables, drawers
+    ├── config/        # Stock universes and widget metadata
+    ├── stores/        # RootStore, market data stores, portfolio stores, theme/balance
+    │   └── stocks/    # Stock table data/UI/allocation sub-stores
+    └── utils/         # Formatting, notifications, widget helpers
 ```
 
+### Runtime Domains
+
+- **Market data** — Yahoo Finance fetchers in `src/main/` plus renderer stores for gold, currency, and benchmark/index symbols
+- **Persistence** — SQLite via Knex/better-sqlite3 with quote cache, scoped holdings, target weights, disabled symbols, and KV cache
+- **IPC/contracts** — `window.api` in preload, shared stock schemas in `src/shared/`, Yahoo response schemas in `src/main/schemas/`
+- **Portfolio engine** — `RootStore`, `StocksStore`, and the stock-table sub-stores coordinate hydration, fetch queueing, allocations, and totals
+- **Presentation** — a single dashboard shell in `src/renderer/src/App.tsx` backed by Mantine components
+
 - **Main process** fetches data from Yahoo Finance, manages the SQLite database, and exposes IPC handlers.
-- **Preload script** bridges main and renderer with a typed `window.api` object; all IPC payloads are validated with Zod before reaching the renderer.
+- **Preload script** bridges main and renderer with a typed `window.api` object.
 - **Renderer** is a React SPA using MobX for state management and Mantine for the component library.
 
 ## License

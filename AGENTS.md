@@ -4,12 +4,21 @@ Electron desktop app — React, TypeScript, Vite, MobX, Mantine UI.
 
 ## Architecture
 
-Three-process Electron architecture with three source directories and two TS project references:
+Three-process Electron architecture with four source roots and two TS project references:
 
-- `src/main/` — Main process (Node.js). Tsconfig: `tsconfig.node.json`
-- `src/preload/` — Preload scripts (IPC bridge). Tsconfig: `tsconfig.node.json`
-- `src/renderer/` — Renderer (React UI). Tsconfig: `tsconfig.web.json`
-- `src/shared/` — Types and schemas shared across all processes. Included in both tsconfigs.
+- `src/main/` — Main process (Node.js). App bootstrap, Yahoo fetchers, SQLite repositories. Tsconfig: `tsconfig.node.json`
+- `src/preload/` — Preload scripts (IPC bridge). Exposes `window.api` and validates IPC payloads. Tsconfig: `tsconfig.node.json`
+- `src/renderer/` — Renderer (React UI). Dashboard shell, components, MobX stores. Tsconfig: `tsconfig.web.json`
+- `src/shared/` — Types, scopes, and IPC schemas shared across processes. Included in both tsconfigs.
+
+### Domain Split
+
+- **Market data** — `src/main/{stocks,gold,currency,yahooHistory}.ts` plus renderer stores `CurrencyStore`, `GoldStore`, `SymbolStore`
+- **Persistence** — `src/main/{database,repositories}.ts` plus renderer persistence-facing stores (`StockAmountsStore`, `StockTargetWeightsStore`, `StocksUiStore`)
+- **IPC/contracts** — `src/preload/index.ts`, `src/preload/index.d.ts`, `src/shared/*`, `src/main/schemas/*`
+- **Portfolio state engine** — `src/renderer/src/stores/*`, centered on `RootStore`
+- **Dashboard presentation** — `src/renderer/src/App.tsx`, `components/*`, `config/*`, `utils/*`
+- **Dormant slices** — commented-out stock universes (`water`, `highYield`, `aristocrats`) and symbol-widget UI blocks that are preserved in code but not rendered
 
 ## Commands
 
@@ -39,7 +48,7 @@ If you see an ESLint error, fix it by running `pnpm lint:fix` before making manu
 
 - **Double quotes**, **no semicolons**, **2-space indent** (spaces, not tabs)
 - **LF** line endings, final newline required, trailing whitespace trimmed
-- `console.log` is allowed (`"no-console": "off"`)
+- `console.warn` and `console.error` are exempt; other console usage is lint-warned, not hard-blocked
 - No Prettier — formatting handled entirely by ESLint
 
 ### Imports
@@ -122,16 +131,31 @@ export class ExampleStore {
 
 Stores are provided via React context with a singleton pattern in `useStores.ts`. Stores expose `createFetch*Task()` methods returning `FetchTask` objects that are enqueued into `FetchQueueStore` for sequential execution with rate limiting.
 
-`RootStore` currently wires up `portfolio` (primary stocks watchlist) plus two single-symbol stores `vwra` (VWRA.L) and `tase` (MORE-S7.TA). The `water`, `highYield`, and `aristocrats` `StocksStore` instances are intentionally left commented out in `RootStore.ts`, `App.tsx`, `FilterDrawer.tsx`, and `BalanceStore.ts` — preserve them as-is unless the user asks to restore those watchlists.
+`RootStore` is the renderer domain hub. The currently active live slices are:
+
+- `currency`, `gold`, `sp500`, `ta35`
+- `individualStocks`, `fundsEtfs`, `psagotEtfs`
+- `stockAmounts`, `stockTargetWeights`, `theme`, `fetchQueue`, `balance`
+
+Additional `SymbolStore`s for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist for fetch/balance plumbing, but their widget UI and amount hydration are currently commented out in `App.tsx`.
+
+The `water`, `highYield`, and `aristocrats` `StocksStore` instances are intentionally left commented out in `RootStore.ts`, `App.tsx`, `FilterDrawer.tsx`, and `BalanceStore.ts` — preserve them as-is unless the user asks to restore those watchlists.
+
+Startup hydration is orchestrated from `App.tsx`: cached renderer state is loaded first, then `RootStore.fetchStartupItems()` seeds the fetch queue, and `RootStore.startAutoRefresh()` keeps the dashboard fresh on a 20-minute interval.
 
 ### IPC & Validation
 
 - IPC channels use namespaced kebab-case: `gold:fetch-quote`, `stock:fetch-quote`, `currency:fetch-rates`, `db:get-stock-cache`, etc.
 - Main process registers handlers in `src/main/index.ts` via `ipcMain.handle()`
-- Preload (`src/preload/index.ts`) exposes a typed `window.api` object; it validates all IPC payloads using Zod schemas before passing to renderer
+- Preload (`src/preload/index.ts`) exposes a typed `window.api` object; stock-focused IPC payloads are runtime-validated there before they reach renderer code
 - Shared schemas live in `src/shared/schemas/` using **`zod/mini`** (required because preload runs in context-isolated environment where `new Function()` is blocked)
 - Main process schemas (`src/main/schemas/`) use standard **`zod`** (full version)
 - API type declarations are in `src/preload/index.d.ts` — update this when adding new IPC methods
+
+Notes:
+
+- Stock quote/amount/weight payloads are runtime-validated in preload. Gold, currency, and generic KV payloads are more weakly typed today, so be careful when extending them.
+- Many DB IPC channel names are duplicated as string literals across main and preload. If you rename one, update both sides.
 
 ### Error Handling
 
@@ -147,6 +171,16 @@ Stores are provided via React context with a singleton pattern in `useStores.ts`
 - Repository functions in `src/main/repositories.ts` — all async, return plain objects
 - Data passed over IPC must be serializable (use `JSON.parse(JSON.stringify(...))` for deep clone)
 
+Important tables:
+
+- `stock_quotes` — quote cache with historical deltas and serialized dividends
+- `stock_amounts_scoped` — primary holdings storage
+- `stock_target_weights_scoped` — target weights
+- `stock_disabled_symbols` — per-table symbol toggles
+- `kv_cache` — generic cache for currency, gold, symbol widgets, and collapse state
+
+`stock_amounts` still exists as a legacy table and is lazily migrated for the `"stocks"` scope. Treat scoped amounts as the canonical path for new work.
+
 ### Styling
 
 - **Mantine** components for UI; use Mantine's theming system
@@ -158,7 +192,7 @@ Stores are provided via React context with a singleton pattern in `useStores.ts`
 
 ```text
 src/
-├── main/              # Main process (index.ts, database.ts, stocks.ts, gold.ts, currency.ts, repositories.ts)
+├── main/              # Main process (index.ts, database.ts, stocks.ts, gold.ts, currency.ts, repositories.ts, yahooHistory.ts)
 │   └── schemas/       # Zod schemas for external API responses (uses zod)
 ├── preload/           # Preload scripts (index.ts + index.d.ts for API types)
 ├── shared/            # Code shared across processes (types, schemas, constants)
@@ -166,9 +200,9 @@ src/
 └── renderer/src/      # React UI
     ├── App.tsx, main.tsx, ThemedApp.tsx
     ├── assets/        # CSS files
-    ├── components/    # React components (GoldStats, StocksTable, etc.)
-    ├── config/        # Static configuration (stock symbol lists)
-    ├── stores/        # MobX stores (RootStore, AppStore, GoldStore, etc.)
+    ├── components/    # Dashboard widgets, tables, drawers, and shared presentation pieces
+    ├── config/        # Static configuration (watchlists, widget titles)
+    ├── stores/        # MobX stores (RootStore, market data, balances, theme, etc.)
     │   └── stocks/    # Sub-stores for stock table features
     └── utils/         # Helpers (notify, quoteFormatters)
 ```
