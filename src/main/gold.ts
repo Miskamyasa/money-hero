@@ -2,7 +2,7 @@ import {z} from "zod"
 
 import type {YahooChartResponse} from "./schemas/yahooChart"
 import {formatYahooSchemaError, YahooChartResponseSchema} from "./schemas/yahooChart"
-import {calculateHistoricalChanges} from "./yahooHistory"
+import {calculateHistoricalChanges, getHistoricalWindowTimestamps} from "./yahooHistory"
 
 export type GoldQuote = {
   price: number,
@@ -23,7 +23,10 @@ export const GOLD_IPC_CHANNEL = "gold:fetch-quote"
 export const GOLD_HISTORY_IPC_CHANNEL = "gold:fetch-history"
 
 const GOLD_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=1d&interval=1d"
-const GOLD_HISTORY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=2y&interval=1d"
+function getGoldHistoryUrl(): string {
+  const {period1, period2} = getHistoricalWindowTimestamps()
+  return `https://query1.finance.yahoo.com/v8/finance/chart/GC=F?period1=${period1}&period2=${period2}&interval=1d`
+}
 
 function validateYahooResponse(data: unknown): YahooChartResponse {
   try {
@@ -84,7 +87,7 @@ export async function fetchGoldQuote(): Promise<GoldQuote> {
 
 export async function fetchGoldHistory(): Promise<GoldHistory> {
   try {
-    const response = await fetch(GOLD_HISTORY_URL)
+    const response = await fetch(getGoldHistoryUrl())
 
     if (!response.ok) {
       throw new Error(`Yahoo Finance API returned status ${response.status}: ${response.statusText}`)

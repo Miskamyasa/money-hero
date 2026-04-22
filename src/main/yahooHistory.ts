@@ -6,6 +6,8 @@ export type HistoricalChanges = {
   change2y: number | null,
 }
 
+const HISTORY_LOOKBACK_PADDING_DAYS = 14
+
 type HistoryPoint = {
   timestamp: number,
   close: number,
@@ -25,6 +27,20 @@ function normalizeHistoricalPrice(price: number | undefined, subunitDivisor: num
   }
 
   return price / subunitDivisor
+}
+
+export function getHistoricalWindowTimestamps(): {period1: number, period2: number} {
+  const now = new Date()
+  const period2 = Math.trunc(now.getTime() / 1000)
+  const period1Date = new Date(now)
+
+  period1Date.setUTCFullYear(period1Date.getUTCFullYear() - 2)
+  period1Date.setUTCDate(period1Date.getUTCDate() - HISTORY_LOOKBACK_PADDING_DAYS)
+
+  return {
+    period1: Math.trunc(period1Date.getTime() / 1000),
+    period2,
+  }
 }
 
 function getUtcMonthLength(year: number, month: number): number {
@@ -142,8 +158,9 @@ export function calculateHistoricalChanges(
 
   const price1m = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {months: 1}))
   const price6m = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {months: 6}))
-  const price2y = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {years: 2}))
-    ?? fallback2yPrice
+  const price2yAnchor = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {years: 2}))
+  const earliestVisiblePrice = points.length > 0 ? points[0].close : fallback2yPrice
+  const price2y = price2yAnchor ?? earliestVisiblePrice
 
   return {
     change1m: computeChangePercent(currentPrice, price1m),

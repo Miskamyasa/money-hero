@@ -3,7 +3,12 @@ import {z} from "zod"
 import type {DividendEvent, StockQuote} from "../shared/stocks"
 
 import {formatYahooSchemaError, YahooChartResponseSchema} from "./schemas/yahooChart"
-import {buildHistoryPoints, calculateHistoricalChanges, inferPreviousCloseFromDailySeries} from "./yahooHistory"
+import {
+  buildHistoryPoints,
+  calculateHistoricalChanges,
+  getHistoricalWindowTimestamps,
+  inferPreviousCloseFromDailySeries,
+} from "./yahooHistory"
 
 export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
 
@@ -74,7 +79,8 @@ export function clearYahooSession(): void {
 }
 
 function buildChartUrl(symbol: string, crumb: string): string {
-  const params = `range=2y&interval=1d&events=div&crumb=${encodeURIComponent(crumb)}`
+  const {period1, period2} = getHistoricalWindowTimestamps()
+  const params = `period1=${period1}&period2=${period2}&interval=1d&events=div&crumb=${encodeURIComponent(crumb)}`
   return `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?${params}`
 }
 
