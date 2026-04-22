@@ -1,4 +1,4 @@
-import {FUNDS_ETFS, INDIVIDUAL_STOCKS} from "@renderer/config/stockUniverses"
+import {FUNDS_ETFS, INDIVIDUAL_STOCKS, PSAGOT_ETFS} from "@renderer/config/stockUniverses"
 
 import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
 
@@ -22,8 +22,9 @@ export class RootStore {
   gold = new GoldStore(this)
   stockAmounts = new StockAmountsStore(AMOUNT_SCOPE_STOCK_HOLDINGS)
   stockTargetWeights = new StockTargetWeightsStore()
-  fundsEtfs = new StocksStore(this, FUNDS_ETFS, "funds-etfs")
   individualStocks = new StocksStore(this, INDIVIDUAL_STOCKS, "individual-stocks")
+  fundsEtfs = new StocksStore(this, FUNDS_ETFS, "funds-etfs")
+  psagotEtfs = new StocksStore(this, PSAGOT_ETFS, "psagot-etfs")
   // water = new StocksStore(this, WATER, "water")
   // highYield = new StocksStore(this, HIGH_YIELD, "high-yield")
   // aristocrats = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
@@ -87,6 +88,8 @@ export class RootStore {
       this.fundsEtfs.data.createFlushCacheTask(),
       ...this.individualStocks.data.createFetchTasks(),
       this.individualStocks.data.createFlushCacheTask(),
+      ...this.psagotEtfs.data.createFetchTasks(),
+      this.psagotEtfs.data.createFlushCacheTask(),
       // ...this.aristocrats.data.createFetchTasks(),
       // this.aristocrats.data.createFlushCacheTask(),
       // ...this.highYield.data.createFetchTasks(),

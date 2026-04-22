@@ -38,6 +38,10 @@ function Dashboard(): React.JSX.Element {
     void stores.healL.loadFromCache()
     void stores.currency.loadFromCache()
     void stores.stockTargetWeights.loadWeights()
+    void stores.psagotEtfs.data.loadFromCache()
+    void stores.psagotEtfs.data.loadAmounts()
+    void stores.psagotEtfs.ui.loadDisabledSymbols()
+    void stores.psagotEtfs.ui.loadCollapseState()
     void stores.fundsEtfs.data.loadFromCache()
     void stores.fundsEtfs.data.loadAmounts()
     void stores.fundsEtfs.ui.loadDisabledSymbols()
@@ -146,11 +150,14 @@ function Dashboard(): React.JSX.Element {
         </Group>
         <FetchProgress />
         <StocksTable
-          store={stores.fundsEtfs}
-          title="Funds / ETFs" />
-        <StocksTable
           store={stores.individualStocks}
-          title="Individual Stocks" />
+          title="IBI: Individual Stocks" />
+        <StocksTable
+          store={stores.fundsEtfs}
+          title="IBI: Funds / ETFs" />
+        <StocksTable
+          store={stores.psagotEtfs}
+          title="Psagot: Funds / ETFs" />
         {/*<StocksTable*/}
         {/*  store={stores.water}*/}
         {/*  title="Water" />*/}

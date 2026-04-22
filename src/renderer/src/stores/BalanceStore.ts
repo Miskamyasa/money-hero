@@ -51,6 +51,7 @@ export class BalanceStore {
 
   get allStocksBalanceIls(): number {
     const {
+      psagotEtfs,
       fundsEtfs,
       individualStocks,
       // aristocrats,
@@ -61,6 +62,7 @@ export class BalanceStore {
     let total = 0
 
     for (const store of [
+      psagotEtfs,
       fundsEtfs,
       individualStocks,
       // aristocrats,

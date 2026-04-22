@@ -1,13 +1,3 @@
-export const FUNDS_ETFS = [
-  "CNYA",
-  "DFNS.L",
-  "EZA",
-  "FLXI.L",
-  "FUSA.L",
-  "GLUG.L",
-  "REMX",
-]
-
 export const INDIVIDUAL_STOCKS = [
   "AAOI",
   "ALAB",
@@ -19,6 +9,26 @@ export const INDIVIDUAL_STOCKS = [
   "NVT",
   "VICR",
   "VRT",
+]
+
+export const FUNDS_ETFS = [
+  "AVDV",
+  "EZA",
+  "HEAL",
+  "REMX",
+  "COPX",
+  "PSI",
+]
+
+export const PSAGOT_ETFS = [
+  "DFNS.L",
+  "FLXI.L",
+  "FUSA.L",
+  "GLUG.L",
+  "IGLN.L",
+  "HEAL.L",
+  "VWRA.L",
+  "MORE-S7.TA",
 ]
 
 export const WATER = [

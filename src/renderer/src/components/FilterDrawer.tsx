@@ -11,6 +11,7 @@ type FilterDrawerProps = {
 function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Element {
   const root = useStores()
   const {
+    psagotEtfs,
     fundsEtfs,
     individualStocks,
     // aristocrats,
@@ -29,6 +30,7 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
   // const waterUi = water.ui
   const fundsEtfsUi = fundsEtfs.ui
   const individualStocksUi = individualStocks.ui
+  const psagotEtfsUi = psagotEtfs.ui
 
   return (
     <>
@@ -45,11 +47,29 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
         <Stack
           gap="xl"
           style={{flex: 1, overflowY: "auto", paddingBottom: "var(--mantine-spacing-md)"}}>
+          <div>
+            <Text
+              fw={500}
+              mb="xs">IBI: Individual Stocks</Text>
+            <Group gap="xs">
+              {individualStocks.allSymbols.map(symbol => (
+                <Button
+                  key={symbol}
+                  size="compact-xs"
+                  variant={individualStocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  onClick={() => {
+                    individualStocksUi.toggleSymbol(symbol)
+                  }}>
+                  {symbol}
+                </Button>
+              ))}
+            </Group>
+          </div>
 
           <div>
             <Text
               fw={500}
-              mb="xs">Funds / ETFs</Text>
+              mb="xs">IBI: Funds / ETFs</Text>
             <Group gap="xs">
               {fundsEtfs.allSymbols.map(symbol => (
                 <Button
@@ -68,15 +88,15 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
           <div>
             <Text
               fw={500}
-              mb="xs">Individual Stocks</Text>
+              mb="xs">Psagot: Funds / ETFs</Text>
             <Group gap="xs">
-              {individualStocks.allSymbols.map(symbol => (
+              {psagotEtfs.allSymbols.map(symbol => (
                 <Button
                   key={symbol}
                   size="compact-xs"
-                  variant={individualStocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  variant={psagotEtfsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                   onClick={() => {
-                    individualStocksUi.toggleSymbol(symbol)
+                    psagotEtfsUi.toggleSymbol(symbol)
                   }}>
                   {symbol}
                 </Button>
