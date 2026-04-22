@@ -3,16 +3,16 @@ import {useEffect} from "react"
 import {observer} from "mobx-react-lite"
 
 import {InfoWidget} from "@renderer/components/InfoWidget"
-import {TA35_WIDGET_TITLE} from "@renderer/config/statsWidgets"
+import {TA125_WIDGET_TITLE} from "@renderer/config/statsWidgets"
 import {useStores} from "@renderer/stores/useStores"
 
-function Ta35StatsImpl(): React.JSX.Element {
-  const {ta35} = useStores()
-  const quote = ta35.quote
+function Ta125StatsImpl(): React.JSX.Element {
+  const {ta125} = useStores()
+  const quote = ta125.quote
 
   useEffect(() => {
-    void ta35.loadFromCache()
-  }, [ta35])
+    void ta125.loadFromCache()
+  }, [ta125])
 
   return (
     <InfoWidget
@@ -24,8 +24,8 @@ function Ta35StatsImpl(): React.JSX.Element {
       currency={quote?.currency ?? "USD"}
       hasData={quote != null}
       price={quote?.price ?? 0}
-      title={TA35_WIDGET_TITLE} />
+      title={TA125_WIDGET_TITLE} />
   )
 }
 
-export const Ta35Stats = observer(Ta35StatsImpl)
+export const Ta125Stats = observer(Ta125StatsImpl)

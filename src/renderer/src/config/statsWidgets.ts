@@ -9,5 +9,5 @@ export const PERFORMANCE_PERIODS = [
 export const GOLD_WIDGET_TITLE = "Gold (GC=F)"
 export const SP500_SYMBOL = "^GSPC"
 export const SP500_WIDGET_TITLE = "S&P 500 (^GSPC)"
-export const TA35_SYMBOL = "TA35.TA"
-export const TA35_WIDGET_TITLE = "TA-35 (TA35.TA)"
+export const TA125_SYMBOL = "^TA125.TA"
+export const TA125_WIDGET_TITLE = "TA-125 (^TA125.TA)"

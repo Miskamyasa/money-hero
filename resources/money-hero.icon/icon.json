@@ -1,35 +1,35 @@
 {
-  "fill" : "automatic",
-  "groups" : [
+  "fill": "automatic",
+  "groups": [
     {
-      "layers" : [
+      "layers": [
         {
-          "fill" : "automatic",
-          "glass" : false,
-          "hidden" : false,
-          "image-name" : "money-hero-logo.png",
-          "name" : "money-hero-logo",
-          "position" : {
-            "scale" : 1,
-            "translation-in-points" : [
+          "fill": "automatic",
+          "glass": false,
+          "hidden": false,
+          "image-name": "money-hero-logo.png",
+          "name": "money-hero-logo",
+          "position": {
+            "scale": 1,
+            "translation-in-points": [
               0,
               0
             ]
           }
         }
       ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
       },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.5
+      "translucency": {
+        "enabled": true,
+        "value": 0.5
       }
     }
   ],
-  "supported-platforms" : {
-    "squares" : [
+  "supported-platforms": {
+    "squares": [
       "macOS"
     ]
   }

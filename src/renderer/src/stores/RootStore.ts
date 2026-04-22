@@ -1,4 +1,4 @@
-import {SP500_SYMBOL, TA35_SYMBOL} from "@renderer/config/statsWidgets"
+import {SP500_SYMBOL, TA125_SYMBOL} from "@renderer/config/statsWidgets"
 import {FUNDS_ETFS, INDIVIDUAL_STOCKS, PSAGOT_ETFS} from "@renderer/config/stockUniverses"
 
 import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
@@ -32,7 +32,7 @@ export class RootStore {
   // aristocrats = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
   theme = new ThemeStore(this)
   sp500 = new SymbolStore(this, SP500_SYMBOL)
-  ta35 = new SymbolStore(this, TA35_SYMBOL)
+  ta125 = new SymbolStore(this, TA125_SYMBOL)
   vwra = new SymbolStore(this, "VWRA.L")
   igln = new SymbolStore(this, "IGLN.L")
   tase = new SymbolStore(this, "MORE-S7.TA")
@@ -70,7 +70,7 @@ export class RootStore {
       this.gold.createFetchQuoteTask(),
       this.gold.createFetchHistoryTask(),
       this.sp500.createFetchQuoteTask(),
-      this.ta35.createFetchQuoteTask(),
+      this.ta125.createFetchQuoteTask(),
       this.vwra.createFetchQuoteTask(),
       this.igln.createFetchQuoteTask(),
       this.tase.createFetchQuoteTask(),
@@ -94,7 +94,7 @@ export class RootStore {
       this.gold.createFetchQuoteTask(),
       this.gold.createFetchHistoryTask(),
       this.sp500.createFetchQuoteTask(),
-      this.ta35.createFetchQuoteTask(),
+      this.ta125.createFetchQuoteTask(),
       // this.vwra.createFetchQuoteTask(),
       // this.igln.createFetchQuoteTask(),
       // this.tase.createFetchQuoteTask(),

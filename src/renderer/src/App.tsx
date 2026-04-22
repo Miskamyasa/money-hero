@@ -11,7 +11,7 @@ import {FilterDrawer} from "@renderer/components/FilterDrawer"
 import {GoldStats} from "@renderer/components/GoldStats"
 import {Sp500Stats} from "@renderer/components/Sp500Stats"
 import {StocksTable} from "@renderer/components/StocksTable"
-import {Ta35Stats} from "@renderer/components/Ta35Stats"
+import {Ta125Stats} from "@renderer/components/Ta125Stats"
 import {ThemeToggle} from "@renderer/components/ThemeToggle"
 import {StoreProvider} from "@renderer/stores/StoreProvider"
 import {useStores} from "@renderer/stores/useStores"
@@ -145,7 +145,7 @@ function Dashboard(): React.JSX.Element {
           w="100%">
           <GoldStats />
           <Sp500Stats />
-          <Ta35Stats />
+          <Ta125Stats />
         </Group>
         <Group
           grow
