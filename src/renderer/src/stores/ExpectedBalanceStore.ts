@@ -14,8 +14,13 @@ const PROJECTION_SOURCE_STORES = [
 type PositionProjection = {
   currentBalance: number,
   currency: string,
-  change1y: number | null,
+  change1y: number,
   change2y: number | null,
+}
+
+type ProjectionSummary = {
+  currentBalanceIls: number,
+  projectedBalanceIls: number,
 }
 
 export class ExpectedBalanceStore {
@@ -31,27 +36,45 @@ export class ExpectedBalanceStore {
     return this.getProjectedBalance5yIls()
   }
 
+  get expectedBalance1yChangePercent(): number {
+    return this.getProjectionChangePercent(this.getProjectedBalanceSummary(1))
+  }
+
+  get expectedBalance5yChangePercent(): number {
+    return this.getProjectionChangePercent(this.getProjectedBalance5ySummary())
+  }
+
   private getProjectedBalanceIls(years: number): number {
-    let total = 0
-
-    for (const position of this.getProjectedPositions()) {
-      if (position.change1y == null) {
-        continue
-      }
-
-      const projectedBalance = position.currentBalance * ((1 + position.change1y) ** years)
-      const projectedBalanceIls = this.root.currency.convertToIls(projectedBalance, position.currency)
-
-      if (projectedBalanceIls != null) {
-        total += projectedBalanceIls
-      }
-    }
-
-    return total
+    return this.getProjectedBalanceSummary(years).projectedBalanceIls
   }
 
   private getProjectedBalance5yIls(): number {
-    let total = 0
+    return this.getProjectedBalance5ySummary().projectedBalanceIls
+  }
+
+  private getProjectedBalanceSummary(years: number): ProjectionSummary {
+    let currentBalanceIls = 0
+    let projectedBalanceIls = 0
+
+    for (const position of this.getProjectedPositions()) {
+      const currentPositionBalanceIls = this.root.currency.convertToIls(position.currentBalance, position.currency)
+      const projectedPositionBalance = position.currentBalance * ((1 + position.change1y) ** years)
+      const projectedPositionBalanceIls = this.root.currency.convertToIls(projectedPositionBalance, position.currency)
+
+      if (currentPositionBalanceIls == null || projectedPositionBalanceIls == null) {
+        continue
+      }
+
+      currentBalanceIls += currentPositionBalanceIls
+      projectedBalanceIls += projectedPositionBalanceIls
+    }
+
+    return {currentBalanceIls, projectedBalanceIls}
+  }
+
+  private getProjectedBalance5ySummary(): ProjectionSummary {
+    let currentBalanceIls = 0
+    let projectedBalanceIls = 0
 
     for (const position of this.getProjectedPositions()) {
       if (position.change2y == null) {
@@ -60,14 +83,30 @@ export class ExpectedBalanceStore {
 
       const annualizedRate = ((1 + position.change2y) ** (1 / 2)) - 1
       const projectedBalance = position.currentBalance * ((1 + annualizedRate) ** 5)
-      const projectedBalanceIls = this.root.currency.convertToIls(projectedBalance, position.currency)
+      const currentPositionBalanceIls = this.root.currency.convertToIls(position.currentBalance, position.currency)
+      const projectedPositionBalanceIls = this.root.currency.convertToIls(projectedBalance, position.currency)
 
-      if (projectedBalanceIls != null) {
-        total += projectedBalanceIls
+      if (
+        !Number.isFinite(annualizedRate)
+        || currentPositionBalanceIls == null
+        || projectedPositionBalanceIls == null
+      ) {
+        continue
       }
+
+      currentBalanceIls += currentPositionBalanceIls
+      projectedBalanceIls += projectedPositionBalanceIls
     }
 
-    return total
+    return {currentBalanceIls, projectedBalanceIls}
+  }
+
+  private getProjectionChangePercent(summary: ProjectionSummary): number {
+    if (summary.currentBalanceIls <= 0 || !Number.isFinite(summary.projectedBalanceIls)) {
+      return 0
+    }
+
+    return ((summary.projectedBalanceIls / summary.currentBalanceIls) - 1) * 100
   }
 
   private getProjectedPositions(): PositionProjection[] {

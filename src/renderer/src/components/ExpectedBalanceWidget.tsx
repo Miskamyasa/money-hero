@@ -1,13 +1,14 @@
-import {Card, Stack, Text} from "@mantine/core"
+import {Card, Group, Stack, Text} from "@mantine/core"
 
-import {formatPrice} from "@renderer/utils/quoteFormatters"
+import {formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
 
 type ExpectedBalanceWidgetProps = {
+  changePercent: number,
   title: string,
   value: number,
 }
 
-export function ExpectedBalanceWidget({title, value}: ExpectedBalanceWidgetProps): React.JSX.Element {
+export function ExpectedBalanceWidget({changePercent, title, value}: ExpectedBalanceWidgetProps): React.JSX.Element {
   return (
     <Card
       withBorder
@@ -22,9 +23,18 @@ export function ExpectedBalanceWidget({title, value}: ExpectedBalanceWidgetProps
           <Text
             c="dimmed"
             size="xs">Projected Total</Text>
-          <Text
-            fw={700}
-            size="xl">{formatPrice(value, "ILS")}</Text>
+          <Group
+            align="baseline"
+            justify="space-between"
+            wrap="nowrap">
+            <Text
+              fw={700}
+              size="xl">{formatPrice(value, "ILS")}</Text>
+            <Text
+              c={getChangeColor(changePercent)}
+              fw={700}
+              size="sm">{formatChangePercent(changePercent)}</Text>
+          </Group>
         </Stack>
       </Stack>
     </Card>
