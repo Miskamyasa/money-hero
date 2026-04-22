@@ -30,6 +30,7 @@ export async function initDatabase(): Promise<void> {
       table.string("currency").notNullable()
       table.float("change_1m").nullable()
       table.float("change_6m").nullable()
+      table.float("change_1y").nullable()
       table.float("change_2y").nullable()
       table.text("dividends").nullable()
       table.integer("updated_at").notNullable()
@@ -40,6 +41,13 @@ export async function initDatabase(): Promise<void> {
     if (!hasDividends) {
       await db.schema.alterTable("stock_quotes", (table) => {
         table.text("dividends").nullable()
+      })
+    }
+
+    const hasChange1y = await db.schema.hasColumn("stock_quotes", "change_1y")
+    if (!hasChange1y) {
+      await db.schema.alterTable("stock_quotes", (table) => {
+        table.float("change_1y").nullable()
       })
     }
   }

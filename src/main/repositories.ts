@@ -13,6 +13,7 @@ type StockQuoteRow = {
   currency: string,
   change_1m: number | null,
   change_6m: number | null,
+  change_1y: number | null,
   change_2y: number | null,
   dividends: string | null,
   updated_at: number,
@@ -86,6 +87,7 @@ export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote
       currency: row.currency,
       change1m: toNullableFiniteNumber(row.change_1m),
       change6m: toNullableFiniteNumber(row.change_6m),
+      change1y: toNullableFiniteNumber(row.change_1y),
       change2y: toNullableFiniteNumber(row.change_2y),
       dividends,
     }
@@ -108,6 +110,7 @@ export async function saveStockQuotesCache(quotes: StockQuote[]): Promise<void> 
     currency: quote.currency,
     change_1m: quote.change1m,
     change_6m: quote.change6m,
+    change_1y: quote.change1y,
     change_2y: quote.change2y,
     dividends: JSON.stringify(quote.dividends),
     updated_at: now,

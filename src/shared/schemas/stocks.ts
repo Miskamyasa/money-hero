@@ -25,6 +25,7 @@ export const StockQuoteSchema = z.object({
   currency: z.string(),
   change1m: z.nullable(z.number()),
   change6m: z.nullable(z.number()),
+  change1y: z.nullable(z.number()),
   change2y: z.nullable(z.number()),
   dividends: z.array(DividendEventSchema),
 })

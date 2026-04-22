@@ -3,6 +3,7 @@ import type {YahooChartResult} from "./schemas/yahooChart"
 export type HistoricalChanges = {
   change1m: number | null,
   change6m: number | null,
+  change1y: number | null,
   change2y: number | null,
 }
 
@@ -152,19 +153,23 @@ export function calculateHistoricalChanges(
     return {
       change1m: null,
       change6m: null,
+      change1y: null,
       change2y: computeChangePercent(currentPrice, fallback2yPrice),
     }
   }
 
   const price1m = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {months: 1}))
   const price6m = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {months: 6}))
+  const price1yAnchor = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {years: 1}))
   const price2yAnchor = findCloseOnOrBefore(points, shiftReferenceTimestamp(referenceTimestamp, {years: 2}))
   const earliestVisiblePrice = points.length > 0 ? points[0].close : fallback2yPrice
+  const price1y = price1yAnchor ?? earliestVisiblePrice
   const price2y = price2yAnchor ?? earliestVisiblePrice
 
   return {
     change1m: computeChangePercent(currentPrice, price1m),
     change6m: computeChangePercent(currentPrice, price6m),
+    change1y: computeChangePercent(currentPrice, price1y),
     change2y: computeChangePercent(currentPrice, price2y),
   }
 }

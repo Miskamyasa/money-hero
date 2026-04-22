@@ -164,6 +164,7 @@ function parseChartResponse(data: unknown): StockQuote {
     currency,
     change1m: historicalChanges.change1m,
     change6m: historicalChanges.change6m,
+    change1y: historicalChanges.change1y,
     change2y: historicalChanges.change2y,
     dividends,
   }

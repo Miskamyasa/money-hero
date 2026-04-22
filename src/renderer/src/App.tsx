@@ -4,6 +4,7 @@ import {ActionIcon, Button, Group, Stack, Text, Title} from "@mantine/core"
 import {observer} from "mobx-react-lite"
 
 import {CurrencyRates} from "@renderer/components/CurrencyRates"
+import {ExpectedBalanceWidget} from "@renderer/components/ExpectedBalanceWidget"
 import {FetchProgress} from "@renderer/components/FetchProgress"
 import {FilterDrawer} from "@renderer/components/FilterDrawer"
 import {GoldStats} from "@renderer/components/GoldStats"
@@ -140,6 +141,17 @@ function Dashboard(): React.JSX.Element {
           <GoldStats />
           <Sp500Stats />
           <Ta35Stats />
+        </Group>
+        <Group
+          grow
+          align="stretch"
+          w="100%">
+          <ExpectedBalanceWidget
+            title="Expected Balance in 1 Year"
+            value={stores.expectedBalance.expectedBalance1yIls} />
+          <ExpectedBalanceWidget
+            title="Expected Balance in 5 Years"
+            value={stores.expectedBalance.expectedBalance5yIls} />
         </Group>
         {/*<Group*/}
         {/*  grow*/}

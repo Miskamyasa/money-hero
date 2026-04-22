@@ -6,6 +6,7 @@ import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
 import {AppStore} from "./AppStore"
 import {BalanceStore} from "./BalanceStore"
 import {CurrencyStore} from "./CurrencyStore"
+import {ExpectedBalanceStore} from "./ExpectedBalanceStore"
 import {FetchQueueStore} from "./FetchQueueStore"
 import {GoldStore} from "./GoldStore"
 import {StockAmountsStore} from "./StockAmountsStore"
@@ -39,6 +40,7 @@ export class RootStore {
   psi = new SymbolStore(this, "PSI")
   healL = new SymbolStore(this, "HEAL.L")
   balance = new BalanceStore(this)
+  expectedBalance = new ExpectedBalanceStore(this)
 
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null
   private lastRefreshAt = 0
@@ -75,6 +77,12 @@ export class RootStore {
       this.copx.createFetchQuoteTask(),
       this.psi.createFetchQuoteTask(),
       this.healL.createFetchQuoteTask(),
+      ...this.fundsEtfs.data.createFetchTasks(),
+      this.fundsEtfs.data.createFlushCacheTask(),
+      ...this.individualStocks.data.createFetchTasks(),
+      this.individualStocks.data.createFlushCacheTask(),
+      ...this.psagotEtfs.data.createFetchTasks(),
+      this.psagotEtfs.data.createFlushCacheTask(),
     ])
   }
 

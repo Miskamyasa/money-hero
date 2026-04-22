@@ -16,6 +16,7 @@ type SymbolQuote = {
   currency: string,
   change1m: number | null,
   change6m: number | null,
+  change1y: number | null,
   change2y: number | null,
 }
 
