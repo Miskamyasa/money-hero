@@ -8,7 +8,7 @@ import type {StockQuote} from "../shared/stocks"
 
 import {CURRENCY_IPC_CHANNEL, fetchCurrencyRates} from "./currency"
 import {initDatabase} from "./database"
-import {fetchGoldQuote, GOLD_IPC_CHANNEL} from "./gold"
+import {fetchGoldHistory, fetchGoldQuote, GOLD_HISTORY_IPC_CHANNEL, GOLD_IPC_CHANNEL} from "./gold"
 import {
   clearStockQuotesCache,
   getDisabledStockSymbols,
@@ -80,6 +80,7 @@ void app.whenReady().then(async () => {
     console.warn("pong")
   })
   ipcMain.handle(GOLD_IPC_CHANNEL, fetchGoldQuote)
+  ipcMain.handle(GOLD_HISTORY_IPC_CHANNEL, fetchGoldHistory)
   ipcMain.handle(STOCK_IPC_CHANNEL, (_event, symbol: string) => fetchStockQuote(symbol))
   ipcMain.handle(CURRENCY_IPC_CHANNEL, fetchCurrencyRates)
 

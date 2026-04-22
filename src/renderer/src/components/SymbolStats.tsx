@@ -1,58 +1,18 @@
-import {ActionIcon, Card, Group, NumberInput, Paper, Stack, Text} from "@mantine/core"
+import {ActionIcon, Card, Group, NumberInput, Stack, Text} from "@mantine/core"
 import {observer} from "mobx-react-lite"
 
+import {WidgetPerformance} from "@renderer/components/WidgetPerformance"
 import type {SymbolStore} from "@renderer/stores/SymbolStore"
 import {useStores} from "@renderer/stores/useStores"
-import {formatChangePercent, formatPrice, formatShareBracket, getChangeColor} from "@renderer/utils/quoteFormatters"
+import {formatPrice, formatShareBracket} from "@renderer/utils/quoteFormatters"
+import {formatSymbolWidgetTitle} from "@renderer/utils/statsWidgets"
 
 type SymbolStatsProps = {
   store: SymbolStore,
 }
 
-type PriceChangeCardProps = {
-  label: string,
-  value: number | null,
-  formatChangePercent: (value: number) => string,
-  getChangeColor: (value: number) => string,
-}
-
-function PriceChangeCard({label, value, formatChangePercent, getChangeColor}: PriceChangeCardProps): React.JSX.Element {
-  return (
-    <Paper
-      withBorder
-      p="sm"
-      radius="sm">
-      <Stack
-        align="center"
-        gap={4}>
-        <Text
-          c="dimmed"
-          size="xs">{label}</Text>
-        {value != null
-          ? (
-            <Text
-              c={getChangeColor(value)}
-              fw={700}
-              size="lg">
-              {formatChangePercent(value)}
-            </Text>
-          )
-          : (
-            <Text
-              c="dimmed"
-              fw={700}
-              size="lg">N/A</Text>
-          )}
-      </Stack>
-    </Paper>
-  )
-}
-
 function SymbolStatsImpl({store}: SymbolStatsProps): React.JSX.Element {
   const {currency, balance} = useStores()
-  const truncateName = (name: string, maxWords: number): string => {
-    return name.split(/\s+/).slice(0, maxWords).join(" ")
-  }
 
   const balanceIls = store.quote
     ? currency.convertToIls(store.balance, store.quote.currency)
@@ -61,9 +21,7 @@ function SymbolStatsImpl({store}: SymbolStatsProps): React.JSX.Element {
     ? formatShareBracket(balance.shareOfTotal(balanceIls))
     : ""
 
-  const title = store.quote?.name
-    ? `${truncateName(store.quote.name, 3)} (${store.symbol})`
-    : store.symbol
+  const title = formatSymbolWidgetTitle(store.quote?.name, store.symbol)
 
   return (
     <Card
@@ -163,23 +121,12 @@ function SymbolStatsImpl({store}: SymbolStatsProps): React.JSX.Element {
                 </Stack>
               </Group>
 
-              <Group grow>
-                <PriceChangeCard
-                  formatChangePercent={formatChangePercent}
-                  getChangeColor={getChangeColor}
-                  label="1 Month"
-                  value={store.quote.change1m}/>
-                <PriceChangeCard
-                  formatChangePercent={formatChangePercent}
-                  getChangeColor={getChangeColor}
-                  label="6 Months"
-                  value={store.quote.change6m}/>
-                <PriceChangeCard
-                  formatChangePercent={formatChangePercent}
-                  getChangeColor={getChangeColor}
-                  label="2 Years"
-                  value={store.quote.change2y}/>
-              </Group>
+              <WidgetPerformance
+                changes={{
+                  change1m: store.quote.change1m,
+                  change6m: store.quote.change6m,
+                  change2y: store.quote.change2y,
+                }} />
             </>
           )
           : (

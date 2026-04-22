@@ -88,6 +88,7 @@ function parseStockTargetWeightWrite(value: unknown): {symbol: string, weight: n
 const api = {
   fetchCurrencyRates: (): Promise<unknown> => ipcRenderer.invoke("currency:fetch-rates"),
   fetchGoldQuote: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-quote"),
+  fetchGoldHistory: (): Promise<unknown> => ipcRenderer.invoke("gold:fetch-history"),
   fetchStockQuote: async (symbol: string): Promise<StockQuote> => {
     const payload: unknown = await ipcRenderer.invoke("stock:fetch-quote", symbol)
     try {

@@ -119,10 +119,9 @@ function parseChartResponse(data: unknown): StockQuote {
   //   - London-listed stocks in GBp (pence sterling, 1/100 GBP)
   //   - Tel Aviv-listed stocks in ILA (agurot, 1/100 ILS)
   // Normalize to the parent currency by dividing all monetary values by 100.
-  const subunitCurrencies: Record<string, string> = {GBp: "GBP", ILA: "ILS"}
+  const subunitCurrencies: Partial<Record<string, string>> = {GBp: "GBP", ILA: "ILS"}
   const parentCurrency = subunitCurrencies[currency]
-  const isSubunit = parentCurrency != null
-  const subunitDivisor = isSubunit ? 100 : 1
+  const subunitDivisor = parentCurrency ? 100 : 1
   if (parentCurrency) {
     currency = parentCurrency
   }

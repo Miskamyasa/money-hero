@@ -1,16 +1,17 @@
 // Subunit currencies: code → { parent ISO code, divisor }
-const SUBUNIT_CURRENCIES: Record<string, {code: string, divisor: number}> = {
+const SUBUNIT_CURRENCIES: Partial<Record<string, {code: string, divisor: number}>> = {
   ILA: {code: "ILS", divisor: 100},
   GBp: {code: "GBP", divisor: 100},
 }
 
 export function normalizeCurrency(currency: string): string {
-  return SUBUNIT_CURRENCIES[currency]?.code ?? currency
+  const subunit = SUBUNIT_CURRENCIES[currency]
+  return subunit ? subunit.code : currency
 }
 
 export function formatPrice(value: number, currency = "USD"): string {
   const subunit = SUBUNIT_CURRENCIES[currency]
-  const code = subunit?.code ?? currency
+  const code = subunit ? subunit.code : currency
   const amount = subunit ? value / subunit.divisor : value
   try {
     return new Intl.NumberFormat("en-US", {style: "currency", currency: code, currencyDisplay: "code"}).format(amount)
