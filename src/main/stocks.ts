@@ -3,18 +3,12 @@ import {z} from "zod"
 import type {DividendEvent, StockQuote} from "../shared/stocks"
 
 import {formatYahooSchemaError, YahooChartResponseSchema} from "./schemas/yahooChart"
+import {buildHistoryPoints, calculateHistoricalChanges, inferPreviousCloseFromDailySeries} from "./yahooHistory"
 
 export const STOCK_IPC_CHANNEL = "stock:fetch-quote"
 
 function normalizeYahooSymbol(symbol: string): string {
   return symbol.trim().toUpperCase()
-}
-
-function computeChangePercent(currentPrice: number, historicalPrice: number | undefined): number | null {
-  if (historicalPrice == null || historicalPrice === 0 || !Number.isFinite(historicalPrice)) {
-    return null
-  }
-  return ((currentPrice - historicalPrice) / historicalPrice) * 100
 }
 
 const SESSION_TTL_MS = 30 * 60 * 1000 // 30 minutes
@@ -80,7 +74,7 @@ export function clearYahooSession(): void {
 }
 
 function buildChartUrl(symbol: string, crumb: string): string {
-  const params = `range=2y&interval=1mo&events=div&crumb=${encodeURIComponent(crumb)}`
+  const params = `range=2y&interval=1d&events=div&crumb=${encodeURIComponent(crumb)}`
   return `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?${params}`
 }
 
@@ -126,23 +120,15 @@ function parseChartResponse(data: unknown): StockQuote {
     currency = parentCurrency
   }
 
-  const closePrices = result.indicators.quote[0].close
-  const validCloses = closePrices
-    .filter((p): p is number => p != null && Number.isFinite(p))
-    .map(p => p / subunitDivisor)
-  const totalPoints = validCloses.length
+  const historyPoints = buildHistoryPoints(result, subunitDivisor)
+  const totalPoints = historyPoints.length
 
   let price = meta.regularMarketPrice != null ? meta.regularMarketPrice / subunitDivisor : null
-  let previousClose = meta.chartPreviousClose != null ? meta.chartPreviousClose / subunitDivisor : null
+  const previousClose = inferPreviousCloseFromDailySeries(result, subunitDivisor)
 
   // Fallback: use the last valid close price if regularMarketPrice is missing
   if (price == null && totalPoints >= 1) {
-    price = validCloses[totalPoints - 1]
-  }
-
-  // Fallback: use the first valid close price if chartPreviousClose is missing
-  if (previousClose == null && totalPoints >= 1) {
-    previousClose = validCloses[0]
+    price = historyPoints[totalPoints - 1].close
   }
 
   if (price == null || previousClose == null) {
@@ -151,10 +137,7 @@ function parseChartResponse(data: unknown): StockQuote {
 
   const change = price - previousClose
   const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0
-
-  const price1m = totalPoints >= 2 ? validCloses[totalPoints - 2] : undefined
-  const price6m = totalPoints >= 7 ? validCloses[totalPoints - 7] : undefined
-  const price2y = totalPoints >= 1 ? validCloses[0] : undefined
+  const historicalChanges = calculateHistoricalChanges(result, price, subunitDivisor)
 
   const dividendsRaw = result.events?.dividends
 
@@ -173,9 +156,9 @@ function parseChartResponse(data: unknown): StockQuote {
     change,
     changePercent,
     currency,
-    change1m: computeChangePercent(price, price1m),
-    change6m: computeChangePercent(price, price6m),
-    change2y: computeChangePercent(price, price2y),
+    change1m: historicalChanges.change1m,
+    change6m: historicalChanges.change6m,
+    change2y: historicalChanges.change2y,
     dividends,
   }
 }

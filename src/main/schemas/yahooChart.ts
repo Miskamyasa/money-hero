@@ -14,6 +14,7 @@ const YahooChartMetaSchema = z.looseObject({
   symbol: z.string(),
   currency: z.string(),
   regularMarketPrice: z.number().optional(),
+  regularMarketTime: z.number().optional(),
   chartPreviousClose: z.number().optional(),
   longName: z.string().optional(),
   shortName: z.string().optional(),
@@ -34,6 +35,7 @@ const YahooChartEventsSchema = z.looseObject({
 
 const YahooChartResultSchema = z.looseObject({
   meta: YahooChartMetaSchema,
+  timestamp: z.array(z.number()).min(1),
   indicators: z.looseObject({
     quote: z.array(YahooChartQuoteSchema).min(1),
   }),
