@@ -30,7 +30,7 @@ A desktop portfolio dashboard that tracks gold, stock watchlists, currency excha
 - **Local Database** — Quotes, holdings, target weights, disabled symbols, and KV cache are persisted in local SQLite storage
 - **Auto-Refresh** — Data refreshes automatically every 20 minutes with a sequential fetch queue and rate limiting
 - **Dark / Light Theme** — Toggle between color schemes with a single click
-- **Packaging Scripts** — electron-builder targets for macOS, Windows, and Linux are included
+- **Packaging Scripts** — electron-builder packaging is configured for macOS only
 
 ## Current Scope
 
@@ -79,6 +79,8 @@ pnpm typecheck
 pnpm lint
 ```
 
+Packaged app support is currently declared for **macOS only**.
+
 ## Scripts
 
 | Command            | Description                                     |
@@ -92,8 +94,6 @@ pnpm lint
 | `pnpm typecheck:node` | Run the Node/main/preload type-check         |
 | `pnpm typecheck:web`  | Run the renderer type-check                  |
 | `pnpm build:mac`   | Build a distributable for macOS                 |
-| `pnpm build:win`   | Build a distributable for Windows               |
-| `pnpm build:linux` | Build a distributable for Linux                 |
 | `pnpm build:unpack` | Build an unpacked app bundle                   |
 
 ## Architecture

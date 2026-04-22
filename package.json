@@ -1,11 +1,11 @@
 {
-  "name": "tmp",
+  "name": "MoneyHero",
   "productName": "Money Hero",
   "type": "module",
   "version": "1.0.0",
   "description": "Money Hero is a desktop portfolio dashboard, not a bank or trading app",
   "author": "MiskaMyasa",
-  "license": "AGPL3",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/Miskamyasa/money-hero.git"
@@ -20,15 +20,13 @@
     "lint:fix": "eslint --cache --fix",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
-    "build": "npm run typecheck && electron-vite build",
+    "build": "pnpm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps && npx @electron/rebuild --only better-sqlite3",
-    "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win",
-    "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:unpack": "pnpm run build && electron-builder --dir",
+    "build:mac": "pnpm run build && electron-builder --mac"
   },
   "dependencies": {
     "@electron-toolkit/preload": "3.0.2",
