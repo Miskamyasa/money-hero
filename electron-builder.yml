@@ -1,6 +1,6 @@
-appId: com.electron.app
-productName: tmp
-icon: resources/money-hero-app-icon.png
+appId: red.paragraph.money-hero
+productName: Money Hero
+icon: resources/icon.png
 directories:
   buildResources: build
 files:

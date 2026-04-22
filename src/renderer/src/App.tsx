@@ -3,6 +3,7 @@ import {useEffect, useState} from "react"
 import {ActionIcon, Button, Group, Stack, Text, Title} from "@mantine/core"
 import {observer} from "mobx-react-lite"
 
+import moneyHeroLogo from "@renderer/assets/money-hero-logo.png"
 import {CurrencyRates} from "@renderer/components/CurrencyRates"
 import {ExpectedBalanceWidget} from "@renderer/components/ExpectedBalanceWidget"
 import {FetchProgress} from "@renderer/components/FetchProgress"
@@ -92,6 +93,10 @@ function Dashboard(): React.JSX.Element {
           <Group
             align="center"
             gap="md">
+            <img
+              alt="Money Hero logo"
+              src={moneyHeroLogo}
+              style={{display: "block", flexShrink: 0, height: 64, width: "auto"}} />
             <Title
               size="3rem"
               style={{textTransform: "uppercase"}}>Money Hero</Title>
