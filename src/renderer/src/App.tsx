@@ -9,7 +9,6 @@ import {FilterDrawer} from "@renderer/components/FilterDrawer"
 import {GoldStats} from "@renderer/components/GoldStats"
 import {Sp500Stats} from "@renderer/components/Sp500Stats"
 import {StocksTable} from "@renderer/components/StocksTable"
-import {SymbolStats} from "@renderer/components/SymbolStats"
 import {Ta35Stats} from "@renderer/components/Ta35Stats"
 import {ThemeToggle} from "@renderer/components/ThemeToggle"
 import {StoreProvider} from "@renderer/stores/StoreProvider"
@@ -26,18 +25,6 @@ function Dashboard(): React.JSX.Element {
 
   useEffect(() => {
     // Load persisted data (non-fetch)
-    void stores.vwra.loadAmount()
-    void stores.vwra.loadFromCache()
-    void stores.igln.loadAmount()
-    void stores.igln.loadFromCache()
-    void stores.tase.loadAmount()
-    void stores.tase.loadFromCache()
-    void stores.copx.loadAmount()
-    void stores.copx.loadFromCache()
-    void stores.psi.loadAmount()
-    void stores.psi.loadFromCache()
-    void stores.healL.loadAmount()
-    void stores.healL.loadFromCache()
     void stores.currency.loadFromCache()
     void stores.stockTargetWeights.loadWeights()
     void stores.psagotEtfs.data.loadFromCache()
@@ -64,6 +51,18 @@ function Dashboard(): React.JSX.Element {
     // void stores.water.data.loadAmounts()
     // void stores.water.ui.loadDisabledSymbols()
     // void stores.water.ui.loadCollapseState()
+    // void stores.vwra.loadAmount()
+    // void stores.vwra.loadFromCache()
+    // void stores.igln.loadAmount()
+    // void stores.igln.loadFromCache()
+    // void stores.tase.loadAmount()
+    // void stores.tase.loadFromCache()
+    // void stores.copx.loadAmount()
+    // void stores.copx.loadFromCache()
+    // void stores.psi.loadAmount()
+    // void stores.psi.loadFromCache()
+    // void stores.healL.loadAmount()
+    // void stores.healL.loadFromCache()
 
     // Fetch startup items through the queue
     stores.fetchStartupItems()
@@ -142,22 +141,22 @@ function Dashboard(): React.JSX.Element {
           <Sp500Stats />
           <Ta35Stats />
         </Group>
-        <Group
-          grow
-          align="stretch"
-          w="100%">
-          <SymbolStats store={stores.igln} />
-          <SymbolStats store={stores.vwra} />
-          <SymbolStats store={stores.tase} />
-        </Group>
-        <Group
-          grow
-          align="stretch"
-          w="100%">
-          <SymbolStats store={stores.copx} />
-          <SymbolStats store={stores.psi} />
-          <SymbolStats store={stores.healL} />
-        </Group>
+        {/*<Group*/}
+        {/*  grow*/}
+        {/*  align="stretch"*/}
+        {/*  w="100%">*/}
+        {/*  <SymbolStats store={stores.igln} />*/}
+        {/*  <SymbolStats store={stores.vwra} />*/}
+        {/*  <SymbolStats store={stores.tase} />*/}
+        {/*</Group>*/}
+        {/*<Group*/}
+        {/*  grow*/}
+        {/*  align="stretch"*/}
+        {/*  w="100%">*/}
+        {/*  <SymbolStats store={stores.copx} />*/}
+        {/*  <SymbolStats store={stores.psi} />*/}
+        {/*  <SymbolStats store={stores.healL} />*/}
+        {/*</Group>*/}
         <FetchProgress />
         <StocksTable
           store={stores.individualStocks}
