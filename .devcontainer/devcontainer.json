@@ -7,6 +7,7 @@
   "containerEnv": {
     "MISE_TRUSTED_CONFIG_PATHS": "${localWorkspaceFolder}",
     "PI_CODING_AGENT_DIR": "/home/ubuntu/.config/pi",
+    "OPENCODE_DISABLE_LSP_DOWNLOAD": true,
     "OPENCODE_YOLO": true
   },
   "mounts": [
