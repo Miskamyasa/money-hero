@@ -134,7 +134,7 @@ Stores are provided via React context with a singleton pattern in `useStores.ts`
 `RootStore` is the renderer domain hub. The currently active live slices are:
 
 - `app`, `currency`, `gold`, `sp500`, `ta125`
-- `individualStocks`, `fundsEtfs`, `psagotEtfs`
+- `stocksAi`, `stocksHc`, `fundsEtfs`, `psagotEtfs`
 - `stockAmounts`, `stockTargetWeights`, `theme`, `fetchQueue`, `balance`, `expectedBalance`
 
 Additional `SymbolStore`s for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist for optional balance plumbing and startup quote fetches, but their widget UI plus amount/cache hydration remain commented out in `App.tsx`, and `refreshAll()` skips them.

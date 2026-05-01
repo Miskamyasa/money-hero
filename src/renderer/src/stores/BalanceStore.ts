@@ -53,7 +53,8 @@ export class BalanceStore {
     const {
       psagotEtfs,
       fundsEtfs,
-      individualStocks,
+      stocksAi,
+      stocksHc,
       // aristocrats,
       // highYield,
       // water,
@@ -64,7 +65,8 @@ export class BalanceStore {
     for (const store of [
       psagotEtfs,
       fundsEtfs,
-      individualStocks,
+      stocksAi,
+      stocksHc,
       // aristocrats,
       // highYield,
       // water,

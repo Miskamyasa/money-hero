@@ -13,7 +13,8 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
   const {
     psagotEtfs,
     fundsEtfs,
-    individualStocks,
+    stocksAi,
+    stocksHc,
     // aristocrats,
     // highYield,
     // water,
@@ -29,7 +30,8 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
   // const highYieldUi = highYield.ui
   // const waterUi = water.ui
   const fundsEtfsUi = fundsEtfs.ui
-  const individualStocksUi = individualStocks.ui
+  const stocksAiUi = stocksAi.ui
+  const stocksHcUi = stocksHc.ui
   const psagotEtfsUi = psagotEtfs.ui
 
   return (
@@ -50,15 +52,34 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
           <div>
             <Text
               fw={500}
-              mb="xs">IBI: Individual Stocks</Text>
+              mb="xs">IBI: Ai</Text>
             <Group gap="xs">
-              {individualStocks.allSymbols.map(symbol => (
+              {stocksAi.allSymbols.map(symbol => (
                 <Button
                   key={symbol}
                   size="compact-xs"
-                  variant={individualStocksUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  variant={stocksAiUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                   onClick={() => {
-                    individualStocksUi.toggleSymbol(symbol)
+                    stocksAiUi.toggleSymbol(symbol)
+                  }}>
+                  {symbol}
+                </Button>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <Text
+              fw={500}
+              mb="xs">IBI: Health</Text>
+            <Group gap="xs">
+              {stocksHc.allSymbols.map(symbol => (
+                <Button
+                  key={symbol}
+                  size="compact-xs"
+                  variant={stocksHcUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  onClick={() => {
+                    stocksHcUi.toggleSymbol(symbol)
                   }}>
                   {symbol}
                 </Button>

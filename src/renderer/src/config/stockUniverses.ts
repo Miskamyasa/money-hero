@@ -1,4 +1,13 @@
-export const INDIVIDUAL_STOCKS = [
+export const INDIVIDUAL_STOCKS_HC = [
+  "ERAS",
+  "LLY",
+  "GKOS",
+  "ISRG",
+  "VKTX",
+  "VRTX",
+]
+
+export const INDIVIDUAL_STOCKS_AI = [
   "AAOI",
   "ALAB",
   "FN",

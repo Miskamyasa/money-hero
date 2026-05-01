@@ -1,5 +1,5 @@
 import {SP500_SYMBOL, TA125_SYMBOL} from "@renderer/config/statsWidgets"
-import {FUNDS_ETFS, INDIVIDUAL_STOCKS, PSAGOT_ETFS} from "@renderer/config/stockUniverses"
+import {FUNDS_ETFS, INDIVIDUAL_STOCKS_AI, INDIVIDUAL_STOCKS_HC, PSAGOT_ETFS} from "@renderer/config/stockUniverses"
 
 import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
 
@@ -24,7 +24,8 @@ export class RootStore {
   gold = new GoldStore(this)
   stockAmounts = new StockAmountsStore(AMOUNT_SCOPE_STOCK_HOLDINGS)
   stockTargetWeights = new StockTargetWeightsStore()
-  individualStocks = new StocksStore(this, INDIVIDUAL_STOCKS, "individual-stocks")
+  stocksHc = new StocksStore(this, INDIVIDUAL_STOCKS_HC, "individual-stocks-heal")
+  stocksAi = new StocksStore(this, INDIVIDUAL_STOCKS_AI, "individual-stocks")
   fundsEtfs = new StocksStore(this, FUNDS_ETFS, "funds-etfs")
   psagotEtfs = new StocksStore(this, PSAGOT_ETFS, "psagot-etfs")
   // water = new StocksStore(this, WATER, "water")
@@ -79,8 +80,10 @@ export class RootStore {
       this.healL.createFetchQuoteTask(),
       ...this.fundsEtfs.data.createFetchTasks(),
       this.fundsEtfs.data.createFlushCacheTask(),
-      ...this.individualStocks.data.createFetchTasks(),
-      this.individualStocks.data.createFlushCacheTask(),
+      ...this.stocksAi.data.createFetchTasks(),
+      this.stocksAi.data.createFlushCacheTask(),
+      ...this.stocksHc.data.createFetchTasks(),
+      this.stocksHc.data.createFlushCacheTask(),
       ...this.psagotEtfs.data.createFetchTasks(),
       this.psagotEtfs.data.createFlushCacheTask(),
     ])
@@ -103,8 +106,8 @@ export class RootStore {
       // this.healL.createFetchQuoteTask(),
       ...this.fundsEtfs.data.createFetchTasks(),
       this.fundsEtfs.data.createFlushCacheTask(),
-      ...this.individualStocks.data.createFetchTasks(),
-      this.individualStocks.data.createFlushCacheTask(),
+      ...this.stocksAi.data.createFetchTasks(),
+      this.stocksAi.data.createFlushCacheTask(),
       ...this.psagotEtfs.data.createFetchTasks(),
       this.psagotEtfs.data.createFlushCacheTask(),
       // ...this.aristocrats.data.createFetchTasks(),

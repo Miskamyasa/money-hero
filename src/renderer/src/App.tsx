@@ -37,10 +37,14 @@ function Dashboard(): React.JSX.Element {
     void stores.fundsEtfs.data.loadAmounts()
     void stores.fundsEtfs.ui.loadDisabledSymbols()
     void stores.fundsEtfs.ui.loadCollapseState()
-    void stores.individualStocks.data.loadFromCache()
-    void stores.individualStocks.data.loadAmounts()
-    void stores.individualStocks.ui.loadDisabledSymbols()
-    void stores.individualStocks.ui.loadCollapseState()
+    void stores.stocksHc.data.loadFromCache()
+    void stores.stocksHc.data.loadAmounts()
+    void stores.stocksHc.ui.loadDisabledSymbols()
+    void stores.stocksHc.ui.loadCollapseState()
+    void stores.stocksAi.data.loadFromCache()
+    void stores.stocksAi.data.loadAmounts()
+    void stores.stocksAi.ui.loadDisabledSymbols()
+    void stores.stocksAi.ui.loadCollapseState()
     // void stores.aristocrats.data.loadFromCache()
     // void stores.aristocrats.data.loadAmounts()
     // void stores.aristocrats.ui.loadDisabledSymbols()
@@ -178,8 +182,11 @@ function Dashboard(): React.JSX.Element {
         {/*</Group>*/}
         <FetchProgress />
         <StocksTable
-          store={stores.individualStocks}
-          title="IBI: Individual Stocks" />
+          store={stores.stocksHc}
+          title="IBI: Health" />
+        <StocksTable
+          store={stores.stocksAi}
+          title="IBI: Ai" />
         <StocksTable
           store={stores.fundsEtfs}
           title="IBI: Funds / ETFs" />

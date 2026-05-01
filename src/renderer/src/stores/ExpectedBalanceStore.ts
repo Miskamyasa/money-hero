@@ -6,7 +6,8 @@ import type {RootStore} from "./RootStore"
 import type {StocksStore} from "./StocksStore"
 
 const PROJECTION_SOURCE_STORES = [
-  "individualStocks",
+  "stocksHc",
+  "stocksAi",
   "fundsEtfs",
   "psagotEtfs",
 ] as const satisfies readonly (keyof RootStore)[]
