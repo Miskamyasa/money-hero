@@ -1,14 +1,44 @@
-import {Card, Group, Stack, Text} from "@mantine/core"
+import {Card, Group, SimpleGrid, Stack, Text} from "@mantine/core"
 
+import type {ExpectedBalanceScenario} from "@renderer/stores/ExpectedBalanceStore"
 import {formatChangePercent, formatPrice, getChangeColor} from "@renderer/utils/quoteFormatters"
 
-type ExpectedBalanceWidgetProps = {
-  changePercent: number,
-  title: string,
-  value: number,
+const SCENARIO_GRID_STYLE = {
+  alignItems: "baseline",
+  gridTemplateColumns: "minmax(8rem, 1fr) minmax(12rem, auto) minmax(5.5rem, auto)",
 }
 
-export function ExpectedBalanceWidget({changePercent, title, value}: ExpectedBalanceWidgetProps): React.JSX.Element {
+type ExpectedBalanceWidgetProps = {
+  conservative: ExpectedBalanceScenario,
+  hotStreak: ExpectedBalanceScenario,
+  title: string,
+}
+
+type ScenarioRowProps = {
+  label: string,
+  scenario: ExpectedBalanceScenario,
+}
+
+function ScenarioRow({label, scenario}: ScenarioRowProps): React.JSX.Element {
+  return (
+    <>
+      <Text
+        c="dimmed"
+        size="sm">{label}</Text>
+      <Text
+        fw={700}
+        size="lg"
+        ta="right">{formatPrice(scenario.projectedBalanceIls, "ILS")}</Text>
+      <Text
+        c={getChangeColor(scenario.changePercent)}
+        fw={700}
+        size="sm"
+        ta="right">{formatChangePercent(scenario.changePercent)}</Text>
+    </>
+  )
+}
+
+export function ExpectedBalanceWidget({conservative, hotStreak, title}: ExpectedBalanceWidgetProps): React.JSX.Element {
   return (
     <Card
       withBorder
@@ -27,23 +57,17 @@ export function ExpectedBalanceWidget({changePercent, title, value}: ExpectedBal
             fw={700}
             size="lg">{title}</Text>
         </Group>
-        <Stack gap={4}>
-          <Text
-            c="dimmed"
-            size="xs">Projected Total</Text>
-          <Group
-            align="baseline"
-            justify="space-between"
-            wrap="nowrap">
-            <Text
-              fw={700}
-              size="xl">{formatPrice(value, "ILS")}</Text>
-            <Text
-              c={getChangeColor(changePercent)}
-              fw={700}
-              size="sm">{formatChangePercent(changePercent)}</Text>
-          </Group>
-        </Stack>
+        <SimpleGrid
+          cols={3}
+          spacing="xs"
+          style={SCENARIO_GRID_STYLE}>
+          <ScenarioRow
+            label="Conservative"
+            scenario={conservative} />
+          <ScenarioRow
+            label="Hot streak"
+            scenario={hotStreak} />
+        </SimpleGrid>
       </Stack>
     </Card>
   )

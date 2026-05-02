@@ -12,6 +12,11 @@ const PROJECTION_SOURCE_STORES = [
   "psagotEtfs",
 ] as const satisfies readonly (keyof RootStore)[]
 
+const CONSERVATIVE_1Y_RETURN_FACTOR = 0.6
+const HOT_STREAK_1Y_RETURN_FACTOR = 1
+const CONSERVATIVE_5Y_DECAY = [0.8, 0.7, 0.6, 0.5, 0.4] as const
+const HOT_STREAK_5Y_DECAY = [1, 0.9, 0.8, 0.7, 0.6] as const
+
 type PositionProjection = {
   currentBalance: number,
   currency: string,
@@ -24,42 +29,54 @@ type ProjectionSummary = {
   projectedBalanceIls: number,
 }
 
+export type ExpectedBalanceScenario = {
+  projectedBalanceIls: number,
+  changePercent: number,
+}
+
 export class ExpectedBalanceStore {
   constructor(private root: RootStore) {
     makeAutoObservable(this)
   }
 
-  get expectedBalance1yIls(): number {
-    return this.getProjectedBalanceIls(1)
+  get expectedBalance1yConservative(): ExpectedBalanceScenario {
+    return this.getProjectedBalance1yScenario(CONSERVATIVE_1Y_RETURN_FACTOR)
   }
 
-  get expectedBalance5yIls(): number {
-    return this.getProjectedBalance5yIls()
+  get expectedBalance1yHotStreak(): ExpectedBalanceScenario {
+    return this.getProjectedBalance1yScenario(HOT_STREAK_1Y_RETURN_FACTOR)
   }
 
-  get expectedBalance1yChangePercent(): number {
-    return this.getProjectionChangePercent(this.getProjectedBalanceSummary(1))
+  get expectedBalance5yConservative(): ExpectedBalanceScenario {
+    return this.getProjectedBalance5yScenario(CONSERVATIVE_5Y_DECAY)
   }
 
-  get expectedBalance5yChangePercent(): number {
-    return this.getProjectionChangePercent(this.getProjectedBalance5ySummary())
+  get expectedBalance5yHotStreak(): ExpectedBalanceScenario {
+    return this.getProjectedBalance5yScenario(HOT_STREAK_5Y_DECAY)
   }
 
-  private getProjectedBalanceIls(years: number): number {
-    return this.getProjectedBalanceSummary(years).projectedBalanceIls
+  private createScenario(summary: ProjectionSummary): ExpectedBalanceScenario {
+    return {
+      projectedBalanceIls: summary.projectedBalanceIls,
+      changePercent: this.getProjectionChangePercent(summary),
+    }
   }
 
-  private getProjectedBalance5yIls(): number {
-    return this.getProjectedBalance5ySummary().projectedBalanceIls
+  private getProjectedBalance1yScenario(returnFactor: number): ExpectedBalanceScenario {
+    return this.createScenario(this.getProjectedBalance1ySummary(returnFactor))
   }
 
-  private getProjectedBalanceSummary(years: number): ProjectionSummary {
+  private getProjectedBalance5yScenario(decay: readonly number[]): ExpectedBalanceScenario {
+    return this.createScenario(this.getProjectedBalance5ySummary(decay))
+  }
+
+  private getProjectedBalance1ySummary(returnFactor: number): ProjectionSummary {
     let currentBalanceIls = 0
     let projectedBalanceIls = 0
 
     for (const position of this.getProjectedPositions()) {
       const currentPositionBalanceIls = this.root.currency.convertToIls(position.currentBalance, position.currency)
-      const projectedPositionBalance = position.currentBalance * ((1 + position.change1y) ** years)
+      const projectedPositionBalance = position.currentBalance * (1 + (position.change1y * returnFactor))
       const projectedPositionBalanceIls = this.root.currency.convertToIls(projectedPositionBalance, position.currency)
 
       if (currentPositionBalanceIls == null || projectedPositionBalanceIls == null) {
@@ -73,7 +90,7 @@ export class ExpectedBalanceStore {
     return {currentBalanceIls, projectedBalanceIls}
   }
 
-  private getProjectedBalance5ySummary(): ProjectionSummary {
+  private getProjectedBalance5ySummary(decay: readonly number[]): ProjectionSummary {
     let currentBalanceIls = 0
     let projectedBalanceIls = 0
 
@@ -83,7 +100,7 @@ export class ExpectedBalanceStore {
       }
 
       const annualizedRate = ((1 + position.change2y) ** (1 / 2)) - 1
-      const projectedBalance = position.currentBalance * ((1 + annualizedRate) ** 5)
+      const projectedBalance = position.currentBalance * this.getDecayMultiplier(annualizedRate, decay)
       const currentPositionBalanceIls = this.root.currency.convertToIls(position.currentBalance, position.currency)
       const projectedPositionBalanceIls = this.root.currency.convertToIls(projectedBalance, position.currency)
 
@@ -100,6 +117,10 @@ export class ExpectedBalanceStore {
     }
 
     return {currentBalanceIls, projectedBalanceIls}
+  }
+
+  private getDecayMultiplier(annualizedRate: number, decay: readonly number[]): number {
+    return decay.reduce((multiplier, decayFactor) => multiplier * (1 + (annualizedRate * decayFactor)), 1)
   }
 
   private getProjectionChangePercent(summary: ProjectionSummary): number {

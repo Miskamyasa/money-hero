@@ -156,13 +156,13 @@ function Dashboard(): React.JSX.Element {
           align="stretch"
           w="100%">
           <ExpectedBalanceWidget
-            changePercent={stores.expectedBalance.expectedBalance1yChangePercent}
-            title="in 1 Year"
-            value={stores.expectedBalance.expectedBalance1yIls} />
+            conservative={stores.expectedBalance.expectedBalance1yConservative}
+            hotStreak={stores.expectedBalance.expectedBalance1yHotStreak}
+            title="in 1 Year" />
           <ExpectedBalanceWidget
-            changePercent={stores.expectedBalance.expectedBalance5yChangePercent}
-            title="in 5 Years"
-            value={stores.expectedBalance.expectedBalance5yIls} />
+            conservative={stores.expectedBalance.expectedBalance5yConservative}
+            hotStreak={stores.expectedBalance.expectedBalance5yHotStreak}
+            title="in 5 Years" />
         </Group>
         {/*<Group*/}
         {/*  grow*/}
