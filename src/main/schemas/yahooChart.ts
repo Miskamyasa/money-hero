@@ -21,7 +21,7 @@ const YahooChartMetaSchema = z.looseObject({
 })
 
 const YahooChartQuoteSchema = z.looseObject({
-  close: z.array(z.number().nullable()),
+  close: z.array(z.number().nullable()).optional(),
 })
 
 const YahooDividendEventSchema = z.looseObject({
@@ -35,7 +35,7 @@ const YahooChartEventsSchema = z.looseObject({
 
 const YahooChartResultSchema = z.looseObject({
   meta: YahooChartMetaSchema,
-  timestamp: z.array(z.number()).min(1),
+  timestamp: z.array(z.number()).min(1).optional(),
   indicators: z.looseObject({
     quote: z.array(YahooChartQuoteSchema).min(1),
   }),

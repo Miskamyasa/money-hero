@@ -97,6 +97,11 @@ export function buildHistoryPoints(result: YahooChartResult, subunitDivisor = 1)
   const points: HistoryPoint[] = []
   const timestamps = result.timestamp
   const closePrices = result.indicators.quote[0].close
+
+  if (!timestamps || !closePrices) {
+    return points
+  }
+
   const pointCount = Math.min(timestamps.length, closePrices.length)
 
   for (let index = 0; index < pointCount; index += 1) {

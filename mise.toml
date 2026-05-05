@@ -4,9 +4,10 @@ node = "24.14.0"
 npm = "11.13.0"
 "npm:@devcontainers/cli" = "0.85.0"
 # Aqua tools
-"aqua:opencode" = "1.1.63"
+"aqua:opencode" = "1.14.33"
 "aqua:cli/cli" = "2.89.0"
 "aqua:pnpm" = "10.33.2"
+rtk = "0.38.0"
 
 [settings]
 lockfile = true
