@@ -5,6 +5,9 @@ export const INDIVIDUAL_STOCKS_HC = [
   "ISRG",
   "VKTX",
   "VRTX",
+  "AXSM",
+  "ALNY",
+  "MIRM",
 ]
 
 export const INDIVIDUAL_STOCKS_AI = [
