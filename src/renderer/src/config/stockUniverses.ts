@@ -2,12 +2,13 @@ export const INDIVIDUAL_STOCKS_HC = [
   "ERAS",
   "LLY",
   "GKOS",
-  "ISRG",
   "VKTX",
   "VRTX",
   "AXSM",
   "ALNY",
   "MIRM",
+  "TMDX",
+  "TGTX",
 ]
 
 export const INDIVIDUAL_STOCKS_AI = [
