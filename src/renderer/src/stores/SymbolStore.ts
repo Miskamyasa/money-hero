@@ -95,7 +95,7 @@ export class SymbolStore {
       execute: async () => {
         const data = await window.api.fetchStockQuote(this.symbol)
         runInAction(() => {
-          this.quote = data as SymbolQuote
+          this.quote = data
         })
         await this.saveToCache()
       },

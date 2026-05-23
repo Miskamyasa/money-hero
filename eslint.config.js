@@ -1,5 +1,4 @@
-import {createConfig} from "@miskamyasa/eslint-config"
-import {createTypeScriptImportResolver} from "eslint-import-resolver-typescript"
+import {createConfig, createTypeScriptImportResolver} from "@miskamyasa/eslint-config"
 
 /** @type {ReturnType<typeof createConfig>} */
 const config = createConfig(

@@ -105,7 +105,7 @@ export class CurrencyStore {
       execute: async () => {
         const data = await window.api.fetchCurrencyRates()
         runInAction(() => {
-          this.data = data as CurrencyRatesData
+          this.data = data
         })
         await this.saveToCache()
       },

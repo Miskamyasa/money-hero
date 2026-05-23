@@ -74,7 +74,7 @@ export class GoldStore {
       execute: async () => {
         const data = await window.api.fetchGoldQuote()
         runInAction(() => {
-          this.quote = data as GoldQuote
+          this.quote = data
         })
         await this.saveToCache()
       },
@@ -87,7 +87,7 @@ export class GoldStore {
       execute: async () => {
         const data = await window.api.fetchGoldHistory()
         runInAction(() => {
-          this.history = data as GoldHistory
+          this.history = data
         })
         await this.saveToCache()
       },

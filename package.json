@@ -1,65 +1,64 @@
 {
-  "name": "MoneyHero",
-  "productName": "Money Hero",
-  "type": "module",
-  "version": "1.0.0",
-  "description": "Money Hero is a desktop portfolio dashboard, not a bank or trading app",
   "author": "MiskaMyasa",
-  "license": "GPL-3.0-only",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/Miskamyasa/money-hero.git"
-  },
   "bugs": {
     "url": "https://github.com/Miskamyasa/money-hero/issues"
-  },
-  "homepage": "https://github.com/Miskamyasa/money-hero",
-  "main": "./out/main/index.js",
-  "scripts": {
-    "lint": "eslint --cache",
-    "lint:fix": "eslint --cache --fix",
-    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
-    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
-    "start": "electron-vite preview",
-    "dev": "electron-vite dev",
-    "build": "pnpm run typecheck && electron-vite build",
-    "postinstall": "electron-builder install-app-deps && npx @electron/rebuild --only better-sqlite3",
-    "build:unpack": "pnpm run build && electron-builder --dir",
-    "build:mac": "pnpm run build && electron-builder --mac"
   },
   "dependencies": {
     "@electron-toolkit/preload": "3.0.2",
     "@electron-toolkit/utils": "4.0.0",
-    "@mantine/core": "9.1.1",
-    "@mantine/hooks": "9.1.1",
-    "@mantine/notifications": "9.1.1",
-    "better-sqlite3": "12.9.0",
-    "knex": "3.2.9",
-    "mobx": "6.15.0",
+    "@mantine/core": "9.2.1",
+    "@mantine/hooks": "9.2.1",
+    "@mantine/notifications": "9.2.1",
+    "better-sqlite3": "12.10.0",
+    "knex": "3.2.10",
+    "mobx": "6.15.3",
     "mobx-react-lite": "4.1.1",
-    "zod": "4.4.2"
+    "zod": "4.4.3"
   },
+  "description": "Money Hero is a desktop portfolio dashboard, not a bank or trading app",
   "devDependencies": {
     "@electron-toolkit/tsconfig": "2.0.0",
     "@electron/rebuild": "4.0.4",
-    "@miskamyasa/eslint-config": "^1.0.2",
+    "@miskamyasa/eslint-config": "1.0.3",
     "@types/better-sqlite3": "7.6.13",
-    "@types/node": "25.6.0",
-    "@types/react": "19.2.14",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.1",
+    "@vitejs/plugin-react": "5.2.0",
     "electron": "41.5.0",
     "electron-builder": "26.8.1",
     "electron-vite": "5.0.0",
-    "eslint": "10.3.0",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "postcss": "8.5.13",
+    "eslint": "10.4.0",
+    "postcss": "8.5.15",
     "postcss-preset-mantine": "1.18.0",
     "postcss-simple-vars": "7.0.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "typescript": "5.9.3",
-    "react": "19.2.5",
-    "react-dom": "19.2.5",
-    "vite": "8.0.10"
-  }
+    "vite": "7.3.3"
+  },
+  "homepage": "https://github.com/Miskamyasa/money-hero",
+  "license": "GPL-3.0-only",
+  "main": "./out/main/index.js",
+  "name": "money-hero",
+  "productName": "Money Hero",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Miskamyasa/money-hero.git"
+  },
+  "scripts": {
+    "build": "pnpm run typecheck && electron-vite build",
+    "build:mac": "pnpm run build && electron-builder --mac",
+    "build:unpack": "pnpm run build && electron-builder --dir",
+    "dev": "electron-vite dev",
+    "lint": "eslint --cache",
+    "lint:fix": "eslint --cache --fix",
+    "postinstall": "electron-builder install-app-deps && npx @electron/rebuild --only better-sqlite3",
+    "start": "electron-vite preview",
+    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false"
+  },
+  "type": "module",
+  "version": "1.0.0"
 }
