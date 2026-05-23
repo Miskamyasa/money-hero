@@ -15,6 +15,7 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
     fundsEtfs,
     stocksAi,
     stocksHc,
+    stocksRobotics,
     // aristocrats,
     // highYield,
     // water,
@@ -32,6 +33,7 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
   const fundsEtfsUi = fundsEtfs.ui
   const stocksAiUi = stocksAi.ui
   const stocksHcUi = stocksHc.ui
+  const stocksRoboticsUi = stocksRobotics.ui
   const psagotEtfsUi = psagotEtfs.ui
 
   return (
@@ -80,6 +82,25 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
                   variant={stocksHcUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                   onClick={() => {
                     stocksHcUi.toggleSymbol(symbol)
+                  }}>
+                  {symbol}
+                </Button>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <Text
+              fw={500}
+              mb="xs">IBI: Robotics</Text>
+            <Group gap="xs">
+              {stocksRobotics.allSymbols.map(symbol => (
+                <Button
+                  key={symbol}
+                  size="compact-xs"
+                  variant={stocksRoboticsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  onClick={() => {
+                    stocksRoboticsUi.toggleSymbol(symbol)
                   }}>
                   {symbol}
                 </Button>

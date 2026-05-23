@@ -45,6 +45,10 @@ function Dashboard(): React.JSX.Element {
     void stores.stocksAi.data.loadAmounts()
     void stores.stocksAi.ui.loadDisabledSymbols()
     void stores.stocksAi.ui.loadCollapseState()
+    void stores.stocksRobotics.data.loadFromCache()
+    void stores.stocksRobotics.data.loadAmounts()
+    void stores.stocksRobotics.ui.loadDisabledSymbols()
+    void stores.stocksRobotics.ui.loadCollapseState()
     // void stores.aristocrats.data.loadFromCache()
     // void stores.aristocrats.data.loadAmounts()
     // void stores.aristocrats.ui.loadDisabledSymbols()
@@ -181,6 +185,9 @@ function Dashboard(): React.JSX.Element {
         {/*  <SymbolStats store={stores.healL} />*/}
         {/*</Group>*/}
         <FetchProgress />
+        <StocksTable
+          store={stores.stocksRobotics}
+          title="IBI: Robotics" />
         <StocksTable
           store={stores.stocksHc}
           title="IBI: Health" />

@@ -1,3 +1,16 @@
+export const INDIVIDUAL_STOCKS_ROBOTICS = [
+  "ISRG",
+  "SYM",
+  "NVDA",
+  "TER",
+  "PRCT",
+  "ZBRA",
+  "6268.T",
+  "6954.T",
+  "CGNX",
+  "KIGRY",
+]
+
 export const INDIVIDUAL_STOCKS_HC = [
   "ERAS",
   "LLY",

@@ -1,5 +1,11 @@
 import {SP500_SYMBOL, TA125_SYMBOL} from "@renderer/config/statsWidgets"
-import {FUNDS_ETFS, INDIVIDUAL_STOCKS_AI, INDIVIDUAL_STOCKS_HC, PSAGOT_ETFS} from "@renderer/config/stockUniverses"
+import {
+  FUNDS_ETFS,
+  INDIVIDUAL_STOCKS_AI,
+  INDIVIDUAL_STOCKS_HC,
+  INDIVIDUAL_STOCKS_ROBOTICS,
+  PSAGOT_ETFS,
+} from "@renderer/config/stockUniverses"
 
 import {AMOUNT_SCOPE_STOCK_HOLDINGS} from "../../../shared/amountScopes"
 
@@ -26,6 +32,7 @@ export class RootStore {
   stockTargetWeights = new StockTargetWeightsStore()
   stocksHc = new StocksStore(this, INDIVIDUAL_STOCKS_HC, "individual-stocks-heal")
   stocksAi = new StocksStore(this, INDIVIDUAL_STOCKS_AI, "individual-stocks")
+  stocksRobotics = new StocksStore(this, INDIVIDUAL_STOCKS_ROBOTICS, "individual-stocks-robotics")
   fundsEtfs = new StocksStore(this, FUNDS_ETFS, "funds-etfs")
   psagotEtfs = new StocksStore(this, PSAGOT_ETFS, "psagot-etfs")
   // water = new StocksStore(this, WATER, "water")
@@ -82,6 +89,8 @@ export class RootStore {
       this.fundsEtfs.data.createFlushCacheTask(),
       ...this.stocksAi.data.createFetchTasks(),
       this.stocksAi.data.createFlushCacheTask(),
+      ...this.stocksRobotics.data.createFetchTasks(),
+      this.stocksRobotics.data.createFlushCacheTask(),
       ...this.stocksHc.data.createFetchTasks(),
       this.stocksHc.data.createFlushCacheTask(),
       ...this.psagotEtfs.data.createFetchTasks(),
@@ -108,6 +117,10 @@ export class RootStore {
       this.fundsEtfs.data.createFlushCacheTask(),
       ...this.stocksAi.data.createFetchTasks(),
       this.stocksAi.data.createFlushCacheTask(),
+      ...this.stocksRobotics.data.createFetchTasks(),
+      this.stocksRobotics.data.createFlushCacheTask(),
+      ...this.stocksHc.data.createFetchTasks(),
+      this.stocksHc.data.createFlushCacheTask(),
       ...this.psagotEtfs.data.createFetchTasks(),
       this.psagotEtfs.data.createFlushCacheTask(),
       // ...this.aristocrats.data.createFetchTasks(),
