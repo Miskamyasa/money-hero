@@ -35,6 +35,7 @@ export const INDIVIDUAL_STOCKS_AI = [
   "NVT",
   "VICR",
   "VRT",
+  "NOW",
 ]
 
 export const FUNDS_ETFS = [
