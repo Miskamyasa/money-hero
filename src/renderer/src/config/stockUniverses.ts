@@ -7,8 +7,8 @@ export const INDIVIDUAL_STOCKS_ROBOTICS = [
   "ZBRA",
   "6268.T",
   "6954.T",
+  "6861.T",
   "CGNX",
-  "KIGRY",
 ]
 
 export const INDIVIDUAL_STOCKS_HC = [
