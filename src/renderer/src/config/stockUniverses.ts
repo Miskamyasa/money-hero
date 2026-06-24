@@ -1,13 +1,13 @@
 export const INDIVIDUAL_STOCKS_ROBOTICS = [
   "ISRG",
   "SYM",
-  "NVDA",
   "TER",
   "PRCT",
   "ZBRA",
   "6268.T",
   "6954.T",
   "6861.T",
+  "066570.KS",
   "CGNX",
 ]
 
@@ -36,6 +36,32 @@ export const INDIVIDUAL_STOCKS_AI = [
   "VICR",
   "VRT",
   "NOW",
+]
+
+export const INDIVIDUAL_STOCKS_BIGTECH = [
+  "NVDA",
+  "MSFT",
+  "GOOG",
+  "ADBE",
+  "AAPL",
+  "AMD",
+  "CSCO",
+  "IBM",
+  "NET",
+  "META",
+]
+
+export const INDIVIDUAL_STOCKS_ENERGY = [
+  "XOM", // Exxon Mobil Corporation
+  "CVX", // Chevron Corporation
+  "COP", // ConocoPhillips
+  "CEG", // Constellation Energy Corporation
+  "VRT", // Vertiv Holdings Co
+  "PWR", // Quanta Services, Inc.
+  "WMB", // The Williams Companies, Inc.
+  "GEV", // GE Vernova Inc.
+  "D", // Dominion Energy, Inc.
+  "NEE", // NextEra Energy, Inc.
 ]
 
 export const FUNDS_ETFS = [
@@ -75,37 +101,7 @@ export const WATER = [
   "XYL", // Xylem Inc.
   "YORW", // The York Water Company
 ]
-export const HIGH_YIELD = [
-  "AMCR", // Amcor plc
-  "AV.L", // Aviva plc
-  "BBY", // Best Buy Co. Inc.
-  "CAG", // ConAgra Brands Inc.
-  "CPB", // Campbell Soup Company
-  "DOC", // Healthpeak Properties Inc.
-  "DUK", // Duke Energy Corporation
-  "EIX", // Edison International
-  "EPD", // Enterprise Products Partners L.P.
-  "HPQ", // HP Inc.
-  "IMB.L", // Imperial Brands PLC
-  "KHC", // The Kraft Heinz Company
-  "LAND.L", // Land Securities Group plc
-  "LGEN.L", // Legal & General Group plc
-  "LYB", // LyondellBasell Industries N.V.
-  "MNG.L", // M&G plc
-  "MO", // Altria Group Inc.
-  "MPLX", // MPLX LP
-  "NNN", // NNN REIT Inc.
-  "O", // Realty Income Corporation
-  "OKE", // ONEOK Inc.
-  "PFE", // Pfizer Inc.
-  "PHNX.L", // Phoenix Group Holdings plc
-  "PRU", // Prudential Financial Inc.
-  "RECLTD.NS", // REC Limited
-  "UPS", // United Parcel Service Inc.
-  "VEDL.NS", // Vedanta Limited
-  "VICI", // VICI Properties Inc.
-  "VZ", // Verizon Communications Inc.
-]
+
 export const DIVIDEND_ARISTOCRATS = [
   "ABBV", // AbbVie Inc.
   "ABT", // Abbott Laboratories

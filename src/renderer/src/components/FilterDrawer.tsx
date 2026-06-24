@@ -16,8 +16,9 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
     stocksAi,
     stocksHc,
     stocksRobotics,
+    stocksBigTech,
+    stocksEnergy,
     // aristocrats,
-    // highYield,
     // water,
   } = root
   const modalsStack = useModalsStack(["reset-confirm"])
@@ -28,12 +29,13 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
     onClose()
   }
   // const aristocratsUi = aristocrats.ui
-  // const highYieldUi = highYield.ui
   // const waterUi = water.ui
   const fundsEtfsUi = fundsEtfs.ui
   const stocksAiUi = stocksAi.ui
   const stocksHcUi = stocksHc.ui
   const stocksRoboticsUi = stocksRobotics.ui
+  const stocksBigTechUi = stocksBigTech.ui
+  const stocksEnergyUi = stocksEnergy.ui
   const psagotEtfsUi = psagotEtfs.ui
 
   return (
@@ -54,15 +56,15 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
           <div>
             <Text
               fw={500}
-              mb="xs">IBI: Ai</Text>
+              mb="xs">IBI: Robotics</Text>
             <Group gap="xs">
-              {stocksAi.allSymbols.map(symbol => (
+              {stocksRobotics.allSymbols.map(symbol => (
                 <Button
                   key={symbol}
                   size="compact-xs"
-                  variant={stocksAiUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  variant={stocksRoboticsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                   onClick={() => {
-                    stocksAiUi.toggleSymbol(symbol)
+                    stocksRoboticsUi.toggleSymbol(symbol)
                   }}>
                   {symbol}
                 </Button>
@@ -92,15 +94,53 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
           <div>
             <Text
               fw={500}
-              mb="xs">IBI: Robotics</Text>
+              mb="xs">IBI: Ai</Text>
             <Group gap="xs">
-              {stocksRobotics.allSymbols.map(symbol => (
+              {stocksAi.allSymbols.map(symbol => (
                 <Button
                   key={symbol}
                   size="compact-xs"
-                  variant={stocksRoboticsUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  variant={stocksAiUi.isSymbolEnabled(symbol) ? "filled" : "default"}
                   onClick={() => {
-                    stocksRoboticsUi.toggleSymbol(symbol)
+                    stocksAiUi.toggleSymbol(symbol)
+                  }}>
+                  {symbol}
+                </Button>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <Text
+              fw={500}
+              mb="xs">IBI: BigTech</Text>
+            <Group gap="xs">
+              {stocksBigTech.allSymbols.map(symbol => (
+                <Button
+                  key={symbol}
+                  size="compact-xs"
+                  variant={stocksBigTechUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  onClick={() => {
+                    stocksBigTechUi.toggleSymbol(symbol)
+                  }}>
+                  {symbol}
+                </Button>
+              ))}
+            </Group>
+          </div>
+
+          <div>
+            <Text
+              fw={500}
+              mb="xs">IBI: Energy</Text>
+            <Group gap="xs">
+              {stocksEnergy.allSymbols.map(symbol => (
+                <Button
+                  key={symbol}
+                  size="compact-xs"
+                  variant={stocksEnergyUi.isSymbolEnabled(symbol) ? "filled" : "default"}
+                  onClick={() => {
+                    stocksEnergyUi.toggleSymbol(symbol)
                   }}>
                   {symbol}
                 </Button>
@@ -158,25 +198,6 @@ function FilterDrawerImpl({opened, onClose}: FilterDrawerProps): React.JSX.Eleme
           {/*        variant={waterUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
           {/*        onClick={() => {*/}
           {/*          waterUi.toggleSymbol(symbol)*/}
-          {/*        }}>*/}
-          {/*        {symbol}*/}
-          {/*      </Button>*/}
-          {/*    ))}*/}
-          {/*  </Group>*/}
-          {/*</div>*/}
-
-          {/*<div>*/}
-          {/*  <Text*/}
-          {/*    fw={500}*/}
-          {/*    mb="xs">High Yield</Text>*/}
-          {/*  <Group gap="xs">*/}
-          {/*    {highYield.allSymbols.map(symbol => (*/}
-          {/*      <Button*/}
-          {/*        key={symbol}*/}
-          {/*        size="compact-xs"*/}
-          {/*        variant={highYieldUi.isSymbolEnabled(symbol) ? "filled" : "default"}*/}
-          {/*        onClick={() => {*/}
-          {/*          highYieldUi.toggleSymbol(symbol)*/}
           {/*        }}>*/}
           {/*        {symbol}*/}
           {/*      </Button>*/}

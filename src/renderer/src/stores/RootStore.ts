@@ -2,6 +2,8 @@ import {SP500_SYMBOL, TA125_SYMBOL} from "@renderer/config/statsWidgets"
 import {
   FUNDS_ETFS,
   INDIVIDUAL_STOCKS_AI,
+  INDIVIDUAL_STOCKS_BIGTECH,
+  INDIVIDUAL_STOCKS_ENERGY,
   INDIVIDUAL_STOCKS_HC,
   INDIVIDUAL_STOCKS_ROBOTICS,
   PSAGOT_ETFS,
@@ -33,10 +35,11 @@ export class RootStore {
   stocksHc = new StocksStore(this, INDIVIDUAL_STOCKS_HC, "individual-stocks-heal")
   stocksAi = new StocksStore(this, INDIVIDUAL_STOCKS_AI, "individual-stocks")
   stocksRobotics = new StocksStore(this, INDIVIDUAL_STOCKS_ROBOTICS, "individual-stocks-robotics")
+  stocksBigTech = new StocksStore(this, INDIVIDUAL_STOCKS_BIGTECH, "individual-stocks-bigtech")
+  stocksEnergy = new StocksStore(this, INDIVIDUAL_STOCKS_ENERGY, "individual-stocks-energy")
   fundsEtfs = new StocksStore(this, FUNDS_ETFS, "funds-etfs")
   psagotEtfs = new StocksStore(this, PSAGOT_ETFS, "psagot-etfs")
   // water = new StocksStore(this, WATER, "water")
-  // highYield = new StocksStore(this, HIGH_YIELD, "high-yield")
   // aristocrats = new StocksStore(this, DIVIDEND_ARISTOCRATS, "aristocrats")
   theme = new ThemeStore(this)
   sp500 = new SymbolStore(this, SP500_SYMBOL)
@@ -93,6 +96,10 @@ export class RootStore {
       this.stocksRobotics.data.createFlushCacheTask(),
       ...this.stocksHc.data.createFetchTasks(),
       this.stocksHc.data.createFlushCacheTask(),
+      ...this.stocksBigTech.data.createFetchTasks(),
+      this.stocksBigTech.data.createFlushCacheTask(),
+      ...this.stocksEnergy.data.createFetchTasks(),
+      this.stocksEnergy.data.createFlushCacheTask(),
       ...this.psagotEtfs.data.createFetchTasks(),
       this.psagotEtfs.data.createFlushCacheTask(),
     ])
@@ -121,12 +128,14 @@ export class RootStore {
       this.stocksRobotics.data.createFlushCacheTask(),
       ...this.stocksHc.data.createFetchTasks(),
       this.stocksHc.data.createFlushCacheTask(),
+      ...this.stocksBigTech.data.createFetchTasks(),
+      this.stocksBigTech.data.createFlushCacheTask(),
+      ...this.stocksEnergy.data.createFetchTasks(),
+      this.stocksEnergy.data.createFlushCacheTask(),
       ...this.psagotEtfs.data.createFetchTasks(),
       this.psagotEtfs.data.createFlushCacheTask(),
       // ...this.aristocrats.data.createFetchTasks(),
       // this.aristocrats.data.createFlushCacheTask(),
-      // ...this.highYield.data.createFetchTasks(),
-      // this.highYield.data.createFlushCacheTask(),
       // ...this.water.data.createFetchTasks(),
       // this.water.data.createFlushCacheTask(),
     ])

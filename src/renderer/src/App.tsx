@@ -49,14 +49,18 @@ function Dashboard(): React.JSX.Element {
     void stores.stocksRobotics.data.loadAmounts()
     void stores.stocksRobotics.ui.loadDisabledSymbols()
     void stores.stocksRobotics.ui.loadCollapseState()
+    void stores.stocksBigTech.data.loadFromCache()
+    void stores.stocksBigTech.data.loadAmounts()
+    void stores.stocksBigTech.ui.loadDisabledSymbols()
+    void stores.stocksBigTech.ui.loadCollapseState()
+    void stores.stocksEnergy.data.loadFromCache()
+    void stores.stocksEnergy.data.loadAmounts()
+    void stores.stocksEnergy.ui.loadDisabledSymbols()
+    void stores.stocksEnergy.ui.loadCollapseState()
     // void stores.aristocrats.data.loadFromCache()
     // void stores.aristocrats.data.loadAmounts()
     // void stores.aristocrats.ui.loadDisabledSymbols()
     // void stores.aristocrats.ui.loadCollapseState()
-    // void stores.highYield.data.loadFromCache()
-    // void stores.highYield.data.loadAmounts()
-    // void stores.highYield.ui.loadDisabledSymbols()
-    // void stores.highYield.ui.loadCollapseState()
     // void stores.water.data.loadFromCache()
     // void stores.water.data.loadAmounts()
     // void stores.water.ui.loadDisabledSymbols()
@@ -195,6 +199,12 @@ function Dashboard(): React.JSX.Element {
           store={stores.stocksAi}
           title="IBI: Ai" />
         <StocksTable
+          store={stores.stocksBigTech}
+          title="IBI: BigTech" />
+        <StocksTable
+          store={stores.stocksEnergy}
+          title="IBI: Energy" />
+        <StocksTable
           store={stores.fundsEtfs}
           title="IBI: Funds / ETFs" />
         <StocksTable
@@ -203,9 +213,6 @@ function Dashboard(): React.JSX.Element {
         {/*<StocksTable*/}
         {/*  store={stores.water}*/}
         {/*  title="Water" />*/}
-        {/*<StocksTable*/}
-        {/*  store={stores.highYield}*/}
-        {/*  title="High Yield" />*/}
         {/*<StocksTable*/}
         {/*  store={stores.aristocrats}*/}
         {/*  title="Dividend Aristocrats" />*/}

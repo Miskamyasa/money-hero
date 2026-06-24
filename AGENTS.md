@@ -18,11 +18,13 @@ Three-process Electron architecture with four source roots and two TS project re
 - **IPC/contracts** — `src/preload/index.ts`, `src/preload/index.d.ts`, `src/shared/*`, `src/main/schemas/*`
 - **Portfolio state engine** — `src/renderer/src/stores/*`, centered on `RootStore`
 - **Dashboard presentation** — `src/renderer/src/App.tsx`, `components/*` (including benchmark cards, `ExpectedBalanceWidget`, tables, and drawers), `config/*`, `utils/*`
-- **Dormant slices** — commented-out stock universes (`water`, `highYield`, `aristocrats`) and symbol-widget UI blocks that are preserved in code but not rendered
+- **Dormant slices** — commented-out stock universes (`water`, `aristocrats`) and symbol-widget UI blocks that are preserved in code but not rendered
+
+The active stock watchlists are defined in `src/renderer/src/config/stockUniverses.ts`: `INDIVIDUAL_STOCKS_ROBOTICS`, `INDIVIDUAL_STOCKS_HC`, `INDIVIDUAL_STOCKS_AI`, `INDIVIDUAL_STOCKS_BIGTECH`, `INDIVIDUAL_STOCKS_ENERGY`, `FUNDS_ETFS`, and `PSAGOT_ETFS`. `WATER` and `DIVIDEND_ARISTOCRATS` remain in config but their store/UI wiring is commented out.
 
 ## Commands
 
-Package manager: **pnpm** (v10.30.1), Node 24. Versions pinned in `mise.toml`.
+Package manager: **pnpm** (v11.4.0), Node 24. Versions pinned in `mise.toml`.
 
 ```bash
 pnpm dev              # Start dev server (electron-vite dev)
@@ -134,12 +136,12 @@ Stores are provided via React context with a singleton pattern in `useStores.ts`
 `RootStore` is the renderer domain hub. The currently active live slices are:
 
 - `app`, `currency`, `gold`, `sp500`, `ta125`
-- `stocksAi`, `stocksHc`, `fundsEtfs`, `psagotEtfs`
+- `stocksRobotics`, `stocksHc`, `stocksAi`, `stocksBigTech`, `stocksEnergy`, `fundsEtfs`, `psagotEtfs`
 - `stockAmounts`, `stockTargetWeights`, `theme`, `fetchQueue`, `balance`, `expectedBalance`
 
 Additional `SymbolStore`s for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist for optional balance plumbing and startup quote fetches, but their widget UI plus amount/cache hydration remain commented out in `App.tsx`, and `refreshAll()` skips them.
 
-The `water`, `highYield`, and `aristocrats` `StocksStore` instances are intentionally left commented out in `RootStore.ts`, `App.tsx`, `FilterDrawer.tsx`, and `BalanceStore.ts` — preserve them as-is unless the user asks to restore those watchlists.
+The `water` and `aristocrats` `StocksStore` instances are intentionally left commented out in `RootStore.ts`, `App.tsx`, `FilterDrawer.tsx`, and `BalanceStore.ts` — preserve them as-is unless the user asks to restore those watchlists.
 
 Startup hydration is orchestrated from `App.tsx`: cached renderer state is loaded first for the live watchlists and dashboard widgets, then `RootStore.fetchStartupItems()` seeds the fetch queue (including hidden symbol quotes), and `RootStore.startAutoRefresh()` refreshes the main dashboard every 20 minutes.
 

@@ -9,6 +9,8 @@ const PROJECTION_SOURCE_STORES = [
   "stocksHc",
   "stocksAi",
   "stocksRobotics",
+  "stocksBigTech",
+  "stocksEnergy",
   "fundsEtfs",
   "psagotEtfs",
 ] as const satisfies readonly (keyof RootStore)[]

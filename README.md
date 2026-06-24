@@ -19,7 +19,7 @@ A desktop portfolio dashboard that tracks gold, stock watchlists, currency excha
 
 - **Gold Widget** — Live gold futures price (`GC=F`) with historical performance (1M / 6M / 2Y)
 - **Benchmark Widgets** — Dedicated cards for the S&P 500 (`^GSPC`) and TA-125 (`^TA125.TA`)
-- **Three Active Stock Watchlists** — Separate tables for **IBI: Individual Stocks**, **IBI: Funds / ETFs**, and **Psagot: Funds / ETFs**
+- **Stock Watchlists** — Separate tables for **IBI: Robotics**, **IBI: Health**, **IBI: Ai**, **IBI: BigTech**, **IBI: Energy**, **IBI: Funds / ETFs**, and **Psagot: Funds / ETFs**
 - **Currency Rates** — USD, DXY, and selected FX rates from Yahoo Finance
 - **Portfolio Balance** — Aggregated tracked holdings balance, converted to ILS
 - **Expected Balance Projections** — 1-year and 5-year projected ILS totals based on held positions and available trailing performance history
@@ -35,10 +35,10 @@ A desktop portfolio dashboard that tracks gold, stock watchlists, currency excha
 ## Current Scope
 
 - The app is currently a single dashboard screen, not a multi-page or routed UI.
-- The live watchlists are `INDIVIDUAL_STOCKS`, `FUNDS_ETFS`, and `PSAGOT_ETFS` from `src/renderer/src/config/stockUniverses.ts`.
+- The live watchlists are `INDIVIDUAL_STOCKS_ROBOTICS`, `INDIVIDUAL_STOCKS_HC`, `INDIVIDUAL_STOCKS_AI`, `INDIVIDUAL_STOCKS_BIGTECH`, `INDIVIDUAL_STOCKS_ENERGY`, `FUNDS_ETFS`, and `PSAGOT_ETFS` from `src/renderer/src/config/stockUniverses.ts`.
 - The dashboard currently renders gold, S&P 500, TA-125, currency, fetch progress, and two expected-balance widgets (`in 1 Year`, `in 5 Years`).
-- Expected-balance projections are computed from held positions in the three active watchlists only: the 1-year card uses trailing 1Y change, and the 5-year card annualizes trailing 2Y change when available.
-- Additional preset universes — **Dividend Aristocrats**, **High Yield**, and **Water** — are still present in config, but their store/UI wiring is commented out.
+- Expected-balance projections are computed from held positions across the seven active watchlists only: the 1-year card uses trailing 1Y change, and the 5-year card annualizes trailing 2Y change when available.
+- Additional preset universes — **Dividend Aristocrats** and **Water** — are still present in config, but their store/UI wiring is commented out.
 - Extra symbol widgets for `VWRA.L`, `IGLN.L`, `MORE-S7.TA`, `COPX`, `PSI`, and `HEAL.L` still exist in the store layer and are fetched at startup, but their dashboard cards plus amount/cache hydration are currently commented out, and recurring `refreshAll()` skips them.
 
 ## Tech Stack
@@ -58,7 +58,7 @@ A desktop portfolio dashboard that tracks gold, stock watchlists, currency excha
 ## Prerequisites
 
 - **Node.js** 24
-- **pnpm** 10
+- **pnpm** 11
 
 Exact versions are pinned in `mise.toml`. If you use [mise](https://mise.jdx.dev/), run `mise install` to set them up automatically.
 

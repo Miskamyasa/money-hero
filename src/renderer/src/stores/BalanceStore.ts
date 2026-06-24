@@ -56,8 +56,9 @@ export class BalanceStore {
       stocksAi,
       stocksHc,
       stocksRobotics,
+      stocksBigTech,
+      stocksEnergy,
       // aristocrats,
-      // highYield,
       // water,
     } = this.root
     const seen = new Set<string>()
@@ -69,8 +70,9 @@ export class BalanceStore {
       stocksAi,
       stocksHc,
       stocksRobotics,
+      stocksBigTech,
+      stocksEnergy,
       // aristocrats,
-      // highYield,
       // water,
     ]) {
       for (const quote of store.activeQuotes) {
