@@ -53,7 +53,7 @@
     "dev": "electron-vite dev",
     "lint": "eslint --cache",
     "lint:fix": "eslint --cache --fix",
-    "postinstall": "electron-builder install-app-deps && npx @electron/rebuild --only better-sqlite3",
+    "postinstall": "electron-builder install-app-deps && npx @electron/rebuild --only better-sqlite3 --force",
     "start": "electron-vite preview",
     "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
