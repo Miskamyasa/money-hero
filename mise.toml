@@ -1,8 +1,7 @@
 [tools]
 node = "24.14.0"
 npm = "11.14.1"
-opencode = "1.14.51"
-pnpm = "11.4.0"
+opencode = "1.17.18"
 
 [settings]
 lockfile = true

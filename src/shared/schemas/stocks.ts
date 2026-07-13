@@ -15,6 +15,11 @@ export const DividendEventSchema = z.object({
   date: z.number(),
 })
 
+export const HistoryPointSchema = z.object({
+  t: z.number(),
+  c: z.number(),
+})
+
 export const StockQuoteSchema = z.object({
   symbol: z.string(),
   name: z.string(),
@@ -28,6 +33,7 @@ export const StockQuoteSchema = z.object({
   change1y: z.nullable(z.number()),
   change2y: z.nullable(z.number()),
   dividends: z.array(DividendEventSchema),
+  historyPoints: z.optional(z.array(HistoryPointSchema)),
 })
 
 export const StockQuotesSchema = z.array(StockQuoteSchema)

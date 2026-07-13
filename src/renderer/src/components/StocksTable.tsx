@@ -7,6 +7,7 @@ import {
   Center,
   Collapse,
   Group,
+  HoverCard,
   NumberInput,
   Table,
   Text,
@@ -21,6 +22,7 @@ import type {StocksStore} from "@renderer/stores/StocksStore"
 import {useStores} from "@renderer/stores/useStores"
 import {formatChangePercent, formatPrice, formatSharePercent, getChangeColor} from "@renderer/utils/quoteFormatters"
 
+import {slicePointsByMonths, Sparkline} from "./Sparkline"
 import type {SortableColumn, SortState} from "./stocksTableSelectors"
 import {selectSortedQuotes} from "./stocksTableSelectors"
 
@@ -250,55 +252,112 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                       </Tooltip>
                     </Table.Td>
                     <Table.Td>
-                      {quote.change1m != null
-                        ? (
+                      <HoverCard
+                        openDelay={300}
+                        shadow="md"
+                        width={270}>
+                        <HoverCard.Target>
+                          {quote.change1m != null
+                            ? (
+                              <Text
+                                inherit
+                                c={getChangeColor(quote.change1m)}
+                                style={{cursor: "default"}}>
+                                {formatChangePercent(quote.change1m)}
+                              </Text>
+                            )
+                            : (
+                              <Text
+                                inherit
+                                c="dimmed"
+                                style={{cursor: "default"}}>
+                                N/A
+                              </Text>
+                            )}
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown p="sm">
                           <Text
-                            inherit
-                            c={getChangeColor(quote.change1m)}>
-                            {formatChangePercent(quote.change1m)}
+                            c="dimmed"
+                            mb={4}
+                            size="xs">
+                            {quote.symbol}
+                            {" \u2014 1 month"}
                           </Text>
-                        )
-                        : (
-                          <Text
-                            inherit
-                            c="dimmed">
-                            N/A
-                          </Text>
-                        )}
+                          <Sparkline points={slicePointsByMonths(quote.historyPoints ?? [], 1)} />
+                        </HoverCard.Dropdown>
+                      </HoverCard>
                     </Table.Td>
                     <Table.Td>
-                      {quote.change6m != null
-                        ? (
+                      <HoverCard
+                        openDelay={300}
+                        shadow="md"
+                        width={270}>
+                        <HoverCard.Target>
+                          {quote.change6m != null
+                            ? (
+                              <Text
+                                inherit
+                                c={getChangeColor(quote.change6m)}
+                                style={{cursor: "default"}}>
+                                {formatChangePercent(quote.change6m)}
+                              </Text>
+                            )
+                            : (
+                              <Text
+                                inherit
+                                c="dimmed"
+                                style={{cursor: "default"}}>
+                                N/A
+                              </Text>
+                            )}
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown p="sm">
                           <Text
-                            inherit
-                            c={getChangeColor(quote.change6m)}>
-                            {formatChangePercent(quote.change6m)}
+                            c="dimmed"
+                            mb={4}
+                            size="xs">
+                            {quote.symbol}
+                            {" — 6 months"}
                           </Text>
-                        )
-                        : (
-                          <Text
-                            inherit
-                            c="dimmed">
-                            N/A
-                          </Text>
-                        )}
+                          <Sparkline points={slicePointsByMonths(quote.historyPoints ?? [], 6)} />
+                        </HoverCard.Dropdown>
+                      </HoverCard>
                     </Table.Td>
                     <Table.Td>
-                      {quote.change2y != null
-                        ? (
+                      <HoverCard
+                        openDelay={300}
+                        shadow="md"
+                        width={270}>
+                        <HoverCard.Target>
+                          {quote.change2y != null
+                            ? (
+                              <Text
+                                inherit
+                                c={getChangeColor(quote.change2y)}
+                                style={{cursor: "default"}}>
+                                {formatChangePercent(quote.change2y)}
+                              </Text>
+                            )
+                            : (
+                              <Text
+                                inherit
+                                c="dimmed"
+                                style={{cursor: "default"}}>
+                                N/A
+                              </Text>
+                            )}
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown p="sm">
                           <Text
-                            inherit
-                            c={getChangeColor(quote.change2y)}>
-                            {formatChangePercent(quote.change2y)}
+                            c="dimmed"
+                            mb={4}
+                            size="xs">
+                            {quote.symbol}
+                            {" \u2014 2 years"}
                           </Text>
-                        )
-                        : (
-                          <Text
-                            inherit
-                            c="dimmed">
-                            N/A
-                          </Text>
-                        )}
+                          <Sparkline points={slicePointsByMonths(quote.historyPoints ?? [], 24)} />
+                        </HoverCard.Dropdown>
+                      </HoverCard>
                     </Table.Td>
                     <Table.Td style={{position: "relative"}}>
                       {formatPrice(data.getBalance(quote.symbol), quote.currency)}

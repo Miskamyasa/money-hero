@@ -145,6 +145,9 @@ function parseChartResponse(data: unknown): StockQuote {
   const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0
   const historicalChanges = calculateHistoricalChanges(result, price, subunitDivisor)
 
+  // Keep full daily history for sparkline charts (1M / 6M / 2Y hover cards)
+  const sparklinePoints = historyPoints.map(p => ({t: p.timestamp, c: p.close}))
+
   const dividendsRaw = result.events?.dividends
 
   const dividends: DividendEvent[] = dividendsRaw
@@ -167,6 +170,7 @@ function parseChartResponse(data: unknown): StockQuote {
     change1y: historicalChanges.change1y,
     change2y: historicalChanges.change2y,
     dividends,
+    historyPoints: sparklinePoints,
   }
 }
 
