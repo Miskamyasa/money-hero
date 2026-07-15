@@ -425,6 +425,11 @@ function StocksTableImpl({store: stocks, title}: StocksTableProps): React.JSX.El
                             }}
                             value={weightValue}
                             onChange={value => {
+                              if (value === "") {
+                                root.stockTargetWeights.setWeight(quote.symbol, 1)
+                                return
+                              }
+
                               const numeric = Number(value)
                               if (!Number.isFinite(numeric) || numeric < 1) return
                               const clamped = Math.min(100, Math.max(1, Math.round(numeric)))

@@ -16,6 +16,7 @@ type StockQuoteRow = {
   change_1y: number | null,
   change_2y: number | null,
   dividends: string | null,
+  history_points: string | null,
   updated_at: number,
 }
 
@@ -28,6 +29,8 @@ type ScopedStockTargetWeightRow = {scope: string, symbol: string, weight: number
 type DisabledSymbolRow = {storage_key: string, symbol: string}
 
 type KvCacheRow = {key: string, value: string}
+
+type StockHistoryPoint = NonNullable<StockQuote["historyPoints"]>[number]
 
 function toFiniteNumber(value: unknown, fallback = 0): number {
   const numeric = typeof value === "number" ? value : Number(value)
@@ -77,6 +80,25 @@ export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote
       }
     }
 
+    let historyPoints: StockHistoryPoint[] = []
+    if (typeof row.history_points === "string") {
+      try {
+        const parsed: unknown = JSON.parse(row.history_points)
+        if (Array.isArray(parsed)) {
+          historyPoints = parsed.map((point): StockHistoryPoint => {
+            const p = point as {c?: unknown, t?: unknown}
+            return {
+              c: toFiniteNumber(p.c),
+              t: toFiniteNumber(p.t),
+            }
+          })
+        }
+      }
+      catch {
+        historyPoints = []
+      }
+    }
+
     return {
       symbol: row.symbol,
       name: row.name,
@@ -90,6 +112,7 @@ export async function getStockQuotesCache(symbols: string[]): Promise<StockQuote
       change1y: toNullableFiniteNumber(row.change_1y),
       change2y: toNullableFiniteNumber(row.change_2y),
       dividends,
+      historyPoints,
     }
   })
 
@@ -113,6 +136,7 @@ export async function saveStockQuotesCache(quotes: StockQuote[]): Promise<void> 
     change_1y: quote.change1y,
     change_2y: quote.change2y,
     dividends: JSON.stringify(quote.dividends),
+    history_points: JSON.stringify(quote.historyPoints ?? []),
     updated_at: now,
   }))
 
@@ -234,6 +258,13 @@ export async function setScopedStockTargetWeight(scope: string, symbol: string, 
   }
 
   const db = getDb()
+  if (weight === 1) {
+    await db("stock_target_weights_scoped")
+      .where({scope, symbol})
+      .delete()
+    return
+  }
+
   await db("stock_target_weights_scoped")
     .insert({scope, symbol, weight})
     .onConflict(["scope", "symbol"])

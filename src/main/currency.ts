@@ -29,6 +29,8 @@ const FOREX_PAIRS = [
   {symbol: "GBPUSD=X", label: "GBP", invert: true, hidden: true},
   {symbol: "EURUSD=X", label: "EUR", invert: true, hidden: false},
   {symbol: "RUBUSD=X", label: "RUB", invert: true, hidden: false},
+  {symbol: "JPYUSD=X", label: "JPY", invert: true, hidden: true},
+  {symbol: "KRWUSD=X", label: "KRW", invert: true, hidden: true},
   {symbol: "INRUSD=X", label: "INR", invert: true, hidden: true},
   {symbol: "BRLUSD=X", label: "BRL", invert: true, hidden: true},
 ]

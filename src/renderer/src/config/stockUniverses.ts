@@ -48,7 +48,6 @@ export const INDIVIDUAL_STOCKS_BIGTECH = [
   "CSCO",
   "IBM",
   "NET",
-  "META",
 ]
 
 export const INDIVIDUAL_STOCKS_ENERGY = [

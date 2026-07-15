@@ -33,6 +33,7 @@ export async function initDatabase(): Promise<void> {
       table.float("change_1y").nullable()
       table.float("change_2y").nullable()
       table.text("dividends").nullable()
+      table.text("history_points").nullable()
       table.integer("updated_at").notNullable()
     })
   }
@@ -48,6 +49,13 @@ export async function initDatabase(): Promise<void> {
     if (!hasChange1y) {
       await db.schema.alterTable("stock_quotes", (table) => {
         table.float("change_1y").nullable()
+      })
+    }
+
+    const hasHistoryPoints = await db.schema.hasColumn("stock_quotes", "history_points")
+    if (!hasHistoryPoints) {
+      await db.schema.alterTable("stock_quotes", (table) => {
+        table.text("history_points").nullable()
       })
     }
   }

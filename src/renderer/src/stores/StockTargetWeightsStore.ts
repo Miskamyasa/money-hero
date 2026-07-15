@@ -36,7 +36,12 @@ export class StockTargetWeightsStore {
       return
     }
 
-    this.weights.set(symbol, value)
+    if (value === 1) {
+      this.weights.delete(symbol)
+    }
+    else {
+      this.weights.set(symbol, value)
+    }
     const writeVersion = (this.writeVersion.get(symbol) ?? 0) + 1
     this.writeVersion.set(symbol, writeVersion)
 
@@ -59,7 +64,12 @@ export class StockTargetWeightsStore {
         return
 
       runInAction(() => {
-        this.persistedWeights.set(symbol, value)
+        if (value === 1) {
+          this.persistedWeights.delete(symbol)
+        }
+        else {
+          this.persistedWeights.set(symbol, value)
+        }
       })
     }
     catch (error) {
