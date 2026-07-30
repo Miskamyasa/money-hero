@@ -2,7 +2,6 @@ export const INDIVIDUAL_STOCKS_ROBOTICS = [
   "ISRG",
   "SYM",
   "TER",
-  "PRCT",
   "ZBRA",
   "6268.T",
   "6954.T",
@@ -12,7 +11,6 @@ export const INDIVIDUAL_STOCKS_ROBOTICS = [
 ]
 
 export const INDIVIDUAL_STOCKS_HC = [
-  "ERAS",
   "LLY",
   "GKOS",
   "VKTX",
@@ -34,7 +32,6 @@ export const INDIVIDUAL_STOCKS_AI = [
   "NBIS",
   "NVT",
   "VICR",
-  "VRT",
   "NOW",
 ]
 
@@ -42,9 +39,7 @@ export const INDIVIDUAL_STOCKS_BIGTECH = [
   "NVDA",
   "MSFT",
   "GOOG",
-  "ADBE",
   "AAPL",
-  "AMD",
   "CSCO",
   "IBM",
   "NET",
@@ -59,8 +54,15 @@ export const INDIVIDUAL_STOCKS_ENERGY = [
   "PWR", // Quanta Services, Inc.
   "WMB", // The Williams Companies, Inc.
   "GEV", // GE Vernova Inc.
-  "D", // Dominion Energy, Inc.
   "NEE", // NextEra Energy, Inc.
+  "VST",
+  "TLN",
+  "NRG",
+  "SO",
+  "DUK",
+  "BEP",
+  "CWEN",
+  "ORA",
 ]
 
 export const FUNDS_ETFS = [
